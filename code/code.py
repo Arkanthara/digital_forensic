@@ -12,10 +12,10 @@ def print_range(img: np.ndarray):
     print(f"max:    {img.max()}")
     print(f"range:  {img.max() - img.min()}")
 
-def print_image(img: np.ndarray, title: str = "Image", cmap: str = 'gray'):
+def print_image(img: np.ndarray, title: str = "Image"):
     plt.figure()
     plt.title(title)
-    plt.imshow(img, cmap=cmap)
+    plt.imshow(img, cmap='gray')
     plt.axis('off')
     plt.show()
 
@@ -27,6 +27,7 @@ def normalize(img: np.ndarray, target: int = 255) -> np.ndarray:
 
 def add_noise(img: np.ndarray, mean: float = 0.0, std: float = 1.0) -> np.ndarray:
     noise = np.random.normal(loc = mean, scale = std, size = img.shape)
+    print_range(noise)
     img_noised = img + noise
     return np.clip(img_noised, a_min = 0, a_max = 255)
 
@@ -45,3 +46,15 @@ def jpeg_compress(img: np.ndarray, quality: int = 90) -> np.ndarray:
 
     compressed_img = cv2.imdecode(encoded_img, cv2.IMREAD_UNCHANGED)
     return compressed_img
+
+def image_processing(img: np.ndarray):
+    print_range(img)
+    noise_1 = add_noise(img)
+    noise_2 = add_noise(img)
+    jpeg_1 = jpeg_compress(img)
+    jpeg_2 = jpeg_compress(img, quality = 50)
+
+img_1 = read_image("256.png")
+img_2 = read_image("512.png")
+img_3 = read_image("1000.jpeg")
+img_4 = read_image("2000.jpg")
