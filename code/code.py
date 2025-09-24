@@ -39,7 +39,7 @@ def filterFT(img: np.ndarray, h: np.ndarray) -> np.ndarray:
 
 def jpeg_compress(img: np.ndarray, quality: int = 90) -> np.ndarray:
     params = [cv2.IMWRITE_JPEG_QUALITY, quality]
-    success, encoded_img = cv2.imencode('jpeg', img, params)
+    success, encoded_img = cv2.imencode('.jpg', img, params)
 
     if not success:
         print("Error when encoding")
@@ -53,8 +53,12 @@ def image_processing(img: np.ndarray):
     noise_2 = add_noise(img)
     jpeg_1 = jpeg_compress(img)
     jpeg_2 = jpeg_compress(img, quality = 50)
+    
+
 
 img_1 = read_image("256.png")
 img_2 = read_image("512.png")
 img_3 = read_image("1000.jpeg")
 img_4 = read_image("2000.jpg")
+
+image_processing(img_1)
