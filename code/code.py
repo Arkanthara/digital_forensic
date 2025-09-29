@@ -61,11 +61,14 @@ def image_processing(img: np.ndarray):
     titles = ["Gaussian noise with sigma = 0.01", "Gaussian noise with sigma = 0.5", "Jpeg compression 90", "Jpeg compression 50"]
     plt.figure()
     plt.subplot(1, 5, 1)
+    plt.title("Original image")
+    plt.imshow(img, cmap='gray')
     for i in range(len(images)):
         print("\n==============================================")
         print(f"{titles[i]}")
         print_image(images[i], titles[i], i)
         print_quality(img, images[i])
+    plt.show()
     
 
 
@@ -75,3 +78,4 @@ img_3 = read_image("1000.jpeg")
 img_4 = read_image("2000.jpg")
 
 image_processing(img_1)
+image_processing(img_2)
