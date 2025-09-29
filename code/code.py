@@ -13,12 +13,11 @@ def print_range(img: np.ndarray):
     print(f"max:    {img.max()}")
     print(f"range:  {img.max() - img.min()}")
 
-def print_image(img: np.ndarray, title: str = "Image"):
-    plt.figure()
+def print_image(img: np.ndarray, title: str = "Image", i: int = 1):
+    plt.subplot(1, 5, i + 2)
     plt.title(title)
     plt.imshow(img, cmap='gray')
     plt.axis('off')
-    plt.show()
 
 def MSE(img_1: np.ndarray, img_2: np.ndarray) -> float:
     return np.mean((img_1 - img_2)**2)
@@ -30,12 +29,6 @@ def add_noise(img: np.ndarray, mean: float = 0.0, std: float = 1.0) -> np.ndarra
     noise = np.random.normal(loc = mean, scale = std, size = img.shape)
     img_noised = img.astype(np.float32) + noise
     return np.clip(img_noised, a_min = 0, a_max = 255).astype(np.uint8)
-
-def filterFT(img: np.ndarray, h: np.ndarray) -> np.ndarray:
-    F_img = np.fft.fft2(img)
-    h = np.fft.fftshift(h)
-    #print_image(np.log(np.abs(F_img * h) + 1))
-    return np.abs(np.fft.ifft2(F_img * h))
 
 def jpeg_compress(img: np.ndarray, quality: int = 90) -> np.ndarray:
     params = [cv2.IMWRITE_JPEG_QUALITY, quality]
@@ -51,7 +44,7 @@ def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> np.ndarray:
     mse = MSE(img_1, img_2)
     if mse == 0:
         return 100
-    return 20 * np.log10(max_value/np.sqrt(mse)) # Multiple definitions possibles ??
+    return 10 * np.log10(max_value**2/mse) # Multiple definitions possibles ??
 
 def print_quality(img_1: np.ndarray, img_2: np.ndarray):
     print(f"MSE: {MSE(img_1, img_2)}")
@@ -66,10 +59,12 @@ def image_processing(img: np.ndarray):
     jpeg_2 = jpeg_compress(img, quality = 50)
     images = [noise_1, noise_2, jpeg_1, jpeg_2]
     titles = ["Gaussian noise with sigma = 0.01", "Gaussian noise with sigma = 0.5", "Jpeg compression 90", "Jpeg compression 50"]
+    plt.figure()
+    plt.subplot(1, 5, 1)
     for i in range(len(images)):
         print("\n==============================================")
         print(f"{titles[i]}")
-        print_range(images[i])
+        print_image(images[i], titles[i], i)
         print_quality(img, images[i])
     
 

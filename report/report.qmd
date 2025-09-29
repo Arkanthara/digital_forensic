@@ -1,0 +1,92 @@
+---
+title: Image quality evaluation
+author: Michel Jean Joseph Donnet
+date: \today
+format: pdf
+toc: true
+numbersections: true
+---
+
+# Introduction
+
+Human eyes can't detect if an image is different from another.
+But in some cases, it can be critical to know if the image is different from another,
+especially in compression domain where the goal is to conserve a good quality of image with a maximum compression.
+In this work, we will work on the image quality evaluation using several methods.
+
+# Methodology
+
+To make image quality evaluation, we will use the MSE, PSNR, SSIM and LPIPS methods between two images, original image and modified image.
+
+## MSE (Mean Square Error) {#sec-mse}
+
+This is a simple image quality evaluation that basicaly compute the mean between the two images and take the square of it.
+Mathematicaly, it can be represented by formula [-@eq-mse] for two images $I$ and $K$ of size $m \times n$.
+
+$$
+\text{MSE} = \frac{1}{mn}\sum_{i = 1}^m \sum_{j = 1}^n \left[I(i, j) - K(i, j)\right]^2
+$$ {#eq-mse}
+
+It give the sum of the square mean of each pixel, so a little value mean that the two images are very similar.
+
+## PSNR {#sec-psnr}
+
+The Peak Signal Noise Ratio (PSNR) is a measure that evaluate the quality of reconstructed images for instance after compression
+by comparing the maximal strength of the signal to the strength of the noise generated during reconstruction that affect the image.
+
+Mathematicaly, it can be represented by formula [-@eq-psnr] for two images $I$ and $K$ of size $m \times n$.
+
+$$
+\text{PSNR} = 10 \cdot \log_{10}\left(\frac{MAX_I^2}{\text{MSE}}\right)
+$$ {#eq-psnr}
+
+Where $MAX_I^2$ is the maximum value of a pixel.
+
+As said in section [-@sec-mse], a little value of the MSE indicate that the two images are very similar.
+So as we have $\frac{MAX_I^2}{\text{MSE}}$, it means that when images are very similar, PSNR is high.
+
+## SSIM {#sec-ssim}
+
+The Structural Similarity Index (SSIM) is a perceptual metric used to quantify the similarity between two images, focusing on human vision.
+It measure the perceptual differences between two images, based on visible structure of images.
+So it's not a pixel-wise method, but more a method useful in term of visual perception of human.
+
+Mathematicaly, it can be represented by formula [-@eq-ssim] for two images $I$ and $K$ of size $m \times n$.
+
+$$
+\text{SSIM}(I, K) = \frac{(2\mu_I \mu_K + C_1)(2\sigma_{IK} + C_2)}{(\mu_I^2 + \mu_K^2 + C_1)(\sigma_I^2 + \sigma_K^2 + C_2)}
+$$ {#eq-ssim}
+
+With:
+
+- $\mu_I$ the mean of image $I$
+- $\mu_K$ the mean of image $K$
+- $\sigma_I^2$ the variance of image $I$
+- $\sigma_K^2$ the variance of image $K$
+- $\sigma_{IK}$ the covariance between image $I$ and image $K$
+- $C_1$, $C_2$ constant values to stabilize the division
+
+If we suppose that image $I$ is image $K$, the SSIM give us:
+$$
+\text{SSIM}(I, I)
+= \frac{(2\mu_I \mu_I + C_1)(2\sigma_{I}^2 + C_2)}{(\mu_I^2 + \mu_I^2 + C_1)(\sigma_I^2 + \sigma_I^2 + C_2)}
+= \frac{(2\mu_I^2 + C_1)(2\sigma_{I}^2 + C_2)}{(2\mu_I^2 + C_1)(2\sigma_I^2 + C_2)} = 1
+$$
+
+So a value closest to $1$ indicate that the two images are perceptualy very similar.
+
+## LPIPS
+
+# Implementation
+
+For the implementation, I use `python` with [OpenCV](https://opencv.org/) to load image and to make the jpeg compression.
+
+Else, `numpy` library is used to make operations on image such as adding a gaussian noise, compute the MSE (ref section [-@sec-mse]) or the PSNR (ref section [-@sec-psnr]).
+
+In my code, I work only with images in range [0, 255].
+
+# Results
+
+# Discussion
+
+# Conclusion
