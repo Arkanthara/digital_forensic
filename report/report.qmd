@@ -75,8 +75,6 @@ $$
 
 So a value closest to $1$ indicate that the two images are perceptualy very similar.
 
-## LPIPS
-
 # Implementation
 
 For the implementation, I use `python` with [OpenCV](https://opencv.org/) to load image and to make the jpeg compression.
@@ -86,6 +84,31 @@ Else, `numpy` library is used to make operations on image such as adding a gauss
 In my code, I work only with images in range [0, 255].
 
 # Results
+
+To achieve my results, I have downloaded photos on internet and I have tried to not have digital image or generated image.
+On generated images or on digital images, perhaps the quality measures will be different due to another structure of our image, with no natural noise etc...
+
+\newpage
+
+```{python}
+#| echo: false
+import sys
+import os
+
+# Add the ../code directory to sys.path
+sys.path.append('/home/fitzwilliam/Documents/digital_forensic/code')
+
+# Now you can import the function
+from tp1 import read_image, image_processing
+img_1 = read_image("256.png")
+img_2 = read_image("512.png")
+img_3 = read_image("1000.jpeg")
+img_4 = read_image("2000.jpg")
+image_processing(img_1)
+image_processing(img_2)
+image_processing(img_3)
+image_processing(img_4)
+```
 
 # Discussion
 

@@ -13,11 +13,12 @@ def print_range(img: np.ndarray):
     print(f"max:    {img.max()}")
     print(f"range:  {img.max() - img.min()}")
 
-def print_image(img: np.ndarray, title: str = "Image", i: int = 1):
-    plt.subplot(1, 5, i + 2)
+def print_image(img: np.ndarray, title: str = "Image"):
+    plt.figure()
     plt.title(title)
     plt.imshow(img, cmap='gray')
     plt.axis('off')
+    plt.show()
 
 def MSE(img_1: np.ndarray, img_2: np.ndarray) -> float:
     return np.mean((img_1 - img_2)**2)
@@ -50,25 +51,20 @@ def print_quality(img_1: np.ndarray, img_2: np.ndarray):
     print(f"MSE: {MSE(img_1, img_2)}")
     print(f"PSNR: {PSNR(img_1, img_2)}")
     print(f"SSIM: {ssim(img_1, img_2)}")
-    print("LPIPS")
 
 def image_processing(img: np.ndarray):
-    noise_1 = add_noise(img, std = 0.01)
-    noise_2 = add_noise(img, std = 0.5)
+    noise_1 = add_noise(img, std = 1)
+    noise_2 = add_noise(img, std = 5)
     jpeg_1 = jpeg_compress(img)
     jpeg_2 = jpeg_compress(img, quality = 50)
     images = [noise_1, noise_2, jpeg_1, jpeg_2]
-    titles = ["Gaussian noise with sigma = 0.01", "Gaussian noise with sigma = 0.5", "Jpeg compression 90", "Jpeg compression 50"]
-    plt.figure()
-    plt.subplot(1, 5, 1)
-    plt.title("Original image")
-    plt.imshow(img, cmap='gray')
+    titles = ["Gaussian noise with sigma = 1", "Gaussian noise with sigma = 5", "Jpeg compression 90", "Jpeg compression 50"]
+    print_image(img, "Original image")
     for i in range(len(images)):
         print("\n==============================================")
         print(f"{titles[i]}")
-        print_image(images[i], titles[i], i)
+        # print_image(images[i], titles[i])
         print_quality(img, images[i])
-    plt.show()
     
 
 
@@ -76,6 +72,6 @@ img_1 = read_image("256.png")
 img_2 = read_image("512.png")
 img_3 = read_image("1000.jpeg")
 img_4 = read_image("2000.jpg")
-
-image_processing(img_1)
-image_processing(img_2)
+#
+# image_processing(img_1)
+# image_processing(img_2)
