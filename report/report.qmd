@@ -1,11 +1,20 @@
 ---
-title: Image quality evaluation
-author: Michel Jean Joseph Donnet
-date: \today
-format: pdf
-toc: true
-numbersections: true
+title: "Image quality evaluation"
+author:
+  - name: Michel Jean Joseph Donnet
+    email: Michel.Donnet@etu.unige.ch
+date: last-modified
+format:
+  titlepage-pdf:
+    pdf-engine: pdflatex
+    documentclass: scrbook
+    classoption: ["oneside", "open=any"]
+    number-sections: true
+    titlepage: "academic"
+    toc: true
 ---
+
+\newpage
 
 # Introduction
 
@@ -14,7 +23,7 @@ But in some cases, it can be critical to know if the image is different from ano
 especially in compression domain where the goal is to conserve a good quality of image with a maximum compression.
 In this work, we will work on the image quality evaluation using several methods.
 
-# Methodology
+# Methodology {#sec-met}
 
 To make image quality evaluation, we will use the MSE, PSNR, SSIM and LPIPS methods between two images, original image and modified image.
 
@@ -92,6 +101,7 @@ On generated images or on digital images, perhaps the quality measures will be d
 
 ```{python}
 #| echo: false
+
 import sys
 import os
 
@@ -112,4 +122,42 @@ image_processing(img_4)
 
 # Discussion
 
+As mentionned in part [-@sec-met]:
+
+- if MSE is low, the two images are very similar
+- if PSNR is high, the two images are very similar
+- if SSIM is close to 1, the two images seems to be similar
+
+So we can constate that when we increase the noise, the MSE increase, the PSNR decrease and the SSIM go far from 1.
+It's the same for JPEG compression...
+
+For the PSNR, as it is defined as a ratio between max possible intensity of a pixel and the MSE, and as the maximum intensity possible for all pixel is always the same for all images because they are all in range from 0 to 255, it means that the PSNR give us basically an information similar to the MSE, but more "human readable".
+So we look at the MSE and for the PSNR, it's the same results (but be carefull, it goes in inverse order: low is bad and high is good !).
+
+If we compare the results side by side, we can constate that the MSE is always the same for images of all sizes when adding noise.
+I think it's basically because we finally measure the mean of the gaussian noise added and this noise is always generated with same gaussian distributions.
+
+We can also see that for JPEG compression, the MSE is, for instance for Lena image, closest between compression 90 and compression 50 whereas for the forest image, the MSE have a huge difference.
+I think it's due to the structure of the image.
+In case of Lena image, we have a lot of smooth part in our image whereas with the forest, we don't have any smooth part: we have alway variations due to leafs of trees.
+So the compression loose data when image is complex with a lot of details, like a forest.
+
+If we look at the SSIM between images, we can see that a great variation of the MSE doesn't mean a great variation of the SSIM.
+For instance, if we look at the forest image, more particulary to the JPEG compression, there is a huge difference between the MSE, but the SSIM is very close because it's only 0.06 of difference between the two results obtained.
+It's perhaps due to the compression: the goal of the compression is to reduce the size of the image in memory by conservating a good similarity with the original image in an "human vision" point of view.
+And here we can say that the goal is reached because the compression have kept perceptible similarities because the SSIM is close to 1 and since the SSIM measure the perceptible difference, it is not too impacted by the compression, contrary to the MSE.
+
+Another observation that we can make is that the SSIM is more impacted by the gaussian noise when the image is smoothy because when we look at the forest image, when we add the noise, the SSIM changes only from 0.01 whereas with the Lena or the deer image, which are more smoothy, when we add the noise, the SSIM changes about approximatively 0.2 which is a big difference.
+It's due to the fact that noise is more visible on smoothy images than on complex images.
+And as SSIM is based on perceptible differences, this explain the difference observed.
+
 # Conclusion
+
+The PSNR and the MSE give same informations but not in the same way.
+PSNR is designed to be more human readable than MSE.
+It's a pixel-wise difference whereas the SSIM method give a perceptible difference, based on human vision.
+
+In the analysis of the images of different sizes, we have seen that adding gaussian noise give always similar values for MSE and PSNR and for images of different sizes.
+It's due to the analysis of the gaussian noise, which follows always the same distribution, by the two method.
+We have also seen that when an image is complex, making a JPEG compression will cause a loss of informations but not visible ones.
+Finally, we have seen that on smoothy images, adding a noise is more perceptible and give more difference between the SSIM obtained.
