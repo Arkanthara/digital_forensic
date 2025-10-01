@@ -1,11 +1,22 @@
 ---
 title: "Image quality evaluation"
+subtitle: "Digital Forensic"
+courseid: 14X065
 author: "Michel Jean Joseph Donnet"
-date: last-modified
+email: "Michel.Donnet@etu.unige.ch"
+# repository: "https://github.com/Arkanthara/digital_forensic"
+# repositoryName: "Digital_Forensic"
+university: "University of Geneva"
+department: "Computer Science Department"
+logo: "../images/unige.pdf"   # optional, can be .pdf/.png/.jpg
+logofooter: "./images/unige_csd.png"
+logofootersize: 1.5cm
+toc: true
 format:
   pdf:
-    pdf-engine: pdflatex
-    include-in-header: titlefooter.sty
+    # pdf-engine: pdflatex
+    # execute: false
+    template: template.tex
 ---
 
 \newpage
