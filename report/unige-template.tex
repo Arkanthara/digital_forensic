@@ -12,39 +12,40 @@ $header-includes$
 $endfor$
 
 \usepackage{graphicx}
-\usepackage[justification=centering]{caption}
-\usepackage{subcaption}
-\usepackage{tabularx}
-\usepackage{float}
+% \usepackage[justification=centering]{caption}
+% \usepackage{subcaption}
+% \usepackage{tabularx}
+% \usepackage{float}
 \usepackage{fancyhdr}
-\usepackage{calc}
-\usepackage{longtable}
-\usepackage{fourier} 
-\usepackage{amsmath, amssymb, blkarray}
-\usepackage[thinc]{esdiff}
-\usepackage{minted}
-\usepackage{xcolor}
-\usepackage{titling}
+% \usepackage{calc}
+% \usepackage{longtable}
+% \usepackage{fourier} 
+\usepackage{amsmath}
+% \usepackage{amsmath, amssymb, blkarray}
+% \usepackage[thinc]{esdiff}
+% \usepackage{minted}
+% \usepackage{xcolor}
+% \usepackage{titling}
 \usepackage{hyperref}
-\usepackage{booktabs}
-\usepackage{polynom}
+% \usepackage{booktabs}
+% \usepackage{polynom}
 
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6pt}
+% \setlength{\parindent}{0pt}
+% \setlength{\parskip}{6pt}
 
 % Header/Footer
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{TP $TPid$: $TPname$}
-\lhead{$Firstname$ $Familyname$}
+\rhead{$title$}
+\lhead{$author$}
 \rfoot{Page \thepage}
 
 %%%%%%% Minted %%%%%%%
-\definecolor{bg}{HTML}{F0F0F0}
-\setminted{bgcolor=bg, frame=lines, linenos}
-% \setminted{mathescape, escapeinside=¬¬}
-\newminted[lstpython]{python3}{}
-\newmintinline[pythoninline]{python3}{}
+% \definecolor{bg}{HTML}{F0F0F0}
+% \setminted{bgcolor=bg, frame=lines, linenos}
+% % \setminted{mathescape, escapeinside=¬¬}
+% \newminted[lstpython]{python3}{}
+% \newmintinline[pythoninline]{python3}{}
 
 % \usepackage{framed}
 % \newenvironment{Shaded}{\begin{framed}}{\end{framed}}
@@ -60,15 +61,15 @@ $endfor$
  \begin{titlepage}
    \centering
    \textsc{\LARGE Université de Genève}\\[1cm]
-   \textsc{\Large Analyse et Traitement de l’Information}\\[0.2cm]
-   \textsc{\large 14X026}\\[1cm]
+   \textsc{\Large Digital Forensic}\\[0.2cm]
+   \textsc{\large 14X065}\\[1cm]
    \rule{\linewidth}{0.5mm}\\[0.8cm]
-   {\huge \bfseries TP $TPid$ : $TPname$}\\[0.7cm]
+   {\huge \bfseries $title$}\\[0.7cm]
    \rule{\linewidth}{0.5mm}\\[2cm]
    \large
-   \emph{Author:} $Firstname$ $Familyname$\\[0.5cm]
-   \emph{E-mail:} \href{mailto:$Email$}{$Email$}\\[7cm]
-   {\large $Monthyear$}\\[2cm]
+   \emph{Author:} $author$ \\[0.5cm]
+   \emph{E-mail:} \href{mailto:$email$}{$email$}\\[7cm]
+   {\large $date$}\\[2cm]
    \includegraphics[width=0.4\textwidth]{images/unige_csd.png}\\[1cm]
    \vfill
  \end{titlepage}

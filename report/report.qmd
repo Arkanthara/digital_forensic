@@ -1,17 +1,11 @@
 ---
 title: "Image quality evaluation"
-author:
-  - name: Michel Jean Joseph Donnet
-    email: Michel.Donnet@etu.unige.ch
+author: "Michel Jean Joseph Donnet"
 date: last-modified
 format:
-  titlepage-pdf:
+  pdf:
     pdf-engine: pdflatex
-    documentclass: scrbook
-    classoption: ["oneside", "open=any"]
-    number-sections: true
-    titlepage: "academic"
-    toc: true
+    include-in-header: titlefooter.sty
 ---
 
 \newpage
