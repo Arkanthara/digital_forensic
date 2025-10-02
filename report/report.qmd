@@ -8,14 +8,15 @@ email: "Michel.Donnet@etu.unige.ch"
 # repositoryName: "Digital_Forensic"
 university: "University of Geneva"
 department: "Computer Science Department"
-logo: "../images/unige.pdf"   # optional, can be .pdf/.png/.jpg
-logofooter: "./images/unige_csd.png"
-logofootersize: 1.5cm
+# logo: "../images/unige.pdf"   # optional, can be .pdf/.png/.jpg
+# logofooter: "./images/unige_csd.png"
+# logofootersize: 1.5cm
+illustration: "./images/title.png"
 toc: true
 format:
   pdf:
-    # pdf-engine: pdflatex
-    # execute: false
+    pdf-engine: xelatex
+    pdf-engine-opts: ["--shell-escape"]
     template: template.tex
 ---
 
@@ -101,6 +102,8 @@ In my code, I work only with images in range [0, 255].
 
 To achieve my results, I have downloaded photos on internet and I have tried to not have digital image or generated image.
 On generated images or on digital images, perhaps the quality measures will be different due to another structure of our image, with no natural noise etc...
+
+The results are presented below in increasing order: first image with size 256x256, second with size 512x512, ...
 
 \newpage
 

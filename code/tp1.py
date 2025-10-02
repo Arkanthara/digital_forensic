@@ -45,7 +45,7 @@ def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> np.ndarray:
     mse = MSE(img_1, img_2)
     if mse == 0:
         return 100
-    return 10 * np.log10(max_value**2/mse) # Multiple definitions possibles ??
+    return 10 * np.log10(max_value**2/mse)
 
 def print_quality(img_1: np.ndarray, img_2: np.ndarray):
     print(f"MSE: {MSE(img_1, img_2)}")
@@ -63,7 +63,6 @@ def image_processing(img: np.ndarray):
     for i in range(len(images)):
         print("\n==============================================")
         print(f"{titles[i]}")
-        # print_image(images[i], titles[i])
         print_quality(img, images[i])
     
 
@@ -72,6 +71,7 @@ img_1 = read_image("256.png")
 img_2 = read_image("512.png")
 img_3 = read_image("1000.jpeg")
 img_4 = read_image("2000.jpg")
-#
-# image_processing(img_1)
-# image_processing(img_2)
+image_processing(img_1)
+image_processing(img_2)
+image_processing(img_3)
+image_processing(img_4)
