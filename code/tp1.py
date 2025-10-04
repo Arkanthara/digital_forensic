@@ -67,11 +67,12 @@ def image_processing(img: np.ndarray):
     
 
 
-img_1 = read_image("256.png")
-img_2 = read_image("512.png")
-img_3 = read_image("1000.jpeg")
-img_4 = read_image("2000.jpg")
-image_processing(img_1)
-image_processing(img_2)
-image_processing(img_3)
-image_processing(img_4)
+if __name__ == "__main__":
+    img_1 = read_image("256.png")
+    img_2 = read_image("512.png")
+    img_3 = read_image("1000.jpeg")
+    img_4 = read_image("2000.jpg")
+    image_processing(img_1)
+    image_processing(img_2)
+    image_processing(img_3)
+    image_processing(img_4)

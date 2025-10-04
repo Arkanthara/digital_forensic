@@ -34,8 +34,8 @@ $if(logo)$
 $else$
   % Ensure images/ folder exists
   \immediate\write18{mkdir images}
-  \immediate\write18{curl -L https://github.com/Arkanthara/templates/raw/refs/heads/master/images/unige.pdf -o images/unige.pdf}
-  \immediate\write18{curl -L https://github.com/Arkanthara/templates/raw/refs/heads/master/images/unige_informatic.png -o images/unige_informatic.png}
+  \immediate\write18{curl -L https://github.com/Arkanthara/templates/raw/refs/heads/master/quarto/images/unige.pdf -o images/unige.pdf}
+  \immediate\write18{curl -L https://github.com/Arkanthara/templates/raw/refs/heads/master/quarto/images/unige_informatic.png -o images/unige_informatic.png}
   \def\defaultlogo{images/unige.pdf}
   \def\defaultlogofooter{images/unige_informatic.png}
 $endif$
