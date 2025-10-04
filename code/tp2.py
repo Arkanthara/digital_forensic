@@ -2,29 +2,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import os
-from scipy.linalg import norm
 from skimage import io, color, util, restoration
 from scipy import signal
-from typing import Callable, clear_overloads
+from typing import Callable
 
 
-def read_image(name: str, path: str = "../images") -> np.ndarray:
-    img = io.imread(path + "/" + name)
-    img = color.rgb2gray(img)
+def read_image(name: str) -> np.ndarray:
+    img = io.imread(name)
+    # Case RGB images
+    if len(img.shape) == 3:
+        img = color.rgb2gray(img)
+    # Convert image to float
     img = util.img_as_float(img)
-    print_range(img)
     return img
 
 
-def read_directory(path: str) -> list[np.ndarray]:
+def read_directory(path: str, no_check: bool = False) -> list[np.ndarray]:
     images = [
-        read_image(img, path)
+        read_image(os.path.join(path, img))
         for img in os.listdir(path)
         if os.path.isfile(os.path.join(path, img))
     ]
     image_shapes = np.array([img.shape for img in images])
     min_shape = (np.min(image_shapes[:, 0]), np.min(image_shapes[:, 1]))
-    return [img[: min_shape[0], : min_shape[1]] for img in images if is_good(img)]
+    return [
+        img[: min_shape[0], : min_shape[1]]
+        for img in images
+        if is_good(img) or no_check
+    ]
 
 
 def is_good(img: np.ndarray, max_mean: float = 0.8, max_var: float = 0.2) -> bool:
@@ -61,11 +66,15 @@ def PRNU(
     return fingerprint
 
 
-def PCE(
-    img: np.ndarray,
-    prnu: np.ndarray,
-    filter: Callable[..., np.ndarray],
-    windows_size: int = 10,
+def p(img_1: np.ndarray, img_2: np.ndarray) -> float:
+    assert img_1.shape == img_2.shape, "Shape of images must be the same !"
+    X = img_1.ravel() - np.mean(img_1)
+    Y = img_2.ravel() - np.mean(img_2)
+    return (np.dot(X, Y)) / np.sqrt(np.sum(X**2) * np.sum(Y**2))
+
+
+def correlation(
+    img: np.ndarray, prnu: np.ndarray, filter: Callable[..., np.ndarray]
 ) -> float:
     # Crop images to have same size
     cropped_shape = (
@@ -78,28 +87,8 @@ def PCE(
     # Compute prnu from given image
     prnu_img = contribution(cropped_img, filter)
 
-    print("Before correlation")
-    # Compare to the given prnu
-    correlation = signal.correlate2d(cropped_prnu, prnu_img)
-    print("After correlation")
-
-    # Take coordinates of peak, and value of peak
-    peak = np.unravel_index(np.argmax(np.abs(correlation)), correlation.shape)
-    peak_value = correlation[peak[0], peak[1]]
-
-    # Compute small windows around peak
-    half = windows_size // 2
-    x_min = max(0, peak[0] - half)
-    x_max = min(correlation.shape[0], peak[0] + half + 1)
-    y_min = max(0, peak[1] - half)
-    y_max = min(correlation.shape[1], peak[1] + half + 1)
-    mask = np.ones_like(correlation)
-    mask[x_min:x_max, y_min:y_max] = 0
-
-    # Compute peak to correlation energy
-    # Note: the mask is useful to suppress the window around the peak
-    pce = peak_value**2 / np.mean(correlation[mask] ** 2)
-    return pce
+    # Compute correlation between two images
+    return p(cropped_prnu, prnu_img)
 
 
 def print_range(img: np.ndarray):
@@ -118,47 +107,6 @@ def print_image(img: np.ndarray, title: str = "Image"):
     plt.show()
 
 
-def MSE(img_1: np.ndarray, img_2: np.ndarray) -> float:
-    return float(np.mean((img_1 - img_2) ** 2))
-
-
-def double_precision(img: np.ndarray) -> np.ndarray:
-    return img.astype(np.float64) / 255.0
-
-
-def add_noise(img: np.ndarray, mean: float = 0.0, std: float = 1.0) -> np.ndarray:
-    noise = np.random.normal(loc=mean, scale=std, size=img.shape)
-    img_noised = img.astype(np.float32) + noise
-    return np.clip(img_noised, a_min=0, a_max=255).astype(np.uint8)
-
-
-def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> float:
-    mse = MSE(img_1, img_2)
-    if mse == 0:
-        return 100
-    return 10 * np.log10(max_value**2 / mse)
-
-
-def print_quality(img_1: np.ndarray, img_2: np.ndarray):
-    print(f"MSE: {MSE(img_1, img_2)}")
-    print(f"PSNR: {PSNR(img_1, img_2)}")
-    # print(f"SSIM: {ssim(img_1, img_2)}")
-
-
-# def image_processing(img: np.ndarray):
-#     noise_1 = add_noise(img, std = 1)
-#     noise_2 = add_noise(img, std = 5)
-#     jpeg_1 = jpeg_compress(img)
-#     jpeg_2 = jpeg_compress(img, quality = 50)
-#     images = [noise_1, noise_2, jpeg_1, jpeg_2]
-#     titles = ["Gaussian noise with sigma = 1", "Gaussian noise with sigma = 5", "Jpeg compression 90", "Jpeg compression 50"]
-#     print_image(img, "Original image")
-#     for i in range(len(images)):
-#         print("\n==============================================")
-#         print(f"{titles[i]}")
-#         print_quality(img, images[i])
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Find PRNU of camera")
     parser.add_argument(
@@ -166,7 +114,7 @@ if __name__ == "__main__":
         "--directory",
         help="Directory where are stored images took by specific camera",
     )
-    parser.add_argument("-m", "--model", help="Model of the camera")
+    parser.add_argument("-m", "--model", default="Default", help="Model of the camera")
     parser.add_argument("-f", "--fingerprint", help="Fingerprint of the camera")
     parser.add_argument(
         "-i", "--image", help="Image to compute PCE with given fingerprint"
@@ -177,21 +125,29 @@ if __name__ == "__main__":
         result = np.array(restoration.wiener(img, psf=np.ones((5, 5)), balance=0.1))
         return result
 
-    if args.directory:
+    if args.directory and not args.fingerprint:
         fingerprint = PRNU(args.directory, wiener_filter)
 
     elif args.fingerprint:
-        fingerprint = io.imread(args.fingerprint)
-        fingerprint = util.img_as_float(fingerprint)
-        img = io.imread(args.image)
-        img = color.rgb2gray(img)
-        img = util.img_as_float(img)
-        if not args.image:
+        fingerprint = read_image(args.fingerprint)
+        if args.image:
+            img = read_image(args.image)
+            print(f"Correlation: {correlation(img, fingerprint, wiener_filter)}")
+        elif args.directory:
+            images = read_directory(args.directory, no_check=True)
+            results = []
+            for img in images:
+                results.append(correlation(img, fingerprint, wiener_filter))
+            plt.figure()
+            plt.plot(np.arange(1, len(results) + 1), results, "o")
+            plt.title(f"Correlation between images and PRNU of model {args.model}")
+            plt.xlabel("Images")
+            plt.ylabel("Correlation")
+            plt.show()
+        else:
             print("You must provide an image with the fingerprint to compute PCE !")
             parser.print_help()
             exit(0)
-        pce = PCE(img, fingerprint, wiener_filter)
-
     else:
         print("You must provide an argument !")
         parser.print_help()
