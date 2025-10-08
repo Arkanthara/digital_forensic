@@ -48,3 +48,9 @@ Quantization matrix -> smaller is the number, more conservated are the datas.
 We conservate more luminance than colors because human vision is more sensitive to edges than to colors...
 
 If we redo compression, what's happens ???
+
+# Compression
+
+- Transform
+- Quantization (reduce range)
+- Encoding
