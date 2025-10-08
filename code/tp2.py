@@ -112,6 +112,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d",
         "--directory",
+        nargs="+",
         help="Directory where are stored images took by specific camera",
     )
     parser.add_argument("-m", "--model", default="Default", help="Model of the camera")
@@ -126,7 +127,7 @@ if __name__ == "__main__":
         return result
 
     if args.directory and not args.fingerprint:
-        fingerprint = PRNU(args.directory, wiener_filter)
+        fingerprint = PRNU(args.directory[0], wiener_filter)
 
     elif args.fingerprint:
         fingerprint = read_image(args.fingerprint)
