@@ -1,171 +1,190 @@
 ---
-title: "Image quality evaluation"
-subtitle: "Digital Forensic"
+title: "Photo Response Non Uniformity (PRNU) estimation"
+subtitle: "Digital Forensics"
 courseid: 14X065
 author: "Michel Jean Joseph Donnet"
 email: "Michel.Donnet@etu.unige.ch"
-# repository: "https://github.com/Arkanthara/digital_forensic"
-# repositoryName: "Digital_Forensic"
+# repository: "https://github.com/yourname/your_repository"
+# repositoryName: "Repository Name"
 university: "University of Geneva"
-department: "Computer Science Department"
-# logo: "../images/unige.pdf"   # optional, can be .pdf/.png/.jpg
+department: "Department Informatic"
+# logo: ""
 # logofooter: "./images/unige_csd.png"
 # logofootersize: 1.5cm
-illustration: "./images/title.png"
 toc: true
 format:
   pdf:
     pdf-engine: xelatex
     pdf-engine-opts: ["--shell-escape"]
     template: template.tex
+    execute: true # Code execution
+    echo: true    # Code printing in document
 ---
 
 \newpage
 
 # Introduction
 
-Human eyes can't detect if an image is different from another.
-But in some cases, it can be critical to know if the image is different from another,
-especially in compression domain where the goal is to conserve a good quality of image with a maximum compression.
-In this work, we will work on the image quality evaluation using several methods.
+In our digital world with improvements of Artificial Intelligence, it's more and more complex to determine the source of informations.
+
+Digital fornesic answers to this requirements and give a way to determine the provenance of a photo if this photo was taken by a camera.
+
+In this work, we will implement and analyse a digital forensic method that determine the provenance of an image.
 
 # Methodology {#sec-met}
 
-To make image quality evaluation, we will use the MSE, PSNR, SSIM and LPIPS methods between two images, original image and modified image.
+## Camera basis
 
-## MSE (Mean Square Error) {#sec-mse}
+First, we will take a look at the camera operation.
 
-This is a simple image quality evaluation that basicaly compute the mean between the two images and take the square of it.
-Mathematicaly, it can be represented by formula [-@eq-mse] for two images $I$ and $K$ of size $m \times n$.
+Human visual system captures the photons from the light which ricochet against objects.
+Then, the brain convert theses photons informations into an image.
 
-$$
-\text{MSE} = \frac{1}{mn}\sum_{i = 1}^m \sum_{j = 1}^n \left[I(i, j) - K(i, j)\right]^2
-$$ {#eq-mse}
+A camera is based on the human visual system: the camera will capture photons from light and convert them into pixels.
 
-It give the sum of the square mean of each pixel, so a little value mean that the two images are very similar.
+## Noise {#sec-noise}
 
-## PSNR {#sec-psnr}
+During this processus, photons go through the lens of the camera and are catched by the color sensor.
+There are different kind of color sensors and lens for cameras, depending on constructor.
 
-The Peak Signal Noise Ratio (PSNR) is a measure that evaluate the quality of reconstructed images for instance after compression
-by comparing the maximal strength of the signal to the strength of the noise generated during reconstruction that affect the image.
+However, theses lens and color sensors contains imperfections or don't have same sensibility...
+This appears as noise on the taken photos
 
-Mathematicaly, it can be represented by formula [-@eq-psnr] for two images $I$ and $K$ of size $m \times n$.
+We have two kind of noise:
 
-$$
-\text{PSNR} = 10 \cdot \log_{10}\left(\frac{MAX_I^2}{\text{MSE}}\right)
-$$ {#eq-psnr}
+- The fixed pattern noise (FPN). It's an additive noise that is the pixel wise difference in dark conditions, produced by imperfections of sensors.
+- The photo response non uniformity noise (PRNU). It's a multiplicative noise caused also by sensors imperfections.
+  In fact, the sensor is composed by millions of photons containers, which have not exactly the same capabilities due to imperfections that comes with the construction of the sensor.
+  For instance, a container could accept more photons than another.
 
-Where $MAX_I^2$ is the maximum value of a pixel.
+Furthermore, as constructors don't use same technologies, the noises obtained on camera will depend on technologies used, so on the constructor, each model having it's own characteristics.
 
-As said in section [-@sec-mse], a little value of the MSE indicate that the two images are very similar.
-So as we have $\frac{MAX_I^2}{\text{MSE}}$, it means that when images are very similar, PSNR is high.
+## Image detection
 
-## SSIM {#sec-ssim}
+The two types of noise mentionned in section [@-sec-noise] don't varies when taking photos and are specific to each camera.
+We call the noise specific to a camera the _fingerprint_ of the camera, each being unique.
+That's why it's possible to extract this noise and, based on this noise, to determine which camera has taken the given photo.
 
-The Structural Similarity Index (SSIM) is a perceptual metric used to quantify the similarity between two images, focusing on human vision.
-It measure the perceptual differences between two images, based on visible structure of images.
-So it's not a pixel-wise method, but more a method useful in term of visual perception of human.
+In most of case, we can't use FPN noise because constructor removes this noise directly in the device to have the best photo quality possible.
 
-Mathematicaly, it can be represented by formula [-@eq-ssim] for two images $I$ and $K$ of size $m \times n$.
+That's why, we will try a method based on the PRNU noise to determine the camera that have taken the picture.
 
-$$
-\text{SSIM}(I, K) = \frac{(2\mu_I \mu_K + C_1)(2\sigma_{IK} + C_2)}{(\mu_I^2 + \mu_K^2 + C_1)(\sigma_I^2 + \sigma_K^2 + C_2)}
-$$ {#eq-ssim}
+### Requirements
 
-With:
+The accuracy of the image detection is based on the quality of the acquisition of the fingerprint of the camera.
 
-- $\mu_I$ the mean of image $I$
-- $\mu_K$ the mean of image $K$
-- $\sigma_I^2$ the variance of image $I$
-- $\sigma_K^2$ the variance of image $K$
-- $\sigma_{IK}$ the covariance between image $I$ and image $K$
-- $C_1$, $C_2$ constant values to stabilize the division
+To extract the fingerprint of a camera, we need some pictures from this camera that respect the following requirements:
 
-If we suppose that image $I$ is image $K$, the SSIM give us:
-$$
-\text{SSIM}(I, I)
-= \frac{(2\mu_I \mu_I + C_1)(2\sigma_{I}^2 + C_2)}{(\mu_I^2 + \mu_I^2 + C_1)(\sigma_I^2 + \sigma_I^2 + C_2)}
-= \frac{(2\mu_I^2 + C_1)(2\sigma_{I}^2 + C_2)}{(2\mu_I^2 + C_1)(2\sigma_I^2 + C_2)} = 1
-$$
+- At least 15 pictures from this camera must be provided, allowing to compute the PRNU of each image and to calculate the mean of the obtained PRNUs.
+  This is a way to obtain a _general_ fingerprint of the camera whereas with only 1 image, the fingerprint could be specific.
+- Pictures must have a high quality compression, and if it's possible the image must not be compressed to avoid a loss of PRNU informations in compression.
+- Pictures must be flat-field. It allows to detect variations in pixels that are due to defaults and not to complexity of environment.
+- Pictures must be brightly but not saturated. The brightness will boost the sensor signal and make imperfections easier to detect.
+- Pictures must have same size for simplicity when computing the mean of the PRNU obtained
 
-So a value closest to $1$ indicate that the two images are perceptualy very similar.
+### Fingerprint computation
+
+To compute the fingerprint of the camera, we calculate the PRNU of each picture provided from the camera and then we compute the PRNU fingerprint by the sum of all the PRNUs obtained.
+
+We can describe the computation of the PRNU fingerprint by the following steps:
+
+1. Compute the residual $W_I$ of an image $I$ according to the denoising filter $F$, given by the formula [-@eq-residual].
+
+  $$W_I = I - F(I)$$ {#eq-residual}
+
+2. Compute the $\text{PRNU}_I$ of the image $I$ by the following formula [-@eq-prnu].
+
+   $$\text{PRNU}_I = \frac{W_I I}{I^2}$$ {#eq-prnu}
+
+3. Compute the final PRNU fingerprint by adding the contribution of the $\text{PRNU}_I$ for each image $I$ given to obtain the fingerprint PRNU, like shown in the following formula [-@eq-fingerprint].
+
+   $$\text{PRNU} = \frac{1}{N}\sum_I^N \text{PRNU}_I$$ {#eq-fingerprint}
+
+4. (Optional) Normalize the fingerprint to have something in a good range and store it on the disk in a lossless compression way (no data is lost in image compression).
+
+### Source camera identification
+
+Now we assume the fact that we have the fingerprint of the camera.
+
+We want to detect that a picture is taken or not by this camera.
+
+To do that, we begin by computing the $\text{PRNU}_I$ of the image $I$, according to the formula [-@eq-prnu].
+
+Then we compute the correlation between the fingerprint and the $\text{PRNU}_I$.
+
+Finally, we can compute the correlation for some images that are not taken by the camera and then compare values obtained to determine if the photo was taken by the given camera.
 
 # Implementation
 
-For the implementation, I use `python` with [OpenCV](https://opencv.org/) to load image and to make the jpeg compression.
+My python program follow the given documentation:
 
-Else, `numpy` library is used to make operations on image such as adding a gaussian noise, compute the MSE (ref section [-@sec-mse]) or the PSNR (ref section [-@sec-psnr]).
+```{text}
+usage: tp2.py [-h] [-d DIRECTORIES [DIRECTORIES ...]] [-f FINGERPRINT] [-l LABELS] [-m MODEL] [-s SAVING_PATH]
 
-In my code, I work only with images in range [0, 255].
+Find PRNU of camera
+
+options:
+  -h, --help            show this help message and exit
+  -d, --directories DIRECTORIES [DIRECTORIES ...]
+                        directories where are stored images took by specific camera
+  -f, --fingerprint FINGERPRINT
+                        Fingerprint of the camera
+  -l, --labels LABELS   Labels for graph output. You must provide a label by directory given. Default is the name of directories.
+  -m, --model MODEL     Model of the camera. Default is 'model'
+  -s, --saving_path SAVING_PATH
+                        Path where fingerprint will be stored. Default is '.'
+```
+
+If we don't give any fingerprint, the program will compute the fingerprint of the given set of photos and store the resulting fingerprint in the path given by argument `-s`.
+
+Else, the program will compute the resulting correlation between the given fingerprint and the images contained in the given directories.
+Then, a graph is computed and printed to the user with all resulting correlations, with label of each set of points given by the name of the directories or by a user defined label.
+
+For instance, according to the following structure:
+
+```{text}
+.
+├── Dataset_Lab2
+│   ├── A02_test
+│   ├── A02_train
+│   ├── A07_test
+│   ├── A07_train
+│   ├── I03_test
+│   └── I03_train
+└── digital_forensic
+    └── code
+        └── tp2.py
+```
+
+
+The computation of the fingerprint for model `A02` is given by the following command:
+
+```{bash}
+cd digital_forensic/code
+python tp2.py \
+  -d ../../Dataset_Lab2/A02_train \
+  -m A02 \
+  -s '.'
+```
+The output will be `A02_fingerprint.png` in directory `code`.
+
+The computation of the correlation graphic between given images and given PRNU is given by the following command:
+
+```{bash}
+python tp2.py \
+  -f A02_fingerprint.png \
+  -d ../../Dataset_Lab2/A02_test ../../Dataset_Lab2/A07_test ../../Dataset_Lab2/I03_test
+  -l A02 A07 I03
+```
 
 # Results
 
-To achieve my results, I have downloaded photos on internet and I have tried to not have digital image or generated image.
-On generated images or on digital images, perhaps the quality measures will be different due to another structure of our image, with no natural noise etc...
-
-The results are presented below in increasing order: first image with size 256x256, second with size 512x512, ...
-
-\newpage
-
-```{python}
-#| echo: false
-
-import sys
-import os
-
-# Add the ../code directory to sys.path
-sys.path.append('/home/fitzwilliam/Documents/digital_forensic/code')
-
-# Now you can import the function
-from tp1 import read_image, image_processing
-img_1 = read_image("256.png")
-img_2 = read_image("512.png")
-img_3 = read_image("1000.jpeg")
-img_4 = read_image("2000.jpg")
-image_processing(img_1)
-image_processing(img_2)
-image_processing(img_3)
-image_processing(img_4)
-```
+Blablablablabla
 
 # Discussion
 
-As mentionned in part [-@sec-met]:
-
-- if MSE is low, the two images are very similar
-- if PSNR is high, the two images are very similar
-- if SSIM is close to 1, the two images seems to be similar
-
-So we can constate that when we increase the noise, the MSE increase, the PSNR decrease and the SSIM go far from 1.
-It's the same for JPEG compression...
-
-For the PSNR, as it is defined as a ratio between max possible intensity of a pixel and the MSE, and as the maximum intensity possible for all pixel is always the same for all images because they are all in range from 0 to 255, it means that the PSNR give us basically an information similar to the MSE, but more "human readable".
-So we look at the MSE and for the PSNR, it's the same results (but be carefull, it goes in inverse order: low is bad and high is good !).
-
-If we compare the results side by side, we can constate that the MSE is always the same for images of all sizes when adding noise.
-I think it's basically because we finally measure the mean of the gaussian noise added and this noise is always generated with same gaussian distributions.
-
-We can also see that for JPEG compression, the MSE is, for instance for Lena image, closest between compression 90 and compression 50 whereas for the forest image, the MSE have a huge difference.
-I think it's due to the structure of the image.
-In case of Lena image, we have a lot of smooth part in our image whereas with the forest, we don't have any smooth part: we have alway variations due to leafs of trees.
-So the compression loose data when image is complex with a lot of details, like a forest.
-
-If we look at the SSIM between images, we can see that a great variation of the MSE doesn't mean a great variation of the SSIM.
-For instance, if we look at the forest image, more particulary to the JPEG compression, there is a huge difference between the MSE, but the SSIM is very close because it's only 0.06 of difference between the two results obtained.
-It's perhaps due to the compression: the goal of the compression is to reduce the size of the image in memory by conservating a good similarity with the original image in an "human vision" point of view.
-And here we can say that the goal is reached because the compression have kept perceptible similarities because the SSIM is close to 1 and since the SSIM measure the perceptible difference, it is not too impacted by the compression, contrary to the MSE.
-
-Another observation that we can make is that the SSIM is more impacted by the gaussian noise when the image is smoothy because when we look at the forest image, when we add the noise, the SSIM changes only from 0.01 whereas with the Lena or the deer image, which are more smoothy, when we add the noise, the SSIM changes about approximatively 0.2 which is a big difference.
-It's due to the fact that noise is more visible on smoothy images than on complex images.
-And as SSIM is based on perceptible differences, this explain the difference observed.
+Blablablablblablblablalblablal
 
 # Conclusion
 
-The PSNR and the MSE give same informations but not in the same way.
-PSNR is designed to be more human readable than MSE.
-It's a pixel-wise difference whereas the SSIM method give a perceptible difference, based on human vision.
-
-In the analysis of the images of different sizes, we have seen that adding gaussian noise give always similar values for MSE and PSNR and for images of different sizes.
-It's due to the analysis of the gaussian noise, which follows always the same distribution, by the two method.
-We have also seen that when an image is complex, making a JPEG compression will cause a loss of informations but not visible ones.
-Finally, we have seen that on smoothy images, adding a noise is more perceptible and give more difference between the SSIM obtained.
+Blablablablblablblablalblablalablablablblablblablalblablal

@@ -47,18 +47,17 @@ def contribution(x: np.ndarray, filter: Callable[..., np.ndarray]) -> np.ndarray
 
 
 def PRNU(
-    path: str,
+    images: list[np.ndarray],
     filter: Callable[..., np.ndarray],
     savedir: str = ".",
     model: str = "model",
 ) -> np.ndarray:
-    images = read_directory(path)
     assert len(images) >= 15, (
         f"You must provide more images ! Actually good images: {len(images)}"
     )
     contributions = [contribution(img, filter) for img in images]
-    fingerprint = normalize(np.sum(contributions, axis=0))
-    print_range(fingerprint)
+    # fingerprint = normalize(np.sum(contributions, axis=0))
+    fingerprint = normalize(np.mean(contributions, axis=0))
     io.imsave(
         os.path.join(savedir, model + "_fingerprint.png"),
         util.img_as_ubyte(fingerprint),
@@ -111,14 +110,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Find PRNU of camera")
     parser.add_argument(
         "-d",
-        "--directory",
+        "--directories",
         nargs="+",
-        help="Directory where are stored images took by specific camera",
+        help="directories where are stored images took by specific camera",
     )
-    parser.add_argument("-m", "--model", default="Default", help="Model of the camera")
     parser.add_argument("-f", "--fingerprint", help="Fingerprint of the camera")
     parser.add_argument(
-        "-i", "--image", help="Image to compute PCE with given fingerprint"
+        "-l",
+        "--labels",
+        help="Labels for graph output. You must provide a label by directory given. Default is the name of directories.",
+    )
+    parser.add_argument(
+        "-m", "--model", default="model", help="Model of the camera. Default is 'model'"
+    )
+    parser.add_argument(
+        "-s",
+        "--saving_path",
+        default=".",
+        help="Path where fingerprint will be stored. Default is '.'",
     )
     args = parser.parse_args()
 
@@ -126,24 +135,40 @@ if __name__ == "__main__":
         result = np.array(restoration.wiener(img, psf=np.ones((5, 5)), balance=0.1))
         return result
 
-    if args.directory and not args.fingerprint:
-        fingerprint = PRNU(args.directory[0], wiener_filter)
+    if args.directories and not args.fingerprint:
+        images = []
+        for dir in args.directories:
+            images += read_directory(dir)
+        fingerprint = PRNU(
+            images, wiener_filter, model=args.model, savedir=args.saving_path
+        )
 
     elif args.fingerprint:
         fingerprint = read_image(args.fingerprint)
-        if args.image:
-            img = read_image(args.image)
-            print(f"Correlation: {correlation(img, fingerprint, wiener_filter)}")
-        elif args.directory:
-            images = read_directory(args.directory, no_check=True)
+        if args.directories:
+            labels = []
+            if not args.labels or len(args.labels) != len(args.directories):
+                labels = [os.path.basename(dir) for dir in args.directories]
+            else:
+                labels = args.labels
+            images = []
+            for dir in args.directories:
+                images.append(read_directory(dir, no_check=True))
             results = []
-            for img in images:
-                results.append(correlation(img, fingerprint, wiener_filter))
+            for imgs in images:
+                tmp = []
+                for img in imgs:
+                    tmp.append(correlation(img, fingerprint, wiener_filter))
+                results.append(tmp)
             plt.figure()
-            plt.plot(np.arange(1, len(results) + 1), results, "o")
-            plt.title(f"Correlation between images and PRNU of model {args.model}")
+            for i in range(len(results)):
+                plt.plot(
+                    np.arange(1, len(results[i]) + 1), results[i], "o", label=labels[i]
+                )
+            plt.title(f"Correlation between images and PRNU of {args.model}")
             plt.xlabel("Images")
             plt.ylabel("Correlation")
+            plt.legend()
             plt.show()
         else:
             print("You must provide an image with the fingerprint to compute PCE !")
