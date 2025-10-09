@@ -8,16 +8,16 @@ email: "Michel.Donnet@etu.unige.ch"
 # repositoryName: "Repository Name"
 university: "University of Geneva"
 department: "Department Informatic"
-# logo: ""
-# logofooter: "./images/unige_csd.png"
+logo: "./images/unige.pdf"
+logofooter: "./images/unige_informatic.png"
 # logofootersize: 1.5cm
 toc: true
 format:
   pdf:
     pdf-engine: xelatex
-    pdf-engine-opts: ["--shell-escape"]
+    # pdf-engine-opts: ["--shell-escape"]
     template: template.tex
-    execute: true # Code execution
+    execute: false # Code execution
     echo: true    # Code printing in document
 ---
 
@@ -114,7 +114,7 @@ Then we compute the correlation between the fingerprint and the $\text{PRNU}_I$.
 
 Finally, we can compute the correlation for some images that are not taken by the camera and then compare values obtained to determine if the photo was taken by the given camera.
 
-# Implementation
+# Implementation {#sec-impl}
 
 My python program follow the given documentation:
 
@@ -173,13 +173,26 @@ The computation of the correlation graphic between given images and given PRNU i
 ```{bash}
 python tp2.py \
   -f A02_fingerprint.png \
-  -d ../../Dataset_Lab2/A02_test ../../Dataset_Lab2/A07_test ../../Dataset_Lab2/I03_test
-  -l A02 A07 I03
+  -d ../../Dataset_Lab2/A02_test ../../Dataset_Lab2/A07_test ../../Dataset_Lab2/I03_test \
+  -l A02 A07 I03 \
+  -m A02
 ```
 
 # Results
 
-Blablablablabla
+I have worked with the given dataset called `Dataset_Lab2`.
+
+In this dataset are images taken from camera `A02`, from camera `A07` and from internet `I03`.
+
+I have computed the fingerprint according to the commands given in section [-@sec-impl].
+
+We can see in figure [-@fig-fingerprint] an example of fingerprint from camera `A02`.
+
+![Fingerprint from camera A02](../code/A02_fingerprint.png){#fig-fingerprint}
+
+![Camera A02](./images/A02.png)
+![Camera A07](./images/A07.png)
+![Camera I03](./images/I03.png)
 
 # Discussion
 

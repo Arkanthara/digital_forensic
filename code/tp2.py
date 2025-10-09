@@ -32,8 +32,14 @@ def read_directory(path: str, no_check: bool = False) -> list[np.ndarray]:
     ]
 
 
-def is_good(img: np.ndarray, max_mean: float = 0.8, max_var: float = 0.2) -> bool:
-    return bool(np.mean(img) < max_mean and np.var(img) < max_var)
+def is_good(img: np.ndarray, max_mean: float = 0.85, max_var: float = 0.1) -> bool:
+    if not np.mean(img) < max_mean and np.var(img) < max_var:
+        print(
+            "Image has a too big variance or mean value ! The detection couldn't properly work !"
+        )
+        print(f"Current mean:       {np.mean(img)}")
+        print(f"Current variance:   {np.var(img)}")
+    return True
 
 
 def normalize(img: np.ndarray, target: float = 1.0) -> np.ndarray:
@@ -118,6 +124,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-l",
         "--labels",
+        nargs="+",
         help="Labels for graph output. You must provide a label by directory given. Default is the name of directories.",
     )
     parser.add_argument(
@@ -165,7 +172,9 @@ if __name__ == "__main__":
                 plt.plot(
                     np.arange(1, len(results[i]) + 1), results[i], "o", label=labels[i]
                 )
-            plt.title(f"Correlation between images and PRNU of {args.model}")
+            plt.title(
+                f"Correlation between given images and fingerprint of {args.model}"
+            )
             plt.xlabel("Images")
             plt.ylabel("Correlation")
             plt.legend()
