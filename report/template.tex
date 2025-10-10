@@ -13,6 +13,13 @@
 \usepackage{fancyhdr}    % headers/footers
 \usepackage{lastpage}    % total pages reference
 \usepackage{array}       % layout tables
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{calc}
+\usepackage{float}
+\usepackage{fontspec}
 % \usepackage{fancyvrb}    % fancy verbatim, needed for Shaded
 % \usepackage{framed}      % provides shaded environment
 % \usepackage{xcolor}
@@ -125,9 +132,25 @@ $endif$
     \vspace{1.2cm}
 
     % --- Illustration (optional) ---
-    $if(illustration)$
-      \includegraphics[width=0.7\linewidth]{$illustration$}\\[1.2cm]
+    % $if(illustration)$
+    %   \includegraphics[width=0.7\linewidth]{$illustration$}\\[1.2cm]
+    % $endif$
+    $if(illustration1)$
+      $if(illustration2)$
+        % both defined, print side by side
+        \begin{minipage}{0.48\linewidth}
+          \includegraphics[width=\linewidth]{$illustration1$}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.48\linewidth}
+          \includegraphics[width=\linewidth]{$illustration2$}
+        \end{minipage}
+      $else$
+        % only illustration1 defined
+        \includegraphics[width=0.7\linewidth]{$illustration1$}\\[1.2cm]
+      $endif$
     $endif$
+
 
     % --- Author(s) ---
     {\Large $for(author)$$author$$sep$ \\ $endfor$\par}
