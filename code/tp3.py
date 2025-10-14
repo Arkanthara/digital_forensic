@@ -81,7 +81,7 @@ def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.nd
             for j in range(0, new_img.shape[1], 8):
                 zBLOCK = new_img[i : i + 8, j : j + 8]
                 # Forward discret cosine transform
-                win1 = dctn(zBLOCK)
+                win1 = dctn(zBLOCK, norm="ortho")
                 dct_domain[i : i + 8, j : j + 8] = win1
                 # Quantization of the DCT coefficients
                 win2 = np.round(win1 / QM1)
@@ -99,7 +99,7 @@ def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.nd
                 win3 = win2 * QM1
                 dct_dequantized[i : i + 8, j : j + 8] = win3
                 # Inverse discrete cosine transform
-                win4 = idctn(win3)
+                win4 = idctn(win3, norm="ortho")
                 dct_restored[i : i + 8, j : j + 8] = win4
         return [dct_restored]
 
@@ -107,11 +107,11 @@ def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.nd
 def double_JPEG_compression(
     img: np.ndarray, QF1: int = 50, QF2: int = 75, graphs: bool = True
 ) -> np.ndarray:
-    dct_quantized = JPEG_Tools(img, QF1, encode=True)[0]
+    dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF1, encode=True)
     decoded = JPEG_Tools(dct_quantized, QF1, encode=False)[0]
     print("Decoded")
     print_range(decoded)
-    dct_quantized2 = JPEG_Tools(decoded, QF2, encode=True)[0]
+    dct_quantized2, dct_quantized2_coeff = JPEG_Tools(decoded, QF2, encode=True)
     decoded2 = JPEG_Tools(dct_quantized2, QF2, encode=False)[0]
 
     if graphs:
@@ -124,18 +124,26 @@ def double_JPEG_compression(
         plt.title("DCT 2nd quantization")
         plt.show()
 
-        # min_dct = min(min(dct_quantized), min(dct_quantized2))
-        # max_dct = max(max(dct_quantized), max(dct_quantized2))
-        # x_bin = np.arange(min_dct, max_dct)
-        hist = skimage.exposure.histogram(util.img_as_ubyte(decoded))
-        hist2 = skimage.exposure.histogram(util.img_as_ubyte(decoded2))
+        print(dct_quantized2_coeff.shape)
+        print(dct_quantized2_coeff)
+
+        y1 = dct_quantized_coeff.ravel()
+        y2 = dct_quantized2_coeff.ravel()
+        # We don't want to print the 0 coefficients because we want to print the kept coefficients
+        y1 = y1[y1 != 0]
+        y2 = y2[y2 != 0]
+        min_dct = min(min(y1), min(y2))
+        max_dct = max(max(y1), np.max(y2))
+        x_bin = np.arange(min_dct, max_dct + 1)
+        print(x_bin)
         plt.figure()
-        plt.subplot(1, 2, 1)
-        plt.bar(hist[1], hist[0])
-        plt.title("DCT 1st quantization")
-        plt.subplot(1, 2, 2)
-        plt.bar(hist2[1], hist2[0])
-        plt.title("DCT 2nd quantization")
+        plt.subplot(2, 1, 1)
+        plt.hist(y1, bins=x_bin)
+        plt.title("One time compressed")
+        plt.subplot(2, 1, 2)
+        plt.hist(y2, bins=x_bin)
+        plt.title("Two times compressed")
+        plt.tight_layout()
         plt.show()
     return decoded2
 

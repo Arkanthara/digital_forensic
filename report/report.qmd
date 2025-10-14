@@ -1,0 +1,96 @@
+---
+title: "Photo Response Non Uniformity (PRNU) estimation"
+subtitle: "Digital Forensics"
+courseid: 14X065
+author: "Michel Jean Joseph Donnet"
+email: "Fitzwilliam.Darcy@blabla.ch"
+repository: "https://github.com/yourname/your_repository"
+repositoryName: "Repository Name"
+university: "University of Geneva"
+department: "Department of Informatics"
+logo: "./images/unige.pdf"
+logofooter: "./images/unige_informatic.png"
+# logofootersize: 1.5cm
+# illustration1: "./images/zoomed.png"
+# illustration2: "./images/A07.png"
+toc: true
+format:
+  pdf:
+    fig-pos: 'h!'
+    pdf-engine: xelatex
+    # pdf-engine-opts: ["--shell-escape"]
+    template: template.tex
+    execute: true # Code execution
+    echo: true    # Code printing in document
+---
+
+\newpage
+
+# Introduction
+
+
+The modification of information exists and has been practiced for a long time, both by governments and by individuals.
+The field of photography is particularly prone to this.
+This can take the form of a detail being corrected or added to improve a photo, or the addition or removal of important information, such as the presence of people in a specific photo.
+This can have serious repercussions, particularly in the field of justice.
+Proof of a person's presence in a particular place at a given time can be critical to the resolution of a case.
+At this point, the digital forensic enter in game and, thanks to its methods, can determine a lot of useful informations about a photo, like if the photo was modified, which kind of device take the photo etc...
+When someone modify a photo, he must save the changes and write the modified photo on the disk.
+This work will study the detection of this kind of manipulations by detecting double JPEG compression.
+Depending on manipulations, it's possible to determine if a photo was modified.
+
+\newpage
+
+# Methodology {#sec-met}
+
+In the digital world, the compression of informations plays a crutial role in multiple domain by reducing the size of the data while preserving the information.
+In imagery, the compression allow to store more photo on disk with or without (depending on method used) loss of informations.
+
+There are many kind of compressions that exists, as `png` or `jpeg` compression.
+Some allow compression without data loss (lossless compression), while others perform compression with data loss (lossy compression).
+
+In the remainder of this report, we will focus on a lossy compression: `jpeg` compression. But first, we will explain the mecanisms bellow image compression.
+
+## Image compression
+
+Your section [-@sec-met]
+
+## Subsection
+
+Your subsection with no ref link
+
+Your latex formula [-@eq-mse]
+$$
+\text{MSE} = \frac{1}{mn}\sum_{i = 1}^m \sum_{j = 1}^n \left[I(i, j) - K(i, j)\right]^2
+$$ {#eq-mse}
+
+\newpage
+
+# Implementation
+
+Blabla
+```{python}
+#| echo: true #print your code
+print("Hello")
+```
+```{bash}
+echo "Coucou"
+```
+
+\newpage
+
+# Results
+
+Blablablablabla
+
+\newpage
+
+# Discussion
+
+Blablablablblablblablalblablal
+
+\newpage
+
+# Conclusion
+
+Blablablablblablblablalblablalablablablblablblablalblablal
