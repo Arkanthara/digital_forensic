@@ -53,6 +53,19 @@ In the remainder of this report, we will focus on a lossy compression: `jpeg` co
 
 ## Image compression
 
+The basis of the image compression result in fact that human vision is more sensitive to, for instance, the luminance compared to the colors.
+Due to the limitations of the human vision, it's possible to delete some informations that the human vision can't see to reduce the storage size of the photo.
+For instance, we can decompose a photo in luminance and colors channels and decrease the size of color channels to have less storage used for this photo.
+
+The general way to compress an image lies in this way:
+
+- First, the data are transformed in a more amenable way to compression.
+  For instance, transformation can allow the exploitation of redundancies or something else.
+- Then, a quantization is performed in lossy compressions.
+  The quantization is a way to delete non useful informations of the image.
+  For a lossless compression, this step is ignored to avoid a loss of informations by quantization.
+- Finally, the new data obtained are encoded and stored in the device in such a way it can be decoded to visualize the image.
+
 Your section [-@sec-met]
 
 ## Subsection
