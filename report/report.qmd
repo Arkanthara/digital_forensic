@@ -1,0 +1,254 @@
+---
+title: "Photo Response Non Uniformity (PRNU) estimation"
+subtitle: "Digital Forensics"
+courseid: 14X065
+author: "Michel Jean Joseph Donnet"
+# repository: "https://github.com/yourname/your_repository"
+# repositoryName: "Repository Name"
+university: "University of Geneva"
+department: "Department of Informatics"
+# logo: "./images/unige.pdf"
+# logofooter: "./images/unige_informatic.png"
+# logofootersize: 1.5cm
+illustration1: "./images/zoomed.png"
+illustration2: "./images/A07.png"
+toc: true
+format:
+  pdf:
+    fig-pos: 'h!'
+    code-block-border: true
+    pdf-engine: xelatex
+    # pdf-engine-opts: ["--shell-escape"]
+    template: template.tex
+    execute: false # Code execution
+    echo: true    # Code printing in document
+---
+
+\newpage
+
+# Introduction
+
+In our digital world with improvements of Artificial Intelligence, it's more and more complex to determine the source of informations.
+Indeed, AI can for instance generate realistic images that spread false information.
+
+Sometimes, determine the source of an image can be crutial, like for justice case.
+Digital fornesic answers to this requirements by analysis of the image.
+Digital forensic is able to determine the provenance of a photo, the type of device used to create the photo, and more informations.
+
+In this work, we will implement and analyse a digital forensic method that determine if images come from a given camera or not.
+
+\newpage
+
+# Methodology {#sec-met}
+
+## Camera basis
+
+First, we will take a look at the camera operation.
+
+Human visual system captures the photons from the light which ricochet against objects.
+Then, the brain convert theses photons informations into an image.
+
+A camera is based on the human visual system: the camera will capture photons from light and convert them into pixels.
+
+## Noise {#sec-noise}
+
+During this processus, photons go through the lens of the camera and are catched by the color sensor.
+There are different kind of color sensors and lens for cameras, depending on constructor.
+
+However, theses lens and color sensors contains imperfections or don't have same sensibility...
+This appears as noise on the taken photos
+
+We have two kind of noise:
+
+- The fixed pattern noise (FPN). It's an additive noise that is the pixel wise difference in dark conditions, produced by imperfections of sensors.
+- The photo response non uniformity noise (PRNU). It's a multiplicative noise caused also by sensors imperfections.
+  In fact, the sensor is composed by millions of photons containers, which have not exactly the same capabilities due to imperfections that comes with the construction of the sensor.
+  For instance, a container could accept more photons than another.
+
+Furthermore, as constructors don't use same technologies, the noises obtained on camera will depend on technologies used, so on the constructor, each model having it's own characteristics.
+
+## Image detection
+
+The two types of noise mentionned in section [@-sec-noise] don't varies when taking photos and are specific to each camera.
+We call the noise specific to a camera the _fingerprint_ of the camera, each being unique.
+That's why it's possible to extract this noise and, based on this noise, to determine which camera has taken the given photo.
+
+In most of case, we can't use FPN noise because constructor removes this noise directly in the device to have the best photo quality possible.
+
+That's why, we will try a method based on the PRNU noise to determine the camera that have taken the picture.
+
+### Requirements
+
+The accuracy of the image detection is based on the quality of the acquisition of the fingerprint of the camera.
+
+To extract the fingerprint of a camera, we need some pictures from this camera that respect the following requirements:
+
+- At least 15 pictures from this camera must be provided, allowing to compute the PRNU of each image and to calculate the mean of the obtained PRNUs.
+  This is a way to obtain a _general_ fingerprint of the camera whereas with only 1 image, the fingerprint could be specific.
+- Pictures must have a high quality compression, and if it's possible the image must not be compressed to avoid a loss of PRNU informations in compression.
+- Pictures must be flat-field. It allows to detect variations in pixels that are due to defaults and not to complexity of environment.
+- Pictures must be brightly but not saturated. The brightness will boost the sensor signal and make imperfections easier to detect.
+- Pictures must have same size for simplicity when computing the mean of the PRNU obtained
+
+### Fingerprint computation
+
+To compute the fingerprint of the camera, we calculate the PRNU of each picture provided from the camera and then we compute the PRNU fingerprint by the sum of all the PRNUs obtained.
+
+We can describe the computation of the PRNU fingerprint by the following steps:
+
+1. Compute the residual $W_I$ of an image $I$ according to the denoising filter $F$, given by the formula [-@eq-residual].
+
+  $$W_I = I - F(I)$$ {#eq-residual}
+
+2. Compute the $\text{PRNU}_I$ of the image $I$ by the following formula [-@eq-prnu].
+
+   $$\text{PRNU}_I = \frac{W_I I}{I^2}$$ {#eq-prnu}
+
+3. Compute the final PRNU fingerprint by adding the contribution of the $\text{PRNU}_I$ for each image $I$ given to obtain the fingerprint PRNU, like shown in the following formula [-@eq-fingerprint].
+
+   $$\text{PRNU} = \frac{1}{N}\sum_I^N \text{PRNU}_I$$ {#eq-fingerprint}
+
+4. (Optional) Normalize the fingerprint to have something in a good range and store it on the disk in a lossless compression way (no data is lost in image compression).
+
+### Source camera identification
+
+Now we assume the fact that we have the fingerprint of the camera.
+
+We want to detect that a picture is taken or not by this camera.
+
+To do that, we begin by computing the $\text{PRNU}_I$ of the image $I$, according to the formula [-@eq-prnu].
+
+Then we compute the correlation between the fingerprint and the $\text{PRNU}_I$.
+
+Finally, we can compute the correlation for some images that are not taken by the camera and then compare values obtained to determine if the photo was taken by the given camera.
+
+\newpage
+
+# Implementation {#sec-impl}
+
+My python program follow the given documentation:
+
+```{text}
+usage: tp2.py [-h] [-d DIRECTORIES [DIRECTORIES ...]] [-f FINGERPRINT]
+              [-l LABELS [LABELS ...]] [-m MODEL] [-s SAVING_PATH]
+
+Find PRNU of camera
+
+options:
+  -h, --help            show this help message and exit
+  -d, --directories DIRECTORIES [DIRECTORIES ...]
+                        directories where are stored images took by
+                        specific camera
+  -f, --fingerprint FINGERPRINT
+                        Fingerprint of the camera
+  -l, --labels LABELS [LABELS ...]
+                        Labels for graph output. You must provide a label
+                        by directory given. Default is the name of
+                        directories.
+  -m, --model MODEL     Model of the camera. Default is 'model'
+  -s, --saving_path SAVING_PATH
+                        Path where fingerprint will be stored. Default is
+                        '.'
+```
+
+If we don't give any fingerprint, the program will compute the fingerprint of the given set of photos and store the resulting fingerprint in the path given by argument `-s`.
+
+Else, the program will compute the resulting correlation between the given fingerprint and the images contained in the given directories.
+Then, a graph is computed and printed to the user with all resulting correlations, with label of each set of points given by the name of the directories or by a user defined label.
+
+For instance the computation of the fingerprint for model `A02` is given by the following command:
+
+```{bash}
+cd digital_forensic/code
+python tp2.py \
+  -d ../../Dataset_Lab2/A02_train \
+  -m A02 \
+  -s '.'
+```
+The output will be `A02_fingerprint.png` in directory `code`.
+
+The computation of the correlation graphic between given images and given fingerprint is obtained by the following command:
+
+```{bash}
+python tp2.py \
+  -f A02_fingerprint.png \
+  -d  ../../Dataset_Lab2/A02_test ../../Dataset_Lab2/A07_test \
+      ../../Dataset_Lab2/I03_test ../images \
+  -l A02 A07 I03 Web \
+  -m A02
+```
+
+\newpage
+
+# Results
+
+I have worked with the given dataset called `Dataset_Lab2`.
+
+In this dataset are images taken from camera `A02`, from camera `A07` and from internet `I03`.
+
+I have computed the fingerprint according to the commands given in section [-@sec-impl].
+
+We can see in figure [-@fig-fingerprint-a2] an example of fingerprint from camera `A02`.
+
+::: {#fig-fingerprint layout-ncol=2}
+
+![fingerprint](../code/A02_fingerprint.png){#fig-fingerprint-a2}
+
+![Top left corner zoomed 10x](./images/zoomed.png){#fig-zoom}
+
+Fingerprint from camera A02
+
+:::
+
+If we zoom in this fingerprint, as shown by figure [-@fig-zoom],
+it's possible to see some specific aligned pattern noise in the top left corner.
+It's also possible to see that the noise has a certain structure.
+This noise with its structure is unique and correspond to the imperfections of the camera `A02`.
+That's why we can determine if a photo is taken with this camera by analysing the structure of the PRNU noise of the picture and by comparing it to the fingerprint.
+
+The `Dataset_Lab2` is composed of train datas and test datas.
+There are datas from 3 cameras, `A02`, `A07`, and `I03`.
+
+In addition to this data, real images taken from the web are added.
+
+When we plot the correlation between camera `A02` fingerprint and all this images, we obtain the figure [-@fig-a2].
+In this figure, we can observe that the correlation is always very small, because we are speaking about values in order of $0.1$.
+However, there is a big difference between the images taken by camera `A02` and the other images:
+there is a difference of at least 20% between values given by all photos compared to photos taken by camera `A02`.
+Thanks to this difference of values, we can affirmate that pictures from the folder `A02_test` come from camera `A02`.
+
+It's the same for the correlation between camera `A07` fingerprint and the set of images, as the figure [-@fig-a7] show us:
+the difference is also of approximatively 20% between photos that come from folder `A07_test` and the others.
+It means once again that the method works because we can determinate thanks to the difference that pictures from folder `A07_test` come from camera `A07`.
+
+::: {layout-ncol=2}
+
+![Camera A02](./images/A02.png){#fig-a2}
+
+![Camera A07](./images/A07.png){#fig-a7}
+
+:::
+
+In case of the correlation between camera `I03` fingerprint and the set of pictures, it's a little bit different:
+As shown in figure [-@fig-i3], the range of correlation is not the same.
+We are speaking about values in order of 0.2 instead of 0.1.
+
+However, when we compare the correlation between images from folder `I03_test` and the others, we can always see a difference of 20%.
+Therefore once again we can determinate that pictures from folder `I03_test` are taken by camera `I03`.
+
+![Camera I03](./images/I03.png){#fig-i3 width="50%"}
+
+Finally, it's easy to see that all images taken from the web are always bad correlated, and less correlated that the camera images in most cases (as shown on figure [-@fig-i3], for instance).
+It means that a random image will not have any correlation with the given fingerprint because of the unicity of the fingerprint for each camera.
+And it's exactly what we research because we want that only images taken with a camera have a correlation with the fingerprint of the camera.
+
+\newpage
+
+# Conclusion
+
+The method based on the Photo Response Non Uniformity noise (PRNU) is able to detect if a photo was taken by a specific camera thanks to the fingerprint of the camera.
+The fingerprint of the camera is obtained by computing the PRNU of a set of images that meet certain constraints to have a good result.
+Results show us that the correlation between a camera fingerprint and PRNU of images will be greater if the images are taken by this camera.
+In this way, it is possible to compare correlations obtained with a set of images to determine the provenance of the given photo.
+
+However, we may wonder whether this method is applicable to videos and what about new cameras with advanced noise reduction or smartphone cameras.
