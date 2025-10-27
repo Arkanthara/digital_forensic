@@ -31,7 +31,7 @@ def insert_img(img: np.ndarray, img2: np.ndarray, tlx: int, tly: int) -> np.ndar
     result = img.copy()
     result[tly : tly + img2.shape[0], tlx : tlx + img2.shape[1]] = img2
     result[result == 0] = img[result == 0]
-    return result
+    return result.astype(int)
 
 
 def print_range(img: np.ndarray):
@@ -86,42 +86,43 @@ if __name__ == "__main__":
     )
     noise_0_5 = add_noise(cropped_img, std=0.5)
     noise_1 = add_noise(cropped_img, std=1)
-    compression_90_50 = jpeg_compress(jpeg_compress(cropped_img, 90), 50)
+    compression_50_30 = jpeg_compress(jpeg_compress(cropped_img, 50), 30)
     compression_50_90 = jpeg_compress(jpeg_compress(cropped_img, 50), 90)
     print_image(img)
     print_image(cropped_img)
-    print_image(
-        insert_img(img, cropped_img, 578, 894), title="moved part without modification"
+    print_image(insert_img(img, rescale_1_5, 440, 840))
+    io.imsave(
+        "no_modification.png", util.img_as_ubyte(insert_img(img, cropped_img, 578, 894))
     )
-    print_image(
-        insert_img(img, rescale_1_5, (1000 - 578) // 2, (1000 - 894) // 2),
-        title="moved part upscaled 2 times",
+    io.imsave(
+        "rescale_1_5.png",
+        util.img_as_ubyte(insert_img(img, rescale_1_5, 440, 840)),
     )
-    print_image(
-        insert_img(img, rescale_0_5, 480, 930),
-        title="moved part downscaled 2 times",
+    io.imsave(
+        "rescale_0_5.png",
+        util.img_as_ubyte(insert_img(img, rescale_0_5, 480, 930)),
     )
-    print_image(
-        insert_img(img, rotate_90, 578, 894),
-        title="moved part rotated 90",
+    io.imsave(
+        "rotate_90.png",
+        util.img_as_ubyte(insert_img(img, rotate_90, 578, 894)),
     )
-    print_image(
-        insert_img(img, rotate_45, 400, 894),
-        title="moved part rotated 45",
+    io.imsave(
+        "rotate_45.png",
+        util.img_as_ubyte(insert_img(img, rotate_45, 400, 894)),
     )
-    print_image(
-        insert_img(img, noise_0_5, 578, 894),
-        title="moved part noise 0.5",
+    io.imsave(
+        "noise_0_5.png",
+        util.img_as_ubyte(insert_img(img, noise_0_5, 578, 894)),
     )
-    print_image(
-        insert_img(img, noise_1, 578, 894),
-        title="moved part noise 1",
+    io.imsave(
+        "noise_1.png",
+        util.img_as_ubyte(insert_img(img, noise_1, 578, 894)),
     )
-    print_image(
-        insert_img(img, compression_50_90, 578, 894),
-        title="moved part compression Q50 then Q90",
+    io.imsave(
+        "compression_50_90.png",
+        util.img_as_ubyte(insert_img(img, compression_50_90, 578, 894)),
     )
-    print_image(
-        insert_img(img, compression_90_50, 578, 894),
-        title="moved part compression Q90 then Q50",
+    io.imsave(
+        "compression_50_30.png",
+        util.img_as_ubyte(insert_img(img, compression_50_30, 578, 894)),
     )
