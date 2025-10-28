@@ -217,12 +217,232 @@ Non-planar lenses create a rainbow effect due to light aberration,which can be u
     - contrast adjustment
     - etc.
 
-## Principles of image JPEG compression. 
-## JPEG compression: general compression scheme 
+## Principles of image JPEG compression.
+
+What is JPEG?
+
+- JPEG is used in many applications. It is particularly suitable for the compression of photos and paintings of realistic scenes with smooth variations of tone and color
+- With respect to the other widely diffused  GIF  format  JPEG ensures better visual quality compressed images for the same file size
+
+- Image compression can be achieved because image data are often hightly redundant and/or irrelevant.
+- Image coding is achieved by reducing the redundancy contained in 
+data. More specifically, two kinds of redundancy exist:
+    – statistical redundancy, which is exploited for lossless compression
+    – Irrelevance (psychovisual redundancy), whose removal leads to lossy compression
+
+JPEG is effective because of the following main points:
+- Image data usually changes slowly across an image, especially within an 
+8x8 block
+    - therefore, images contain much redundancy
+- Experiments indicate that humans are not very sensitive to the high 
+frequency data images
+    - therefore, we can remove much of this data exploiting  
+transform coding
+- Humans are much more sensitive to brightness (luminance)  
+information than to color (chrominance)
+    - JPEG performs subsampling of chrominance information (color 
+channels)
+
+
+## JPEG compression: general compression scheme
+
+- Image compression can be achieved because image data are often hightly redundant and/or irrelevant.
+- Image coding is achieved by reducing the redundancy contained in 
+data. More specifically, two kinds of redundancy exist:
+    – statistical redundancy, which is exploited for lossless compression
+    – Irrelevance (psychovisual redundancy), whose removal leads to lossy compression
+
+- T = Transformer, it applies a one-to-one transform to input data, the  output should be more amenable to compression (e.g. skew probability  distribution, reduced correlation among data). No loss occurs here.  Examples: predictive mapping, DCT transform.
+- Q = Quantizer, it achieves lossy compression by performing a many-to-one mapping of data into symbols (scalar or vector quantization)
+- C = Coder, by assigning a codeword to each symbol produced by the quantizer, lossless compression is achieved (fixed-lenght or variable-lenght codes may be used)
+
+### Lossless compression
+
+- By removing the quantizer, a general lossless compression scheme is obtained
+- The transformer T only aims at removing the spatial, spectral and temporal redundancy (memory), or at putting it in a different form, so that it is easier for the symbol coder to compress data
+- Compression ratios achievable through lossless coding are not sufficient to meet the needs of most practical applications
+
+### Details
+
+- Transform coding is performed by taking an image and breaking it down into
+sub-image (block) of size nxn. The transform is then applied to each sub-image
+(block) and the resulting transform coefficients are quantized and entropy
+coded.
+
+Quantization
+- Goal: to reduce number of bits per sample
+- For each 8x8 DCT block, F(u.v) is divided by a 8x8 quantization matrix Q
+Quantization
+- Each F[u,v] in a 8x8 block is divided by constant value Q(u,v)
+- Higher values in the quantization matrix Q allows to achieve better 
+compression at the cost of visual quality
+- How to choose Q?
+- Eye is more sensitive to low frequencies (upper left corner of the 8x8 matrix), 
+less sensitive to high frequencies (lower right corner)
+    - Idea: quantize more (large quantization step) the high 
+frequencies, less the low frequencies
+- The values of the Q matrix are controlled with parameter called Quality 
+Factor (QF).
+– QF ranges from 100 (best quality) to 1 (extremely low)
+
+
+Main steps:
+1. Discrete Cosine Transform (DCT) of each 8x8 pixel block
+2. Scalar quantization
+3. Zig-zag scan to exploit redundancy
+4. Data preparation for entropy 
+coding:
+- differential pulse-code modulation (DPCM)
+- run-length coding (RLC)
+- variable-length coding (VLC)
+5. Entropy coding
+
 ## JPEG compression: sources of redundancies 
-## JPEG compression: particularities of luminance and chrominance channels processing 
-## JPEG compression artefacts 
-## Detection of double JPEG compression 
+
+- Spatial redundancy
+    - correlation between neighboring pixels
+- Spectral redundancy
+    - correlation among color components
+- Temporal redundancy (for video compression)
+    - correlation between consecutive frames
+
+- Spatial irrelevance
+    - refers to the ability of the Human Visual System (HVS) to perceive small image details
+- Spectral irrelevance
+    - refers to the way the HVS perceives colors
+- Temporal irrelevance (for video compression)
+    - accounts for the ability of the HVS to perceive rapid changes between subsequent video frames
+
+## JPEG compression: particularities of luminance and chrominance channels processing
+
+- RGB color space is not the only method of image representation
+- There are several other color spaces, each one with its properties
+- A popular color space in image compression is the YCbCr, which:
+    - separates luminance (Y) from color information (Cb,Cr)
+    - processes Y and (Cb,Cr) separately (not possible in RGB)
+- RGB to YCbCr (and YCbCr to RGB) linear conversions:
+
+Color space transform – subsampling
+- Y is taken every pixel, and Cb,Cr are taken for a block of 2x2 pixels
+- Example: block 64x64
+Data size is reduced to a half without significant losses in visual quality
+Without subsampling, one must take 642
+pixel values for each color channel:
+3* 642 = 12288 values (1 bytes per  
+value)
+JPEG takes 642  pixel values for Y 
+channel and 2x322 pixel values for
+chroma channel:
+ 
+642 + 2x322 = 6144 values (1 bytes per  
+value)
+
+## JPEG compression artefacts
+
+JPEG compression footprints
+- Like any other image processing, JPEG leaves traces into the 
+image,  especially at low Quality Factors
+    - Such traces can be exploited to gather useful information on the
+image
+- Some JPEG artifacts are immediately identified
+    - Blocking due to block discontinuities
+    - Ringing on edges due to the DCT
+    - Graininess due to coarse quantization
+    - Blurring due to high frequency removal
+- Other (statistical) alterations are more subtle to identify!
+### Details
+
+Blocking artifacts
+- Processing each 8x8 block independently introduces discontinuities along  
+the block boundaries, thus making image tiling visible
+
+Ringing artifacts
+- Spurious signals near sharp transitions
+    - Visually, they appear as bands or “ghosts”
+    - Particularly evident along edges an in text images
+Graininess artifacts
+- Particularly evident as “dots” along the edges
+
+Blurring artifacts
+- Removing high frequency DCT coefficients increases the smoothness of the  
+image and is retaining shapes but making textures less distinguishable
+    - Human eye is particularly good at spotting smoothness
+
+## Detection of double JPEG compression
+
+Double JPEG compression forensics
+- Double JPEG compression is when an image is JPEG compressed first with
+QF1 and then JPEG compressed again with QF2
+- In multimedia  forensics, several approaches have been proposed to reveal
+the footprints left by double compression
+Why knowledge that image has been JPEG  compressed (quantized) 
+twice is important?
+
+Double JPEG compression: footprints
+Double compression is an indicator of possible 
+image manipulations
+
+Double quantization: footprints
+- When an image is JPEG compressed first with QF1 and then JPEG
+compressed again with QF2, a double quantization occurs
+- Statistical footprints are left by double quantization
+- Therefore, double JPEG images show these artifacts, while single JPEG
+does not
+- Double JPEG detection can be performed based on these artifacts[*]
+
+Single quantization (SQ)
+- Quantization is the point-wise operation:
+where:
+    - is a strictly positive integer (quantization step)
+    - the value is approximated to the closest integer
+- De-quantization brings the quantized values back to their original range
+Qa is not invertible because of the rounding operation
+
+Double quantization (DQ)
+- Double quantization is a point-wise operation:
+where     and      are the quantization steps of the first and second quantization
+- Double quantization can be represented as a sequence of three steps:
+1. Quantization with step
+2. De-quantization with step
+3. Quantization with step
+
+When $a<b$, some bins are empty (holes). This happens because the second 
+quantization re-distributes the quantized coefficients into more bins than the 
+first quantization
+
+When $a>b$, some bins contain more samples that neighbouring bins. This 
+happens because even bins receive samples from more original bins with 
+respect to the odd bins
+
+Double quantization and DJPEG
+- In a JPEG image, quantization is performed in the DCT domain
+- Then, in a double-JPEG  (D-JPEG) image, the double quantization
+footprints consist in periodic artifacts in the histograms of the 8x8 block-
+DCT coefficients
+– when QF1 < QF2, the histograms have periodic holes
+
+Detection of double quantization
+- The periodic patterns are particularly visible in the Fourier domain as 
+strong peaks in the mid and high frequencies
+- Then, the Fourier transform of each DCT histogram is evaluated to see if it 
+has certain artifacts [*].
+- If the answer is “yes” for at least 1 of the first 10 DCT histograms of 
+the JPEG image, the image is regarded as doubly compressed.
+
+Detection of double quantization
+- For the case QF1 < QF2 , the detection is more reliable
+    - Peaks and gap are easy to detect
+    - Rule of thumb:
+(the strength of the artifacts depends on Δ)
+- QF1 < QF2 is often the most frequent case in practice
+
+Another feature: FSD distribution
+- Another method is based on the distribution of the First Significant Digits 
+(FSD) of the block-DCT coefficients.
+- For single JPEG images, the distribution of the FSDs follows a known law 
+(Benford’s law) [**]
+- Double compression cause violation of this law
+
 ## Image editing forensics: inconsistency in light 
 ## Image editing forensics: local filtering traces 
 ## Photo manipulation with inconsistent shadows: basic assumptions 
