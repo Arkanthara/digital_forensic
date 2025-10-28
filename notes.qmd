@@ -444,11 +444,176 @@ Another feature: FSD distribution
 - Double compression cause violation of this law
 
 ## Image editing forensics: inconsistency in light 
-## Image editing forensics: local filtering traces 
-## Photo manipulation with inconsistent shadows: basic assumptions 
+
+Copy-paste image tampering is the most common method of creating an image 
+forgery. Usually, they are causing some inconsistencies in lighting, shadows, 
+perspective, etc. 
+If two objects originally come from different images, it is unlikely that their light  
+sources will be similar in direction and distance.
+
+- Lambertian assumption of the surface of interest
+- constant assumption of the objects reflectance
+- assumption that light source is located infinitely far away.
+
+## Image editing forensics: local filtering traces
+
+median filtering detection ... Structure uniform is not natural => image filtered...
+
+local filtering traces
+
+smooth filter, then sharpened image filter (lowpass filter then highpass filter) => give overshoot artifact in top and bottom of the line
+
+Median filtering is a common image post-processing method to filter out image 
+noise. With its nonlinear property, it also can be used in image forgeries to 
+remove specific modification traces.
+
+Unsharp masking sharpening detection
+Unsharp masking sharpening is a technique that is widely used to enhance 
+edge contrast in order to improve image quality. However, in many image 
+forgeries, Unsharp masking sharpening can also be employed to cover the 
+traces of image manipulation. 
+
+
+## Photo manipulation with inconsistent shadows: basic assumptions
+
+Basic assumptions
+- Two types of shadows can be analyzed:
+    - Cast Shadows
+    -  Attached Shadows
+- A single distance or light source
+- No other assumptions on scene geometry
+
+In case of multi-objects scene:
+- Mark every object
+- The single light source is expected to be within the region formed by the 
+intersection of all the constraints
+
+
 ## Photo manipulation with inconsistent shadows: cast shadow 
-## Photo manipulation with inconsistent shadows: attached shadow 
-## Photo manipulation with inconsistent shadows: mathematical model 
+## Photo manipulation with inconsistent shadows: attached shadow
+
+Attached shadows are specified 
+with a half-plane
+
+- Orientation and direction 
+automatically suggested by 
+computing image gradient
+- Analyst can accept or adjust the 
+constraint
+
+
+## Photo manipulation with inconsistent shadows: mathematical model
+
+Constrain the projection location 
+of the light source
+- Feasible solutions indicate 
+physically plausible shadows
+- Failure to find a solution provides 
+evidence of photo tampering
+Forensic analyst needs to specify 
+shadow’s constraints
+If a wedge does not overlap the 
+yellow wedge at all, the constraint 
+is inconsistent with previous ones: 
+forgery
+
+Using analytic geometry
+- Formula of a 2-D line passing through a known point p(px, py), with a 
+given normal n(nx, ny):
+Using analytic geometry
+- For the case of half-plane:
+$nx -np \geq 0$
+- For the case of cast shadow:
+$n_1x - n_1p \geq 0$ and $n_2x - n_2p \geq 0$
+
+Combined together: $Nx - P \geq 0$
+Problem solution
+- solution to this system should always exist
+- in case of inconsistencies slack variables are added ($s \geq 0$)
+So $N x - P + s \geq 0 \Longleftrightarrow Nx - P \geq -s$
+
+After solving the linear programming problem:
+• if slack variables for optimal solution are all ZERO: there is a single light 
+source position that satisfies all the constraints
+• else, one or more shadows is inconsistent with the single light source 
+assumption
+Caution: 
+Due to the adopted projective model, there is an inherent sign ambiguity when 
+specifying the shadow constraints
+➢ If the light source in the real 3-D world is behind the camera:
+- Its position is inversely projected onto the image plane
+- All constraint normals should be negated
+
+In order to not worry about the position of the light source in the real 
+world, the authors solve two kinds of linear programs
+$Nx - P \geq -s$ and $-Nx - P \geq -s$
+
+Conclusions
+➢ Broad range of ambiguous cast and attached shadows
+    - Combination of many constraints can be effective
+➢ Easy to identify inconsistent constraints.
+➢ Computationally efficient solution (standard linear programming problem)
+➢ Works only for a single dominant light source
+    - Preclude analysis of scenes with multiple point lights or diffuse area 
+lighting
+    - Includes common situation of outdoor scenes or indoor scenes 
+photographed with a flash
+➢ No assumptions about the scene geometry or photometry 
+    - Only linear perspective projection and a single dominant point light 
+source
+➢ Lens distortion may be an issue
+➢ Depends on the user
+    - Poor selection of constraints could lead to a failure in detecting a 
+manipulation
+➢ Counter forensics
+    - Using this technique to ensure that all shadows are consistent
+    - Combine with other techniques for estimating lighting from a single 
+image
+
+
+
+
+
+
 ## Traces of image editing: resampling detection 
-## Traces of image editing: detection of global contrast enhancement 
+
+The splicing image region usually undergoes a resizing and/or a rotation 
+procedure to cover the forgery traces and to make the final image forgery appear 
+more realistic. Moreover, in the resizing and rotation procedure, the pixels in the 
+modified image patch must be resampled to fit the new sample lattice. Hence, 
+resampling detection can help to detect possible image forgeries and locate
+suspicious splicing regions.
+
+In digital image forensics, **resampling detection** is used to reveal image manipulations such as resizing, rotation, or copy-paste.
+When an image is resampled, each new pixel is **interpolated** from its neighbors, creating **predictable linear relationships** between pixels.
+This process can be modeled as ( y = Hx ), where (H) is an interpolation matrix.
+For large signals, some rows of (H) become **linearly dependent**, leading to **periodic correlations** in the resampled data.
+Detecting these periodic patterns provides strong evidence that a region of the image has been **geometrically transformed** — a common sign of **forgery**.
+
+➢ The probabilities for each yi can be represented in a probability map
+➢ These probabilities are periodic that introduces picks in the Fourier Transform of probability map
+
+## Traces of image editing: detection of global contrast enhancement
+
+‣ All contrast enhancement mappings result in an increase in energy
+‣ This energy is related to the intrinsic fingerprint
+‣ Expected image DFTs are to be strongly low-pass signal
+‣ Therefore, the presence of energy in the high frequency regions is 
+indicative of contrast enhancement
+‣ Contrast enhancement will cause isolated peaks and gaps in the 
+histogram
+
+
 ## Traces of image editing: detection of local contrast enhancement
+
+‣ Defined as applying a contrast mapping to a set of contiguous pixels 
+within an image
+‣ Can identify cut-and-paste forgeries
+‣ To detect it, the image is divided into smaller blocks and the global 
+technique is applied to the blocks
+‣ Blocks of size 200x200, 100x100, 50x50, 25x25, and 20x20
+
+Ex: The image was divided in 100x100 pixel blocks and tested local contrast 
+enhancement on the red (d), green (e) and blue (f) color layers
+To improve localization of modified area image was divided into 50x50 pixel 
+blocks and tested on local contrast enhancement in 3 the color layers
