@@ -1,0 +1,303 @@
+# Digital Forensics Summary
+
+## Principles of digital forensics
+
+**Forensic Gist:** The systematic process for investigating digital evidence while maintaining legal admissibility.
+
+- **Acquisition:** Securely preserve digital evidence without alteration using forensic tools
+- **Identification:** Locate and extract relevant data, including hidden or deleted content
+- **Evaluation:** Analyze extracted data to reconstruct events and establish timelines
+- **Presentation:** Communicate findings clearly to both technical and non-technical audiences
+
+**Key Users:** Law enforcement, legal teams, corporations investigating internal matters
+
+## Digital multimedia forensics: definition, classification.
+
+**Forensic Gist:** Verifying the authenticity of digital media (images, video, audio) by detecting manipulation traces.
+
+**Core Problem:** Digital media can no longer be automatically trusted as evidence due to:
+- Easy manipulation tools
+- Social impact of misinformation
+- Scientific challenge of establishing ultimate reliability
+
+### Idea
+
+**Forensic Approach:** Analyze inherent "digital fingerprints" left during:
+- Creation (camera-specific patterns)
+- Processing (editing software traces)
+- Scene characteristics (lighting, geometry)
+
+#### Digital fingerprints
+
+Three main fingerprint categories:
+- **In-camera fingerprints:** Hardware/software signatures unique to specific devices
+- **Out-camera fingerprints:** Statistical changes from editing operations
+- **Scene fingerprints:** Physical consistency checks (lighting, perspective, shadows)
+
+## Active and passive approaches for multimedia authentication.
+
+### Active approach:
+
+**Forensic Gist:** Proactive protection using embedded security features.
+
+**Methods:**
+- **Cryptographic Signature:** Digital signatures created at source and verified later
+- **Digital Watermarking:** Invisible data embedded for authentication
+
+#### Disadvantages
+
+**Limitations of Active Methods:**
+- Heavy computational requirements
+- Cannot distinguish compression from malicious tampering
+- Protection disappears after decryption
+- Requires pre-existing infrastructure
+
+### Passive and blind approach: multimedia forensics
+
+**Forensic Gist:** Analyze media without pre-embedded markers to answer:
+- **Source identification:** Which device created this?
+- **Integrity verification:** Has this been altered?
+
+#### Advantages
+
+**Benefits of Passive Methods:**
+- No special preparation required
+- Works with any existing digital media
+- No need for device databases or standards
+
+## Image generation pipeline
+
+**Forensic Gist:** Understanding camera processing steps reveals detectable fingerprints.
+
+**Processing Chain:**
+1. **Light projection** onto sensor grid
+2. **Amplification and quantization** of electrical signals
+3. **Signal adjustment** for white balance
+4. **Color filtering** through Bayer pattern CFA
+5. **Interpolation/demosaicking** to reconstruct full color
+6. **Color/gamma correction** for display
+7. **Sharpening/denoising** filters
+8. **Storage** in compressed format
+
+Each step leaves forensic traces that can identify the device or detect edits.
+
+## Camera identification based on photo response non-uniformity (PRNU)
+
+**Forensic Gist:** Use sensor manufacturing imperfections as unique camera fingerprints.
+
+**Sensor Noise Components:**
+- **Fixed Pattern Noise (FPN):** Additive noise visible in dark conditions
+- **Photo-Response Non-Uniformity (PRNU):** Multiplicative noise from pixel sensitivity variations
+
+**Mathematical Model:**
+$I(x, y) = I_0(x, y) + I_0(x, y) \cdot K(x, y) + N(x, y)$
+
+Where:
+- $I(x, y)$: Observed pixel value
+- $I_0(x, y)$: Ideal noise-free image
+- $K(x, y)$: PRNU pattern (camera fingerprint)
+- $N(x, y)$: Random noise
+
+**Forensic Application:** Estimate $K(x, y)$ by averaging multiple images from same camera, then compare unknown images against this fingerprint.
+
+## Media forensics based on in-camera fingerprints.
+
+### Source identification
+
+**Forensic Gist:** Determine capture device characteristics through inherent signatures.
+
+**Identification Hierarchy:**
+- Device class (CCD vs CMOS)
+- Brand/model specifications
+- Individual device identification
+
+### Usage of digital fingerprints
+
+**Applications:**
+- **Source identification:** Match against reference device databases
+- **Forgery detection:** Identify fingerprint inconsistencies indicating edits
+
+#### Tampering detection
+
+**Specific Techniques:**
+- Analyze Color Filter Array (CFA) interpolation patterns
+- Detect processing chain anomalies (white balance, sharpening traces)
+- Compare against expected camera model behaviors
+
+## Application of geometrical fingerprints in digital forensics.
+
+**Forensic Gist:** Use physical scene properties to detect inconsistencies.
+
+**Key Methods:**
+- **Copy-move detection:** Find duplicated regions using sliding window analysis
+- **Highlight analysis:** Model eyes as spheres to verify light source consistency
+- **Shadow analysis:** Check lighting direction coherence across objects
+- **Chromatic aberration:** Detect cut-paste operations through lens distortion patterns
+
+## Out-camera fingerprints in digital forensics.
+
+**Forensic Gist:** Detect post-capture processing through statistical alterations.
+
+**Detectable Operations:**
+- Compression artifacts
+- Geometric transformations (rotation, scaling)
+- Filter applications (blur, sharpening)
+- Contrast adjustments
+- Multiple processing combinations
+
+## Principles of image JPEG compression.
+
+**Forensic Gist:** Understand compression artifacts that serve as forensic markers.
+
+**JPEG Advantages:**
+- Effective for photographic content with smooth variations
+- Exploits human visual system limitations
+- Separates luminance (detail) from chrominance (color) processing
+
+**Redundancy Types:**
+- **Statistical redundancy:** Correlations between neighboring pixels
+- **Psychovisual redundancy:** Information humans don't perceive well
+
+## JPEG compression: general compression scheme
+
+**Forensic Gist:** Compression pipeline creates detectable patterns.
+
+**Processing Steps:**
+1. **Transform (T):** Convert to frequency domain (DCT)
+2. **Quantize (Q):** Reduce precision (lossy step)
+3. **Code (C):** Compress losslessly (Huffman coding)
+
+**Key Operation:** $F_{quantized}[u,v] = round\left(\frac{F[u,v]}{Q(u,v)}\right)$
+
+Where $Q(u,v)$ is quantization matrix values controlling quality/compression trade-off.
+
+### Lossless compression
+
+**Alternative:** Remove quantizer step for perfect reconstruction but limited compression.
+
+## JPEG compression: sources of redundancies 
+
+**Forensic Gist:** Different redundancy types leave distinct compression footprints.
+
+**Spatial:** Pixel neighborhood correlations  
+**Spectral:** Color channel relationships  
+**Temporal:** Frame-to-frame video similarities  
+
+**Human Perception Limits:**  
+High frequency detail, color subtlety, rapid changes - all can be compressed without noticeable quality loss.
+
+## JPEG compression: particularities of luminance and chrominance channels processing
+
+**Forensic Gist:** Separate processing of brightness vs. color creates forensic signatures.
+
+**YCbCr Color Space:**
+- Y (luminance): Preserved at full resolution
+- Cb, Cr (chrominance): Subsampled (typically 4:2:0)
+
+**Data Reduction Example:**
+Original: $3 \times 64^2 = 12,288$ values  
+JPEG: $64^2 + 2 \times 32^2 = 6,144$ values (50% reduction)
+
+## JPEG compression artefacts
+
+**Forensic Gist:** Compression imperfections serve as authenticity indicators.
+
+**Visible Artifacts:**
+- **Blocking:** 8×8 block boundary discontinuities
+- **Ringing:** Ghosting near edges from frequency truncation
+- **Graininess:** Quantization noise appearing as dots
+- **Blurring:** High frequency detail loss
+
+## Detection of double JPEG compression
+
+**Forensic Gist:** Multiple compressions indicate possible image manipulation.
+
+**Forensic Importance:** Double JPEG compression often occurs when edited images are resaved.
+
+### Double quantization: footprints
+
+**Mathematical Analysis:**
+First quantization: $Q_1(x) = round\left(\frac{x}{a}\right)$  
+Second quantization: $Q_2(x) = round\left(\frac{Q_1(x) \cdot a}{b}\right)$
+
+**Statistical Patterns:**
+- When $a < b$: Histograms show periodic empty bins ("holes")
+- When $a > b$: Histograms show periodic bin overcrowding
+
+**Detection Method:** Analyze DCT coefficient histograms for periodic patterns detectable via Fourier analysis.
+
+## Image editing forensics: inconsistency in light 
+
+**Forensic Gist:** Detect copy-paste forgeries through lighting direction mismatches.
+
+**Key Assumptions:**
+- Lambertian surface reflectance
+- Constant object material properties
+- Distant light source approximation
+
+**Forensic Application:** Objects from different images will likely have incompatible lighting conditions.
+
+## Image editing forensics: local filtering traces
+
+**Forensic Gist:** Detect editing operations through filter characteristic patterns.
+
+**Median Filtering Detection:** Identifies unnatural structural uniformity
+**Unsharp Masking Detection:** Reveals overshoot artifacts at edges
+
+Both filters are commonly used to hide manipulation traces or enhance manipulated regions.
+
+## Photo manipulation with inconsistent shadows: basic assumptions
+
+**Forensic Gist:** Use shadow physics to detect composite images.
+
+**Shadow Types:**
+- **Cast shadows:** Objects blocking light onto surfaces
+- **Attached shadows:** Self-shading on object surfaces
+
+**Core Principle:** Single light source should produce consistent shadow directions across entire scene.
+
+## Photo manipulation with inconsistent shadows: cast shadow
+## Photo manipulation with inconsistent shadows: attached shadow
+
+**Forensic Gist:** Different shadow types provide complementary authenticity checks.
+
+**Cast Shadows:** Define light source position through shadow-object relationships  
+**Attached Shadows:** Determine lighting direction from surface gradient analysis
+
+## Photo manipulation with inconsistent shadows: mathematical model
+
+**Forensic Gist:** Formalize shadow consistency checking as geometric constraint problem.
+
+**Mathematical Framework:**
+For each shadow constraint: $n \cdot x - n \cdot p \geq 0$
+
+**System Solution:** Solve $Nx - P \geq -s$ where:
+- $N$: Constraint normals matrix
+- $P$: Reference points vector
+- $s$: Slack variables (nonzero values indicate inconsistencies)
+
+**Decision Rule:** All $s = 0$ → consistent shadows; Any $s > 0$ → potential forgery
+
+## Traces of image editing: resampling detection 
+
+**Forensic Gist:** Detect geometric transformations (resizing, rotation) common in forgeries.
+
+**Technical Basis:** Resampling creates periodic pixel correlations through interpolation:
+$y = Hx$
+
+Where $H$ is interpolation matrix creating linearly dependent relationships detectable via Fourier analysis of probability maps.
+
+## Traces of image editing: detection of global contrast enhancement
+
+**Forensic Gist:** Identify overall image adjustments through histogram and frequency analysis.
+
+**Detection Methods:**
+- Histogram analysis for isolated peaks/gaps
+- Frequency domain energy distribution checking
+- Expected low-pass signal violation detection
+
+## Traces of image editing: detection of local contrast enhancement
+
+**Forensic Gist:** Locate specific tampered regions through block-based analysis.
+
+**Methodology:** Divide image into blocks (200×200 to 20×20 pixels) and apply global techniques locally to identify manipulated areas.

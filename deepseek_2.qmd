@@ -1,0 +1,315 @@
+---
+title: "Reviewed: Digital Forensics Questions"
+author: "Assistant — reviewed"
+format:
+    pdf:
+        pdf-engine: xelatex
+---
+# Digital Forensics: Principles and Techniques
+
+## Principles of digital forensics
+
+**Core Concept:** A systematic methodology for investigating digital evidence while maintaining legal integrity and chain of custody.
+
+**Four Key Phases:**
+
+1. **Acquisition:** Create forensic copies using write-blockers to preserve original evidence integrity
+2. **Identification:** Locate, recover, and categorize relevant digital evidence using specialized tools
+3. **Evaluation:** Analyze evidence to reconstruct timelines, establish causality, and validate hypotheses
+4. **Presentation:** Document findings in court-admissible formats understandable to legal professionals
+
+**Applications:** Criminal investigations, civil litigation, corporate internal audits, incident response
+
+## Digital multimedia forensics: definition, classification
+
+**Definition:** Scientific discipline verifying authenticity and origin of digital media through analysis of inherent traces.
+
+**Media Types:** Images, video, audio files
+
+**Critical Problem:** Digital media can no longer be trusted as objective evidence due to:
+- Sophisticated editing tools enabling seamless manipulation
+- Social impact: erosion of trust in visual information
+- Scientific challenge: establishing definitive authenticity protocols
+
+### Core Principle
+
+**Fundamental Insight:** Every digital media file contains inherent traces ("digital fingerprints") from:
+- Acquisition device characteristics
+- Processing operations applied
+- Physical scene properties
+
+#### Digital fingerprints
+
+Three distinct fingerprint categories:
+
+- **In-camera fingerprints:** Hardware/software signatures unique to specific devices (lens distortions, sensor patterns, processing algorithms)
+- **Out-camera fingerprints:** Statistical alterations from editing operations (compression artifacts, filter applications)
+- **Scene fingerprints:** Physical consistency indicators (lighting direction, shadow coherence, perspective geometry)
+
+## Active and passive approaches for multimedia authentication
+
+### Active approach
+
+**Proactive Protection:** Embed security features during creation phase
+
+**Methods:**
+
+1. **Cryptographic Signatures:** Hash-based authentication with potential blockchain integration
+2. **Digital Watermarking:** 
+   - **Fragile watermarks:** Detect any modification
+   - **Semi-fragile watermarks:** Allow legitimate processing while detecting malicious tampering
+
+#### Disadvantages
+
+**Technical Limitations:**
+- Multimedia-specific encryption challenges: loss of scalability, high computational demands
+- Inability to distinguish between compression (acceptable) and tampering (malicious)
+- Protection ceases after decryption, requiring additional rights management
+
+### Passive approach: multimedia forensics
+
+**Reactive Analysis:** Investigate existing media without pre-embedded markers
+
+**Forensic Questions:**
+- **Source identification:** Which device created this media?
+- **Integrity verification:** Has this media been altered from its original state?
+
+#### Advantages
+
+**Practical Benefits:**
+- No requirement for pre-existing security infrastructure
+- Applicable to any digital media regardless of origin
+- Works with standard consumer devices and formats
+
+## Image generation pipeline
+
+**Process Understanding:** Digital cameras apply specific processing chains that leave detectable fingerprints
+
+**Eight-Stage Pipeline:**
+
+1. **Light projection:** Optical system focuses light onto sensor array
+2. **Amplification/quantization:** Convert photon energy to digital values
+3. **White balancing:** Adjust color gains for proper color reproduction
+4. **Color filtering:** Bayer pattern CFA separates RGB components
+5. **Demosaicking:** Interpolate missing color values from neighboring pixels
+6. **Color correction:** Transform to standard color spaces (sRGB, Adobe RGB)
+7. **Enhancement:** Apply sharpening, noise reduction, gamma correction
+8. **Compression/storage:** Encode in JPEG/HEIC formats with metadata
+
+**Forensic Value:** Each stage introduces device-specific patterns usable for authentication
+
+## Camera identification based on photo response non-uniformity (PRNU)
+
+**Unique Identifier:** Manufacturing imperfections in image sensors create device-specific noise patterns
+
+**Noise Components:**
+- **Fixed Pattern Noise (FPN):** Additive noise visible in uniform dark conditions
+- **Photo-Response Non-Uniformity (PRNU):** Multiplicative noise from pixel sensitivity variations - the primary forensic fingerprint
+
+**Mathematical Model:**
+$I(x, y) = I_0(x, y) + I_0(x, y) \cdot K(x, y) + N(x, y)$
+
+Where:
+- $I(x, y)$: Observed pixel value
+- $I_0(x, y)$: Ideal noise-free image
+- $K(x, y)$: PRNU pattern (camera fingerprint)
+- $N(x, y)$: Additive noise term
+
+**Implementation:** Estimate $K(x, y)$ by averaging noise residuals from multiple reference images, then correlate with questioned images
+
+## Media forensics based on in-camera fingerprints
+
+### Source identification
+
+**Device Attribution:** Determine capture device through hierarchical analysis
+
+**Identification Levels:**
+- Device class (CCD vs CMOS sensors)
+- Manufacturer and model identification
+- Individual unit identification
+
+### Fingerprint applications
+
+**Dual Purpose:**
+- **Authentication:** Match against reference databases of known devices
+- **Tampering detection:** Identify fingerprint inconsistencies indicating manipulation
+
+#### Specific techniques
+
+**CFA Analysis:** Detect anomalies in color filter array interpolation patterns
+**Processing Chain Analysis:** Identify inconsistencies in white balance, sharpening, compression parameters
+**Device Model Profiling:** Compare against expected behaviors for specific camera models
+
+## Application of geometrical fingerprints in digital forensics
+
+**Physical Consistency Checks:** Use scene geometry properties to detect forgeries
+
+**Detection Methods:**
+
+- **Copy-move detection:** Identify duplicated regions using block-matching algorithms
+- **Lighting analysis:** Verify consistency of highlights/shadows across objects
+- **Perspective verification:** Check geometric coherence in scene composition
+- **Chromatic aberration:** Detect inconsistencies in lens distortion patterns
+
+**Practical Application:** Most effective for identifying composite images from multiple sources
+
+## Out-camera fingerprints in digital forensics
+
+**Post-processing Detection:** Identify editing operations through statistical analysis
+
+**Detectable Operations:**
+- Compression history (JPEG quantization tables)
+- Geometric transformations (scaling, rotation parameters)
+- Filter applications (convolution kernel signatures)
+- Contrast/color adjustments (histogram modifications)
+
+**Technical Basis:** Each processing operation alters statistical properties in detectable ways
+
+## Principles of image JPEG compression
+
+**Compression Rationale:** Exploit redundancies and human visual limitations
+
+**Redundancy Types:**
+- **Spatial:** Correlation between neighboring pixels
+- **Spectral:** Relationships between color channels
+- **Psychovisual:** Information poorly perceived by humans
+
+**Key Insight:** Human vision is more sensitive to luminance (brightness) than chrominance (color), enabling chroma subsampling
+
+## JPEG compression: general compression scheme
+
+**Three-Stage Process:**
+
+1. **Transform (T):** Convert spatial data to frequency domain using Discrete Cosine Transform (DCT)
+2. **Quantize (Q):** Reduce precision using quality-dependent quantization matrices
+3. **Encode (C):** Apply entropy coding (Huffman/RLE) for final compression
+
+**Quantization Formula:**
+$F_{quantized}[u,v] = round\left(\frac{F[u,v]}{Q(u,v)}\right)$
+
+Where $Q(u,v)$ represents frequency-dependent quantization steps
+
+## JPEG compression: sources of redundancies
+
+**Compression Efficiency:** Different redundancy types enable various compression strategies
+
+**Redundancy Exploitation:**
+- **Spatial:** DCT concentrates energy into few coefficients
+- **Spectral:** Chroma subsampling (4:2:0, 4:2:2)
+- **Psychovisual:** Quantize high frequencies more aggressively
+
+## JPEG compression: luminance/chrominance processing
+
+**Color Space Strategy:** Convert RGB to YCbCr for separate processing
+
+**YCbCr Benefits:**
+- Y (luminance): Preserved at full resolution for detail retention
+- Cb/Cr (chrominance): Subsampled with minimal perceptual impact
+
+**Data Reduction Example:**
+64×64 block: RGB = $3 × 4096 = 12,288$ values → YCbCr 4:2:0 = $4096 + 2 × 1024 = 6,144$ values (50% reduction)
+
+## JPEG compression artefacts
+
+**Forensic Indicators:** Compression imperfections provide authenticity clues
+
+**Visible Artifacts:**
+- **Blocking:** 8×8 block boundary discontinuities at low quality factors
+- **Ringing:** Ghosting effects near strong edges from frequency truncation
+- **Graininess:** Quantization noise appearing as random speckling
+- **Blurring:** High-frequency detail loss from aggressive quantization
+
+## Detection of double JPEG compression
+
+**Manipulation Indicator:** Multiple compression cycles often occur during image editing
+
+**Technical Basis:** Double quantization creates periodic patterns in DCT coefficient histograms
+
+**Mathematical Analysis:**
+First quantization: $Q_1(x) = round\left(\frac{x}{a}\right)$  
+Second quantization: $Q_2(x) = round\left(\frac{round\left(\frac{x}{a}\right) \cdot a}{b}\right)$
+
+**Detection Methods:**
+- Histogram analysis for periodic holes/peaks
+- Fourier analysis of DCT coefficient distributions
+- Benford's law violation detection in significant digits
+
+## Image editing forensics: inconsistency in light
+
+**Physical Principle:** Lighting conditions should be consistent across authentic images
+
+**Detection Method:** Analyze highlight and shadow directions using geometric models
+
+**Key Assumptions:**
+- Lambertian surface reflectance
+- Single dominant light source
+- Distant light approximation
+
+**Forensic Value:** Objects from different sources typically have incompatible lighting
+
+## Image editing forensics: local filtering traces
+
+**Operation Detection:** Identify specific editing filters through characteristic patterns
+
+**Median Filtering:** Creates unnatural structural uniformity detectable via statistical analysis
+**Unsharp Masking:** Produces characteristic overshoot artifacts at edges
+
+**Forensic Application:** These filters are commonly used to hide manipulation traces or enhance doctored regions
+
+## Photo manipulation with inconsistent shadows
+
+### Basic assumptions
+
+**Analytical Framework:** Shadows provide strong physical consistency checks
+
+**Shadow Types:**
+- **Cast shadows:** Objects blocking light onto surfaces
+- **Attached shadows:** Self-shading on object surfaces
+
+**Core Principle:** Single light source should produce consistent shadow geometry
+
+### Cast shadow analysis
+### Attached shadow analysis
+
+**Complementary Techniques:**
+- **Cast shadows:** Define light source position through shadow-object relationships
+- **Attached shadows:** Determine lighting direction from surface gradient analysis
+
+### Mathematical model
+
+**Geometric Formulation:** Represent shadow constraints as linear inequalities
+
+**Constraint System:**
+For each shadow: $n \cdot x - n \cdot p \geq 0$
+
+**Complete System:**
+$Nx - P \geq -s$ where slack variables $s \geq 0$ measure consistency violations
+
+**Decision Metric:** All $s = 0$ indicates physically plausible shadows; any $s > 0$ suggests manipulation
+
+## Traces of image editing: resampling detection
+
+**Geometric Transformation Evidence:** Resizing/rotation operations leave interpolation patterns
+
+**Technical Basis:** Resampling creates periodic pixel correlations through interpolation:
+$y = Hx$
+
+Where interpolation matrix $H$ introduces linearly dependent relationships detectable via Fourier analysis
+
+**Forensic Application:** Identifies regions that have been geometrically transformed - common in forgeries
+
+## Traces of image editing: contrast enhancement detection
+
+### Global contrast enhancement
+
+**Histogram Analysis:** Contrast stretching creates gaps and peaks in intensity distributions
+
+**Frequency Domain:** Enhanced images show abnormal high-frequency energy patterns
+
+### Local contrast enhancement
+
+**Region-Specific Detection:** Apply global techniques to image blocks to locate manipulated areas
+
+**Implementation:** Divide image into blocks (25×25 to 200×200 pixels) and analyze each block independently
+
+**Practical Use:** Effective for identifying spliced regions with different processing history
