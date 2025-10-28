@@ -152,10 +152,71 @@ number of training images taken by camera C
 
 ## Media forensics based on in-camera fingerprints.
 
+### Source identification
+
+- How was the image captured?
+- Which CLASS of device wasused?
+- Which BRAND / MODEL / SPECIFIC DEVICE? (CCD vs CMOS)
+
+### Usage of digital fingerprints
+
+- For source identification:
+    - Fingerprints are usually extracted and then compared with a dataset of possible fingerprints specific for each class/brand/model of acquisition (creation) devices
+- For forgery detection:
+    - detect non-uniformity or absence of fingerprints within the analyzed data
+    - detect the presence of fingerprints pointing to a specific post-processing
+
+- Bayer Array for almost all digital cameras
+- Color interpolation algorithms are different for each digital camera manufacturer
+- In the same way one can distinguish between different devices: scanners, computer generated images
+
+#### Tampering detection
+
+Incongruencies in CFA fingerprint can be used to detect tampering
+
+#### Digital Camera Models
+
+- The signal undergoes additional processing such as: white balancing, color processing, image sharpening, contrast  enhancement, gamma correction
+- It is stored in the camera memory in a customized format, (for commercial devices JPEG format is usually preferred)
+- All these steps introduce traces that can be exploited for multimedia forensics 
 
 
-## Application of geometrical fingerprints in digital forensics. 
-## Out-camera fingerprints in digital forensics. 
+
+## Application of geometrical fingerprints in digital forensics.
+
+### copy-move
+
+This is a particular kind of tampering: part of image is duplicated to cover some undesired details
+
+Possible solution: we analyze the image with a sliding window looking for 
+improbable duplicates
+However, it is not possible to understand which of the duplicated parts is the 
+original
+
+### Highlights
+
+The eyes are modeled as spheres and infer the direction of light source from highlights
+Very likely this picture was taken in three different time instants
+
+### Shadows
+
+Under certain assumptions it is possible to derive the direction of light from shadows
+
+Creating a photomontage by preserving the coherence of light and shadows is not an easy task
+
+### Chromatic aberration
+
+Non-planar lenses create a rainbow effect due to light aberration,which can be used to detect cut & paste tampering
+
+## Out-camera fingerprints in digital forensics.
+
+- Several kinds of processing can be applied to an image during its lifecycle:
+    - compression
+    - geometric transformation (rotation, scaling, ...)
+    - blurring and sharpening
+    - contrast adjustment
+    - etc.
+
 ## Principles of image JPEG compression. 
 ## JPEG compression: general compression scheme 
 ## JPEG compression: sources of redundancies 
