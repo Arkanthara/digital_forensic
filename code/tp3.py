@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import argparse
 from skimage import io, color, util
 from scipy.fftpack import dctn, idctn
-import skimage
 
 
 def read_image(name: str) -> np.ndarray:
@@ -34,11 +33,6 @@ def zigzag(img: np.ndarray) -> np.ndarray:
     return output
 
 
-a = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
-print(a)
-print(zigzag(a))
-
-
 def quality_matrix(QF: int = 90) -> np.ndarray:
     QM1 = np.array([])
     Q50 = np.array(
@@ -62,7 +56,9 @@ def quality_matrix(QF: int = 90) -> np.ndarray:
     return QM1.astype(np.float64)
 
 
-def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.ndarray]:
+def JPEG_Tools(
+    img: np.ndarray, QF: int = 90, encode: bool = True, dct: bool = False
+) -> list[np.ndarray]:
     # Quality Matrix for QF
     QM1 = quality_matrix(QF)
 
@@ -71,10 +67,10 @@ def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.nd
     dct_quantized = np.zeros_like(img)
     dct_dequantized = np.zeros_like(img)
     dct_quantized_coeff = np.zeros((64, (img.shape[0] // 8) * (img.shape[1] // 8)))
+    dct_domain_coeff = np.zeros((64, (img.shape[0] // 8) * (img.shape[1] // 8)))
     dct_restored = np.zeros_like(img)
     # Encoding
     if encode:
-        print_range(img)
         new_img = img - 128
         k = 0
         for i in range(0, new_img.shape[0], 8):
@@ -83,6 +79,7 @@ def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.nd
                 # Forward discret cosine transform
                 win1 = dctn(zBLOCK, norm="ortho")
                 dct_domain[i : i + 8, j : j + 8] = win1
+                dct_domain_coeff[:, k] = zigzag(win1)
                 # Quantization of the DCT coefficients
                 win2 = np.round(win1 / QM1)
                 dct_quantized[i : i + 8, j : j + 8] = win2
@@ -90,6 +87,18 @@ def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.nd
                 k += 1
         return [dct_quantized, dct_quantized_coeff]
 
+    elif dct:
+        new_img = img - 128
+        k = 0
+        for i in range(0, new_img.shape[0], 8):
+            for j in range(0, new_img.shape[1], 8):
+                zBLOCK = new_img[i : i + 8, j : j + 8]
+                # Forward discret cosine transform
+                win1 = dctn(zBLOCK, norm="ortho")
+                dct_domain[i : i + 8, j : j + 8] = win1
+                dct_domain_coeff[:, k] = zigzag(win1)
+                k += 1
+        return [dct_domain, dct_domain_coeff]
     # Decoding
     else:
         for i in range(0, img.shape[0], 8):
@@ -101,7 +110,96 @@ def JPEG_Tools(img: np.ndarray, QF: int = 90, encode: bool = True) -> list[np.nd
                 # Inverse discrete cosine transform
                 win4 = idctn(win3, norm="ortho")
                 dct_restored[i : i + 8, j : j + 8] = win4
-        return [dct_restored]
+        dct_restored += 128
+        return [np.clip(dct_restored, 0, 255)]
+
+
+def manimage1(img: np.ndarray, QF1: int, QF2: int) -> np.ndarray:
+    result = np.zeros_like(img)
+    print(result.shape)
+    half = result.shape[1] // 2
+    dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF1, encode=True)
+    decoded = JPEG_Tools(dct_quantized, QF1, encode=False)[0]
+    dct_quantized2, dct_quantized2_coeff = JPEG_Tools(decoded, QF2, encode=True)
+    result[:, :half] = dct_quantized[:, :half]
+    result[:, half:] = dct_quantized2[:, half:]
+    # return result
+    # return JPEG_Tools(result, max([QF1, QF2]), encode=False)[0]
+    return JPEG_Tools(result, QF1, encode=False)[0]
+
+
+def manimage2(img: np.ndarray, QF1: int, QF2: int) -> np.ndarray:
+    result = np.zeros_like(img)
+    half = result.shape[1] // 2
+    dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF1, encode=True)
+    decoded = JPEG_Tools(dct_quantized, QF1, encode=False)[0]
+    dct_quantized2, dct_quantized2_coeff = JPEG_Tools(decoded, QF2, encode=True)
+    decoded2 = JPEG_Tools(dct_quantized2, QF2, encode=False)[0]
+    print_range(decoded)
+    print_range(decoded2)
+    result[:, :half] = decoded[:, :half]
+    result[:, half:] = decoded2[:, half:]
+    return result
+
+
+def plot_graph(
+    img: np.ndarray, title: list[str] = ["Original image", "DCT", "Histogram"]
+):
+    plt.figure()
+    plt.imshow(img, cmap="gray")
+    plt.title(title[0])
+    plt.axis("off")
+    plt.show()
+    dct_quantized, dct_quantized_coeff = JPEG_Tools(img, dct=True)
+    plt.figure()
+    plt.imshow(dct_quantized, cmap="gray")
+    plt.title(title[1])
+    plt.axis("off")
+    plt.show()
+    y = dct_quantized_coeff.ravel()
+    x_bin = np.arange(np.min(y), np.max(y) + 1)
+    plt.figure()
+    plt.hist(y, bins=x_bin)
+    plt.title(title[2])
+    plt.yscale("log")
+    plt.show()
+
+
+def plot_graphs(
+    dct_quantized: np.ndarray,
+    dct_quantized2: np.ndarray,
+    dct_quantized_coeff: np.ndarray,
+    dct_quantized2_coeff: np.ndarray,
+    QF1: int,
+    QF2: int,
+):
+    plt.figure()
+    plt.subplot(1, 2, 1)
+    plt.imshow(dct_quantized, cmap="gray")
+    plt.title(f"DCT 1st quantization with QF={QF1}")
+    plt.subplot(1, 2, 2)
+    plt.imshow(dct_quantized2, cmap="gray")
+    plt.title(f"DCT 2nd quantization with QF={QF2}")
+    plt.tight_layout()
+    plt.show()
+
+    y1 = dct_quantized_coeff.ravel()
+    y2 = dct_quantized2_coeff.ravel()
+    # We don't want to print the 0 coefficients because we want to print the kept coefficients
+    min_dct = min(min(y1), min(y2))
+    max_dct = max(max(y1), np.max(y2))
+    x_bin = np.arange(min_dct, max_dct + 1)
+    plt.figure()
+    plt.subplot(2, 1, 1)
+    plt.hist(y1, bins=x_bin)
+    plt.title(f"One time compressed with QF={QF1}")
+    plt.yscale("log")
+    plt.subplot(2, 1, 2)
+    plt.hist(y2, bins=x_bin)
+    plt.title(f"Two times compressed with QF={QF2}")
+    plt.yscale("log")
+    plt.tight_layout()
+    plt.show()
 
 
 def double_JPEG_compression(
@@ -109,42 +207,18 @@ def double_JPEG_compression(
 ) -> np.ndarray:
     dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF1, encode=True)
     decoded = JPEG_Tools(dct_quantized, QF1, encode=False)[0]
-    print("Decoded")
-    print_range(decoded)
     dct_quantized2, dct_quantized2_coeff = JPEG_Tools(decoded, QF2, encode=True)
     decoded2 = JPEG_Tools(dct_quantized2, QF2, encode=False)[0]
 
     if graphs:
-        plt.figure()
-        plt.subplot(1, 2, 1)
-        plt.imshow(dct_quantized, cmap="gray")
-        plt.title("DCT 1st quantization")
-        plt.subplot(1, 2, 2)
-        plt.imshow(dct_quantized2, cmap="gray")
-        plt.title("DCT 2nd quantization")
-        plt.show()
-
-        print(dct_quantized2_coeff.shape)
-        print(dct_quantized2_coeff)
-
-        y1 = dct_quantized_coeff.ravel()
-        y2 = dct_quantized2_coeff.ravel()
-        # We don't want to print the 0 coefficients because we want to print the kept coefficients
-        y1 = y1[y1 != 0]
-        y2 = y2[y2 != 0]
-        min_dct = min(min(y1), min(y2))
-        max_dct = max(max(y1), np.max(y2))
-        x_bin = np.arange(min_dct, max_dct + 1)
-        print(x_bin)
-        plt.figure()
-        plt.subplot(2, 1, 1)
-        plt.hist(y1, bins=x_bin)
-        plt.title("One time compressed")
-        plt.subplot(2, 1, 2)
-        plt.hist(y2, bins=x_bin)
-        plt.title("Two times compressed")
-        plt.tight_layout()
-        plt.show()
+        plot_graphs(
+            dct_quantized,
+            dct_quantized2,
+            dct_quantized_coeff,
+            dct_quantized2_coeff,
+            QF1,
+            QF2,
+        )
     return decoded2
 
 
@@ -179,8 +253,45 @@ if __name__ == "__main__":
     parser.add_argument(
         "--QF2", default=75, help="Quality Factor for second compression"
     )
+    parser.add_argument(
+        "-m1",
+        "--manipulated1",
+        action="store_true",
+        help="Create image with half QF1 and half QF2 in DCT domain and plot results",
+    )
+    parser.add_argument(
+        "-m2",
+        "--manipulated2",
+        action="store_true",
+        help="Create image with half QF1 and half QF2 in spacial domain and plot results",
+    )
     args = parser.parse_args()
 
     img = read_image(args.image)
 
-    double_JPEG_compression(img, args.QF1, args.QF2, graphs=True)
+    QF1 = int(args.QF1)
+    QF2 = int(args.QF2)
+
+    double_JPEG_compression(img, QF1, QF2, graphs=True)
+
+    if args.manipulated1:
+        tmp = manimage1(img, QF1, QF2)
+        plot_graph(
+            tmp,
+            [
+                f"ManImage1 with QF1={QF1} and QF2={QF2}",
+                f"DCT transform with QF1={QF1} and QF2={QF2}",
+                "Histogram of DCT coefficients",
+            ],
+        )
+
+    if args.manipulated2:
+        tmp = manimage2(img, QF1, QF2)
+        plot_graph(
+            tmp,
+            [
+                f"ManImage1 with QF1={QF1} and QF2={QF2}",
+                f"DCT transform with QF1={QF1} and QF2={QF2}",
+                "Histogram of DCT coefficients",
+            ],
+        )

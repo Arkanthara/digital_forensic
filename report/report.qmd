@@ -1,11 +1,11 @@
 ---
-title: "Photo Response Non Uniformity (PRNU) estimation"
+title: "Double JPEG Compression"
 subtitle: "Digital Forensics"
 courseid: 14X065
 author: "Michel Jean Joseph Donnet"
-email: "Fitzwilliam.Darcy@blabla.ch"
-repository: "https://github.com/yourname/your_repository"
-repositoryName: "Repository Name"
+# email: "Fitzwilliam.Darcy@blabla.ch"
+# repository: "https://github.com/yourname/your_repository"
+# repositoryName: "Repository Name"
 university: "University of Geneva"
 department: "Department of Informatics"
 logo: "./images/unige.pdf"
@@ -53,42 +53,77 @@ In the remainder of this report, we will focus on a lossy compression: `jpeg` co
 
 ## Image compression
 
-The basis of the image compression result in fact that human vision is more sensitive to, for instance, the luminance compared to the colors.
-Due to the limitations of the human vision, it's possible to delete some informations that the human vision can't see to reduce the storage size of the photo.
-For instance, we can decompose a photo in luminance and colors channels and decrease the size of color channels to have less storage used for this photo.
+The image compression is based on redundancies, both spatial and psychovisual.
 
+- Spatial redundancies. This kind of redundancies are present in some region of image. For instance, at some given region, all pixels can have the same intensity.
+  So it's possible to deduct intensity of given pixel by taking the neighbors of this pixel.
+
+- Psychovisual redundancies. This is based on the imperfection and characteristics of Human Visual System.
+  For instance, Human Visual System is more sensitive to the brightness than to the colors, so image can be transformed into YCbCr channels with Y the luminance of the image and Cb and Cr some color channel.
+  In this way, we can conservate original luminance of the image, and downsampling the colors channels, and the Human Visual System will not see any change in the image.
+  Human Visual System is also less sensitive to high frequencies, that's why a DCT (Discrete Cosine Transform) transform is applied, allowing to separate low and high frequencies.
+  Then, a quantization is made, removing the high frequencies, and Human Visual System will not see the difference.
+
+So it's possible to reduce the quantity of data to store by deleting redundancies in the image.
 The general way to compress an image lies in this way:
 
-- First, the data are transformed in a more amenable way to compression.
-  For instance, transformation can allow the exploitation of redundancies or something else.
+- First, the data are transformed in a more amenable way to compression, to exploit redundancies.
+  For instance, applying a DCT allow to separate low and high frequencies.
 - Then, a quantization is performed in lossy compressions.
-  The quantization is a way to delete non useful informations of the image.
+  The quantization is a way to delete non useful informations of the image for Human Visual System, like high frequencies.
   For a lossless compression, this step is ignored to avoid a loss of informations by quantization.
 - Finally, the new data obtained are encoded and stored in the device in such a way it can be decoded to visualize the image.
 
-Your section [-@sec-met]
+### Quantization
 
-## Subsection
+In the quantization step in JPEG compression, a quantization matrix $Q$ is applied for each block of DCT coefficients.
+Suppose that we have a matrix of coefficients $C_{ij}$ of DCT, and a quantization matrix $Q$ for the given channel.
+Then, the quantization is applied as in the formula [-@eq-quantize].
 
-Your subsection with no ref link
-
-Your latex formula [-@eq-mse]
 $$
-\text{MSE} = \frac{1}{mn}\sum_{i = 1}^m \sum_{j = 1}^n \left[I(i, j) - K(i, j)\right]^2
-$$ {#eq-mse}
+C_{ij \ \text{quantized}} = round\left(\frac{C_{ij}}{Q}\right)
+$$ {#eq-quantize}
+
+The quantization matrix looks like in the formula [-@eq-q] and can be ajusted depending on needs.
+
+$$
+Q =
+\begin{bmatrix}
+17 & 18 & 24 & 47 & 99 & 99 & 99 & 99 \\
+18 & 21 & 26 & 66 & 99 & 99 & 99 & 99 \\
+24 & 26 & 56 & 99 & 99 & 99 & 99 & 99 \\
+47 & 66 & 99 & 99 & 99 & 99 & 99 & 99 \\
+99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 \\
+99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 \\
+99 & 99 & 99 & 99 & 99 & 99 & 99 & 99 \\
+99 & 99 & 99 & 99 & 99 & 99 & 99 & 99
+\end{bmatrix}
+$$ {#eq-q}
+
+In the formula [-@eq-q], we can see that the high frequencies of the DCT will be deleted because the low frequencies are in top left corner and the closer we are to the lower right corner, the higher the frequencies are.
+In this way, we will divide high frequencies by big value $99$, making the result equal to $0$ because of the rounding.
 
 \newpage
 
 # Implementation
 
-Blabla
-```{python}
-#| echo: true #print your code
-print("Hello")
+The code is implemented in python from an existant matlab code provided.
+
+It works in command line in this way:
+
+```{text}
+usage: tp3.py [-h] -i IMAGE [--QF1 QF1] [--QF2 QF2]
+
+Double JPEG compression
+
+options:
+  -h, --help         show this help message and exit
+  -i, --image IMAGE  Image to make double compression
+  --QF1 QF1          Quality Factor for first compression
+  --QF2 QF2          Quality Factor for second compression
 ```
-```{bash}
-echo "Coucou"
-```
+
+The output printed is the histogram of the DCT coefficients.
 
 \newpage
 
