@@ -1,0 +1,408 @@
+---
+title: "CC1"
+subtitle: "Digital Forensics"
+courseid: 14x065
+author: "Michel Jean Joseph Donnet"
+# email: "Fitzwilliam.Darcy@blabla.ch"
+# repository: "https://github.com/yourname/your_repository"
+# repositoryName: "Repository Name"
+university: "University of Geneva"
+department: "Department of Informatics"
+logo: "./images/unige.pdf"
+logofooter: "./images/unige_informatic.png"
+# logofootersize: 1.5cm
+toc: true
+format:
+  pdf:
+    pdf-engine: xelatex
+    # pdf-engine-opts: ["--shell-escape"]
+    template: template.tex
+    execute: false # Code execution
+    echo: true    # Code printing in document
+---
+
+## Principles of digital forensics
+
+1. **Acquisition**: Freeze the system (bit-wise copy, write-blocker) to avoid evidence alteration.  
+2. **Identification**: Extract data – recover deleted files, reveal steganography, parse metadata.  
+3. **Evaluation**: Reconstruct a timeline, cross-correlate events, assess reliability.  
+4. **Presentation**: Translate findings into layman-friendly reports or court-ready exhibits.
+
+Typical users: criminal prosecutors, civil litigants, private corporations, insurance firms, journalists.
+
+---
+
+## Digital multimedia forensics: definition, classification.
+
+Because cheap editing tools exist, “seeing is believing” no longer holds.  
+We therefore need **multimedia forensics**: the science that reveals the *history* of a digital image, video or audio file by analysing its internal traces.
+
+**Media types** covered: image, video, audio.  
+**Threats**: opinion manipulation, fake news, hoaxes, reputation damage.
+
+---
+
+### Idea
+
+Every device or processing step leaves **inherent traces**—“digital fingerprints”—that can be measured even without embedded watermarks.
+
+#### Digital fingerprints
+
+- **In-camera fingerprints**: sensor noise pattern, lens distortion, CFA interpolation, on-board compression.  
+- **Out-camera fingerprints**: re-sampling, re-compression, contrast stretch, sharpening, social-platform re-encoding.  
+- **Scene (geometric) fingerprints**: lighting direction, shadow consistency, chromatic aberration, specular highlights in eyes.
+
+---
+
+## Active and passive approaches for multimedia authentication.
+
+### Active approach
+
+You *add* authentication data at the source.
+
+- **Cryptographic signature**  
+  – Hash selected features → sign with private key → receiver verifies.  
+  – Can be time-stamped on a blockchain.  
+  – Needs PKI and trusted camera firmware.
+
+- **Fragile / semi-fragile watermarking**  
+  – Embed an imperceptible mark that breaks (fragile) or survives benign change (semi-fragile).  
+  – Requires embedding hardware/software; marks may be removed by re-encoding.
+
+#### Disadvantages
+
+- Crypto alone does *not* say *what* was changed, only *that* something changed.  
+- Bit-level integrity is too strict for lossy compression.  
+- Protection disappears after decryption.  
+- Watermarks degrade quality and are vulnerable to collusion.
+
+---
+
+### Passive and blind approach: multimedia forensics
+
+No extra data added.  
+From the *received* file only, we answer:
+
+- **Source identification**: which brand / model / individual device?  
+- **Integrity verification**: was the file recompressed, cropped, spliced?
+
+#### Advantages
+
+- Works on legacy files.  
+- No standards to negotiate, no embedding hardware, no key management.  
+- Compatible with social-media re-distribution chains.
+
+---
+
+## Image generation pipeline
+
+1. **Light projection** – photons hit the sensor mosaic.  
+2. **Charge → voltage → digital value** – amplifier + ADC.  
+3. **White-balance gain** – scale R, G, B channels.  
+4. **Color Filter Array (CFA) demosaicking** – interpolate missing colours.  
+5. **Color & gamma correction** – map to sRGB.  
+6. **Sharpening / denoising filters**.  
+7. **JPEG compression & storage**.
+
+Each step injects device-specific or software-specific traces.
+
+---
+
+## Camera identification based on photo response non-uniformity (PRNU)
+
+Sensor pixels respond slightly differently to the same light.  
+The dominant component of this **pixel non-uniformity** is **PRNU** – a multiplicative noise pattern unique to each sensor.
+
+Model:
+
+$$
+I(x,y) = I_0(x,y) + I_0(x,y)\,K(x,y) + N(x,y)
+$$
+
+where  
+- $I_0$ – ideal noise-free image,  
+- $K$ – PRNU factor ($\approx 0.5\%$–$2\%$ amplitude),  
+- $N$ – additive noise.
+
+**Estimation**: take 30–50 flat-field or natural images from the camera, compute noise residuals, average them to obtain the **reference PRNU pattern** 
+$\hat K$.  
+**Verification**: extract noise from a suspect image, correlate with $\hat K$; peak > threshold ⇒ same camera.
+
+---
+
+## Media forensics based on in-camera fingerprints.
+
+### Source identification
+
+- **Device class**: DSLR vs phone vs scanner.  
+- **Brand / model**: CFA layout, JPEG quantization tables, internal sharpening kernel.  
+- **Individual unit**: PRNU, defective-pixel cluster.
+
+### Usage of digital fingerprints
+
+- **Source ID**: compare extracted fingerprint against database of reference patterns.  
+- **Tamper detection**: local absence or mismatch of fingerprint ⇒ splice; presence of *external* fingerprint ⇒ insertion from another device.
+
+**Examples**  
+- Bayer CFA interpolation introduces periodic correlations → detectable.  
+- Different vendors use different JPEG Q-matrices → quick model lookup.  
+- Scanner noise vs camera PRNU → separate CG vs real.
+
+---
+
+### Tampering detection
+
+A pasted region often comes from a different camera or undergoes re-compression → CFA or PRNU inconsistency.
+
+---
+
+## Application of geometrical fingerprints in digital forensics.
+
+### Copy-move
+
+Part of the image is cloned to hide something.  
+Detection: divide image into overlapping blocks, extract features (DCT, Zernike, BRISK), look for unusually similar blocks in the *same* image.  
+Limitation: cannot tell which copy came first.
+
+### Highlights
+
+Eye corneas act like little mirrors.  
+Fit a sphere to specular highlights → estimate light direction.  
+Multiple inconsistent highlight directions ⇒ composite.
+
+### Shadows
+
+Under Lambertian+single-point-light assumptions, shadow boundaries constrain the 3-D light position.  
+Intersect constraints from several objects; empty intersection ⇒ fake.
+
+### Chromatic aberration
+
+Lenses bend wavelengths differently → coloured fringes.  
+Cut-and-paste often breaks fringe continuity ⇒ detect splice.
+
+---
+
+## Out-camera fingerprints in digital forensics.
+
+Post-production steps leave their own marks:
+
+- **Re-compression** – double-quantization periodic histograms.  
+- **Re-sampling** – periodic linear dependencies detectable by EM or CNN.  
+- **Contrast stretch** – histogram gaps/peaks.  
+- **Median filtering** – destroys Gaussian noise tail, introduces edge “cross-shaped” artifacts.  
+- **Sharpening** – overshoot along edges (USM kernel).
+
+---
+
+## Principles of image JPEG compression.
+
+JPEG = lossy codec tuned for natural photos.  
+Exploits **two redundancies**:
+
+1. **Statistical redundancy** – spatial correlation (DCT).  
+2. **Psychovisual redundancy** – humans ignore high frequencies (quantization).
+
+Extra leverage: eye sees luminance ($Y$) better than chrominance ($C_b, C_r$) → down-sample colour 2×.
+
+---
+
+## JPEG compression: general compression scheme
+
+Encoder pipeline:  
+$T$ (transform, lossless) → $Q$ (quantizer, lossy) → $C$ (entropy coder, lossless).
+
+Removing $Q$ gives lossless mode, but compression ratio ≈ 2∶1 only.
+
+---
+
+### Details
+
+1. Split $Y, C_b, C_r$ into $8×8$ blocks.  
+2. **DCT** each block:  
+   $F(u,v) = \text{DCT}\bigl(f(x,y)\bigr)$.  
+3. **Quantize**:  
+   $F_q(u,v) = \text{round}\bigl(F(u,v)/Q(u,v)\bigr)$.  
+   Larger $Q(u,v)$ at high frequencies → aggressive compression.  
+   $Q$ matrices scaled by **Quality Factor** $QF \in [1,100]$.
+
+4. **Zig-zag scan** → 1-D sequence.  
+5. **DPCM** on DC coefficient, **RLE** on AC run-lengths, **Huffman / arithmetic coding**.
+
+---
+
+## JPEG compression: sources of redundancies 
+
+- **Spatial** – neighbouring pixels similar.  
+- **Spectral** – $R,G,B$ highly correlated (why we convert to $YC_bC_r$).  
+- **Temporal** – successive frames alike (used in Motion-JPEG).
+
+**Irrelevance** counterparts:  
+eye tolerates blur, colour error, and temporal flicker – all quantized more coarsely.
+
+---
+
+## JPEG compression: particularities of luminance and chrominance channels processing
+
+RGB → $YC_bC_r$ (linear):
+
+$$
+\begin{bmatrix}
+Y\\C_b\\C_r
+\end{bmatrix}
+=
+\begin{bmatrix}
+0.299 & 0.587 & 0.114\\
+-0.169 & -0.331 & 0.5\\
+0.5 & -0.419 & -0.081
+\end{bmatrix}
+\begin{bmatrix}
+R\\G\\B
+\end{bmatrix}
+$$
+
+**Chroma subsampling** 4:2:0 → keep $Y$ at full resolution, $C_b,C_r$ at half.  
+Data volume halved with almost no visual loss.
+
+---
+
+## JPEG compression artefacts
+
+Low $QF$ introduces:
+
+- **Blocking** – $8×8$ grid discontinuities.  
+- **Ringing** – Gibbs phenomenon near edges.  
+- **Blurring** – high frequencies zeroed.  
+- **Graininess** – coarse quantisation noise.
+
+All leave **detectable statistical footprints**.
+
+---
+
+## Detection of double JPEG compression
+
+An image re-saved with **different JPEG settings** acquires **double-quantisation (DQ) footprints** in DCT histograms.
+
+**Why care?** DQ ⇒ file was modified after original export ⇒ possible forgery.
+
+### Single quantisation (SQ)
+
+$$
+y = \text{round}(x/a)
+$$
+
+$x$ recovered by $x' = a\,y$ (lossy).
+
+### Double quantisation (DQ)
+
+$$
+z = \text{round}\!\bigl(\text{round}(x/a)\cdot a/b\bigr)
+$$
+
+- If $a < b$ → histogram shows **empty bins** (holes).  
+- If $a > b$ → **periodic peaks**.
+
+**Detection**: compute Fourier transform of DCT-coeff histogram; strong peaks at $k a / \gcd(a,b)$ ⇒ DQ.  
+Reliable when $QF_1 < QF_2$.
+
+**Benford / First-Significant-Digit (FSD) test**: single JPEG obeys Benford’s law; double compression violates it ⇒ another detector.
+
+---
+
+## Image editing forensics: inconsistency in light
+
+Copy-paste usually merges objects lit by **different sources**.  
+Under simple assumptions (Lambertian surface, distant light, uniform albedo) the **light direction** can be estimated from the **intensity gradient** on an 
+occluding contour.  
+Different directions ⇒ splice.
+
+---
+
+## Image editing forensics: local filtering traces
+
+**Median filtering** erases noise spikes and JPEG blockiness; output histogram becomes **piece-wise constant** – unnatural for natural images.  
+Detect by checking **histogram bin clusters** or by CNN.
+
+**Unsharp masking** subtracts blurred version:  
+
+$$
+g = f + \lambda(f - f_{\text{blur}})
+$$
+
+creates **overshoot artefacts** (dark/light parallel stripes) along edges → kernel fingerprints detectable.
+
+---
+
+## Photo manipulation with inconsistent shadows: basic assumptions
+
+- Only **one dominant point light** (sun, flash).  
+- Two shadow classes:  
+  – **Cast shadow** – projected on ground.  
+  – **Attached shadow** – on object itself (self-shadow).  
+- No geometry model needed; only **2-D projection constraints**.
+
+For $n$ objects draw $n$ half-planes / wedges; intersection must be **non-empty**.  
+Empty set ⇒ inconsistent ⇒ tampering.
+
+---
+
+## Photo manipulation with inconsistent shadows: cast shadow  
+## Photo manipulation with inconsistent shadows: attached shadow
+
+Attached shadow edge gives **gradient direction** ⇒ half-plane constraint.  
+User can adjust auto-detected normal $n$.
+
+---
+
+## Photo manipulation with inconsistent shadows: mathematical model
+
+A 2-D line through point $p=(p_x,p_y)$ with normal $n=(n_x,n_y)$:
+
+$$
+n_x x + n_y y - (n_x p_x + n_y p_y) = 0
+$$
+
+Half-plane (attached shadow):
+
+$$
+n_x x + n_y y \geq n_x p_x + n_y p_y
+$$
+
+Cast shadow uses **two** such lines (umbra & penumbra).  
+Stack all inequalities: $Nx \geq P$.  
+
+If system **infeasible**, add **slack variables** $s \geq 0$:
+
+$$
+Nx - P + s \geq 0
+$$
+
+Solve **linear program**; minimal sum of slacks > 0 ⇒ inconsistent shadows ⇒ forgery.
+
+**Sign ambiguity**: light could be behind camera ⇒ solve **both**  
+$Nx - P \geq -s$ and $-Nx - P \geq -s$; keep the feasible one.
+
+---
+
+## Traces of image editing: resampling detection
+
+Splicing often needs **scale / rotate** → **re-sampling interpolation** introduces **periodic linear dependencies** among pixels.  
+Model: $y = Hx$ with $H$ the interpolation matrix.  
+For large images $H$ becomes rank-deficient ⇒ **periodic predictability**.  
+Compute **probability map** of pixel being linearly predicted; Fourier transform shows **harmonic peaks** ⇒ alerts to geometric tampering.
+
+---
+
+## Traces of image editing: detection of global contrast enhancement
+
+Any global tone curve **expands dynamic range** → **energy grows**, especially in **high DFT frequencies**.  
+Natural images have **low-pass DFT**; isolated **HF peaks** ⇒ contrast mapping applied.  
+Histogram may also show **isolated spikes / gaps**.
+
+---
+
+## Traces of image editing: detection of local contrast enhancement
+
+Local enhancement (e.g. brushed in Photoshop) only inside spliced region.  
+**Sliding window**: divide image into blocks (200×200 … 20×20), apply global detector to each.  
+**Map** of positives pinpoints tampered area at block resolution.  
+Run on **R, G, B** separately for better localisation.

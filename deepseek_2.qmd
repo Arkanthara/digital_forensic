@@ -1,10 +1,26 @@
 ---
-title: "Reviewed: Digital Forensics Questions"
-author: "Assistant — reviewed"
+title: "CC1"
+subtitle: "Digital Forensics"
+courseid: 14x065
+author: "Michel Jean Joseph Donnet"
+# email: "Fitzwilliam.Darcy@blabla.ch"
+# repository: "https://github.com/yourname/your_repository"
+# repositoryName: "Repository Name"
+university: "University of Geneva"
+department: "Department of Informatics"
+logo: "./images/unige.pdf"
+logofooter: "./images/unige_informatic.png"
+# logofootersize: 1.5cm
+toc: true
 format:
-    pdf:
-        pdf-engine: xelatex
+  pdf:
+    pdf-engine: xelatex
+    # pdf-engine-opts: ["--shell-escape"]
+    template: template.tex
+    execute: false # Code execution
+    echo: true    # Code printing in document
 ---
+
 # Digital Forensics: Principles and Techniques
 
 ## Principles of digital forensics
