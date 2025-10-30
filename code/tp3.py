@@ -16,6 +16,8 @@ def read_image(name: str) -> np.ndarray:
 
 
 def zigzag(img: np.ndarray) -> np.ndarray:
+    # Perform zigzag scan on a matrix.
+    # The implementation doesn't follow the matlab implementation.
     assert len(img.shape) == 2, f"Image must be 2D array and not {len(img.shape)}"
     index = 0
     output = np.zeros(img.shape[0] * img.shape[1])
@@ -115,8 +117,9 @@ def JPEG_Tools(
 
 
 def manimage1(img: np.ndarray, QF1: int, QF2: int) -> np.ndarray:
+    # Generate manipulated image 1 by working in DCT domain.
+    # Note that the result is encoded with QF1, even if QF1 is lower than QF2 !
     result = np.zeros_like(img)
-    print(result.shape)
     half = result.shape[1] // 2
     dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF1, encode=True)
     decoded = JPEG_Tools(dct_quantized, QF1, encode=False)[0]
@@ -129,20 +132,20 @@ def manimage1(img: np.ndarray, QF1: int, QF2: int) -> np.ndarray:
 
 
 def manimage2(img: np.ndarray, QF1: int, QF2: int) -> np.ndarray:
+    # Genrate manipulated image 2 by working in spacial domain.
     result = np.zeros_like(img)
     half = result.shape[1] // 2
     dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF1, encode=True)
     decoded = JPEG_Tools(dct_quantized, QF1, encode=False)[0]
     dct_quantized2, dct_quantized2_coeff = JPEG_Tools(decoded, QF2, encode=True)
     decoded2 = JPEG_Tools(dct_quantized2, QF2, encode=False)[0]
-    print_range(decoded)
-    print_range(decoded2)
     result[:, :half] = decoded[:, :half]
     result[:, half:] = decoded2[:, half:]
     return result
 
 
 def plot_graph(
+    # Plot graphs of given image, it DCT coefficients and it histogram of DCT coefficients
     img: np.ndarray,
     title: list[str] = ["Original image", "DCT", "Histogram"],
     QF: int = 75,
@@ -152,6 +155,8 @@ def plot_graph(
     plt.title(title[0])
     plt.axis("off")
     plt.show()
+    # Here I use encode=True and not dct=True else histograms printed for manipulated images are with a lot of holes
+    # since there is a lot of coefficients from the original image that are deleted.
     dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF=QF, encode=True)
     plt.figure()
     plt.imshow(dct_quantized, cmap="gray")
@@ -175,17 +180,19 @@ def plot_graphs(
     QF1: int,
     QF2: int,
 ):
+    # Plot comparison graphs of given image for double JPEG compression, with DCT coefficients, histograms
+    # and pairwise analysis.
     plt.figure()
     plt.subplot(1, 2, 1)
     block = 35
     plt.imshow(
-        normalize(dct_quantized[block * 8 : block * 8 + 8, block * 8 : block * 8 + 8]),
+        dct_quantized[block * 8 : block * 8 + 8, block * 8 : block * 8 + 8],
         cmap="gray",
     )
     plt.title(f"DCT 1st quantization with QF={QF1}")
     plt.subplot(1, 2, 2)
     plt.imshow(
-        normalize(dct_quantized2[block * 8 : block * 8 + 8, block * 8 : block * 8 + 8]),
+        dct_quantized2[block * 8 : block * 8 + 8, block * 8 : block * 8 + 8],
         cmap="gray",
     )
     plt.title(f"DCT 2nd quantization with QF={QF2}")
@@ -194,7 +201,6 @@ def plot_graphs(
 
     y1 = dct_quantized_coeff.ravel()
     y2 = dct_quantized2_coeff.ravel()
-    # We don't want to print the 0 coefficients because we want to print the kept coefficients
     min_dct = min(min(y1), min(y2))
     max_dct = max(max(y1), np.max(y2))
     x_bin = np.arange(min_dct, max_dct + 1)
@@ -216,16 +222,15 @@ def plot_graphs(
         p2 = dct_quantized2_coeff[coeff, :]
         x_min = np.min([p1, p2])
         x_max = np.max([p1, p2])
-        # mask = (p1 != 0) & (p2 != 0)
-        # p1 = p1[mask]
-        # p2 = p2[mask]
         plt.subplot(2, 4, i + 1)
         plt.scatter(p1, p2, alpha=0.5, s=1)
         plt.title(f"Coefficient {coeff}")
         plt.xlabel("compression 1")
         plt.ylabel("compression 2")
-        plt.xlim(x_min, x_max)
-        plt.ylim(x_min, x_max)
+        # Avoid case where x_min and x_max are 0
+        if x_min != x_max:
+            plt.xlim(x_min, x_max)
+            plt.ylim(x_min, x_max)
     plt.suptitle(
         f"Pairwise analysis of DCT coefficients with QF1={QF1} and QF2={QF2}",
         fontsize=18,
@@ -238,6 +243,7 @@ def plot_graphs(
 def double_JPEG_compression(
     img: np.ndarray, QF1: int = 50, QF2: int = 75, graphs: bool = True
 ) -> np.ndarray:
+    # Perform double JPEG compression and plot comparison graphs.
     dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF1, encode=True)
     decoded = JPEG_Tools(dct_quantized, QF1, encode=False)[0]
     dct_quantized2, dct_quantized2_coeff = JPEG_Tools(decoded, QF2, encode=True)
@@ -255,36 +261,16 @@ def double_JPEG_compression(
     return decoded2
 
 
-def normalize(img: np.ndarray, target: float = 1.0) -> np.ndarray:
-    return (img - img.min()) * target / (img.max() - img.min())
-
-
-def print_range(img: np.ndarray):
-    print(f"dtype:  {img.dtype}")
-    print(f"shape:  {img.shape}")
-    print(f"min:    {img.min()}")
-    print(f"max:    {img.max()}")
-    print(f"range:  {img.max() - img.min()}")
-
-
-def print_image(img: np.ndarray, title: str = "Image"):
-    plt.figure()
-    plt.title(title)
-    plt.imshow(img, cmap="gray")
-    plt.axis("off")
-    plt.show()
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Double JPEG compression")
     parser.add_argument(
         "-i", "--image", required=True, help="Image to make double compression"
     )
     parser.add_argument(
-        "--QF1", default=50, help="Quality Factor for first compression"
+        "--QF1", default=50, help="Quality Factor for first compression. Default is 50"
     )
     parser.add_argument(
-        "--QF2", default=75, help="Quality Factor for second compression"
+        "--QF2", default=75, help="Quality Factor for second compression. Default is 75"
     )
     parser.add_argument(
         "-m1",
@@ -305,7 +291,8 @@ if __name__ == "__main__":
     QF1 = int(args.QF1)
     QF2 = int(args.QF2)
 
-    double_JPEG_compression(img, QF1, QF2, graphs=True)
+    if not args.manipulated1 and not args.manipulated2:
+        double_JPEG_compression(img, QF1, QF2, graphs=True)
 
     if args.manipulated1:
         tmp = manimage1(img, QF1, QF2)

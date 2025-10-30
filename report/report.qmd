@@ -119,8 +119,10 @@ Double JPEG compression
 options:
   -h, --help           show this help message and exit
   -i, --image IMAGE    Image to make double compression
-  --QF1 QF1            Quality Factor for first compression
-  --QF2 QF2            Quality Factor for second compression
+  --QF1 QF1            Quality Factor for first compression.
+                        Default is 50.
+  --QF2 QF2            Quality Factor for second compression.
+                        Default is 75.
   -m1, --manipulated1  Create image with half QF1 and half QF2 
                         in DCT domain and plot results
   -m2, --manipulated2  Create image with half QF1 and half QF2
@@ -128,6 +130,20 @@ options:
 ```
 
 The output printed is the histogram of the DCT coefficients.
+
+When no manipulated is given, the code compute the double compression with given quality factors.
+
+For example, to have the graphs from double compression with quality factors $50$ and $75$, the following command is used:
+
+```{bash}
+python .\tp3.py -i ..\instructions\lena_512.bmp --QF1 75 --QF2 75
+```
+
+And to generate graphs for manipulated image 2, the following command is used:
+
+```{bash}
+python .\tp3.py -i ..\instructions\lena_512.bmp --QF1 75 --QF2 75 -m2
+```
 
 \newpage
 
@@ -137,6 +153,8 @@ The results obtained are the following:
 
 ## Double compression
 
+### $QF_1 > QF_2$
+
 ![Histogram](./images/hist_qf1.png){#fig-hist_qf1 fig-pos="H"}
 
 ![Image of DCT coefficients](./images/dct_qf1.png){#fig-dct_qf1 fig-pos="H"}
@@ -145,6 +163,8 @@ The results obtained are the following:
 
 ![Pairwise analysis](./images/pair_qf1.png){#fig-pair_qf1 fig-pos="H"}
 
+### $QF_1 < QF_2$
+
 ![Histogram](./images/hist_qf2.png){#fig-hist_qf2 fig-pos="H"}
 
 ![Image of DCT coefficients](./images/dct_qf2.png){#fig-dct_qf2 fig-pos="H"}
@@ -152,6 +172,12 @@ The results obtained are the following:
 ![Zoom](./images/dct_qf22.png){#fig-dct_qf22 fig-pos="H"}
 
 ![Pairwise analysis](./images/pair_qf2.png){#fig-pair_qf2 fig-pos="H"}
+
+### $QF_1 = QF_2$
+
+![Histogram for $QF_1 = QF_2$](./images/id_hist.png){#fig-id_hist fig-pos="H"}
+
+![Pairwise analysis for $QF_1 = QF_2$](./images/id_pair.png){#fig-id_pair fig-pos="H"}
 
 ## Image manipulated 1
 
@@ -196,7 +222,7 @@ $$
 C_{ij \ \text{quantized}} = round\left(round\left(\frac{C_{ij}}{Q_1}\right) \cdot \frac{Q_1}{Q_2}\right)
 $$ {#eq-2q}
 
-### $QF_1$ < $QF_2$
+### $QF_1$ < $QF_2$ {#sec-double}
 
 When the quality factor of first compression is less than the quality factor of the second compression, it's possible to see that during the second compression,
 no change is made in the DCT, as shown on figure [-@fig-dct_qf22]
@@ -213,7 +239,7 @@ creating gaps because coefficients have already been removed by the first lower 
 
 So the double JPEG compression is easily detectable when the quality of the first compression is worse than the quality of the second compression.
 
-### $QF_1 > QF_2$
+### $QF_1 > QF_2$ {#sec-double2}
 
 When the quality factor of first compression is greater than the quality factor of the second compression, some DCT coefficients are deleted during the second compression,
 like shown on figure [-@fig-dct_qf12] where more different blocks appears in the first quantization compared to second quantization, each block representing a DCT coefficient.
@@ -228,7 +254,14 @@ This happens because some bins receive more samples from original bins than othe
 
 In this way, it's possible to detect a double compression with the first compression with a better quality than the second.
 
+### $QF_1 = QF_2$
+
+In the case where $QF_1 = QF_2$, the double JPEG compression doesn't leave any trace, as it's possible to see on figures [-@fig-id_hist] and [-@fig-id_pair].
+
 ### Manipulated images
+
+The interest to detect manipulated image is that for instance, an image that have been already compressed can be merged in another image, making partial double compression when the result is encoded and saved to the disk.
+In this way, the goal is to determine if the image has been modified, to avoid trusting an image that is not real.
 
 Two manipulated images have been created for experiment purpose.
 
@@ -255,10 +288,39 @@ This behavior is not normal for the histogram of the DCT coefficients of the ima
 Indeed, if we look at what the histogram of an unmodified image looks like, like histogram [-@fig-original_hist], there is no behavior with bins that are larger than their neighbors in a regular manner.
 So we can conclude that image is modified due to the obtained histogram.
 
+The manipulated image in spacial domain is not visible for the human system, however the histograms reveal the modifications.
+
+In case of double compression of the right part of the image with $QF_1 > QF_2$, the histogram contains periodicaly some bins that are bigger than their neighbors.
+This behavior is once again not normal which allows, in the same way as for the image manipulated in the DCT domain with $QF_1 < QF_2$ to determine that the image has been modified.
+On top of that, due to histogram structure, it's possible to determine that the image has undergone a double compression with $QF_1 > QF_2$ because the histogram is of this type, as explained in section [-@sec-double2].
+
+Finaly, in case of double compression using $QF_1 < QF_2$, the histogram of DCT coefficient is clearly not normal because there are a lot of holes between bins,
+like for the double compression with $QF_1 < QF_2$ explained in section [-@sec-double].
+So in this case, we can easily determinate that the image has undergone double compression with $QF_1 < QF_2$, thanks to the presence of holes.
 
 
 \newpage
 
 # Conclusion
 
-Blablablablblablblablalblablalablablablblablblablalblablal
+The JPEG compression is based on redundancies, both spatial and psychovisual.
+It allows to reduce the amount of data needed to store a photo whith a loss of informations.
+During compression, quantization is performed, leaving some artifacts when double compressing with different quality factors.
+These artifacts can be analysed and detected by studying the DCT domain, more specifically by studying the DCT coefficients.
+
+When the quality of first compression is bigger than the quality of second compression, there are periodicaly some bins that are greater than their neighbors.
+And when the quality of first compression is less than the quality of second compression, there are holes that appears between bins in the histogram of DCT coefficients.
+
+In this way, it's possible to detect when:
+
+- Image is composed of two images merged in spacial domain, with one of the two compressed 2 times with different quality factors.
+- Image is composed of two images merged in DCT domain, with the image compressed 2 times with $QF_1 < QF_2$
+
+However, it's not possible to detect when image is composed of two images merged in DCT domain with image compressed 2 times with $QF_1 > QF_2$,
+or when double compression is made with exactly the same quality factor.
+
+So in this way, it's possible to detect if an image is modified depending on the modification of the image and of the quality factors.
+However, if image is not detected as having been modified, this does not mean that the image has not been altered.
+That is why other methods must be used before concluding that the image has not been altered.
+
+We may wonder if there is a way to find exactly the area of the image that has been compressed twice.
