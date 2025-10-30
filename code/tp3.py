@@ -199,6 +199,30 @@ def plot_graphs(
     plt.title(f"Two times compressed with QF={QF2}")
     plt.yscale("log")
     plt.tight_layout()
+
+    plt.figure()
+    for i in range(8):
+        coeff = i * 8
+        p1 = dct_quantized_coeff[coeff, :]
+        p2 = dct_quantized2_coeff[coeff, :]
+        x_min = np.min([p1, p2])
+        x_max = np.max([p1, p2])
+        # mask = (p1 != 0) & (p2 != 0)
+        # p1 = p1[mask]
+        # p2 = p2[mask]
+        plt.subplot(2, 4, i + 1)
+        plt.scatter(p1, p2, alpha=0.5, s=1)
+        plt.title(f"Coefficient {coeff}")
+        plt.xlabel("compression 1")
+        plt.ylabel("compression 2")
+        plt.xlim(x_min, x_max)
+        plt.ylim(x_min, x_max)
+    plt.suptitle(
+        f"Pairwise analysis of DCT coefficients with QF1={QF1} and QF2={QF2}",
+        fontsize=18,
+        y=0.98,
+    )
+    plt.tight_layout()
     plt.show()
 
 
