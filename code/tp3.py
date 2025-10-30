@@ -123,7 +123,7 @@ def manimage1(img: np.ndarray, QF1: int, QF2: int) -> np.ndarray:
     dct_quantized2, dct_quantized2_coeff = JPEG_Tools(decoded, QF2, encode=True)
     result[:, :half] = dct_quantized[:, :half]
     result[:, half:] = dct_quantized2[:, half:]
-    # return result
+    # Other way to generate the manimage1...
     # return JPEG_Tools(result, max([QF1, QF2]), encode=False)[0]
     return JPEG_Tools(result, QF1, encode=False)[0]
 
@@ -143,14 +143,16 @@ def manimage2(img: np.ndarray, QF1: int, QF2: int) -> np.ndarray:
 
 
 def plot_graph(
-    img: np.ndarray, title: list[str] = ["Original image", "DCT", "Histogram"]
+    img: np.ndarray,
+    title: list[str] = ["Original image", "DCT", "Histogram"],
+    QF: int = 75,
 ):
     plt.figure()
     plt.imshow(img, cmap="gray")
     plt.title(title[0])
     plt.axis("off")
     plt.show()
-    dct_quantized, dct_quantized_coeff = JPEG_Tools(img, dct=True)
+    dct_quantized, dct_quantized_coeff = JPEG_Tools(img, QF=QF, encode=True)
     plt.figure()
     plt.imshow(dct_quantized, cmap="gray")
     plt.title(title[1])
@@ -175,10 +177,17 @@ def plot_graphs(
 ):
     plt.figure()
     plt.subplot(1, 2, 1)
-    plt.imshow(dct_quantized, cmap="gray")
+    block = 35
+    plt.imshow(
+        normalize(dct_quantized[block * 8 : block * 8 + 8, block * 8 : block * 8 + 8]),
+        cmap="gray",
+    )
     plt.title(f"DCT 1st quantization with QF={QF1}")
     plt.subplot(1, 2, 2)
-    plt.imshow(dct_quantized2, cmap="gray")
+    plt.imshow(
+        normalize(dct_quantized2[block * 8 : block * 8 + 8, block * 8 : block * 8 + 8]),
+        cmap="gray",
+    )
     plt.title(f"DCT 2nd quantization with QF={QF2}")
     plt.tight_layout()
     plt.show()
@@ -307,6 +316,7 @@ if __name__ == "__main__":
                 f"DCT transform with QF1={QF1} and QF2={QF2}",
                 "Histogram of DCT coefficients",
             ],
+            np.max([QF1, QF2]),
         )
 
     if args.manipulated2:
@@ -314,8 +324,9 @@ if __name__ == "__main__":
         plot_graph(
             tmp,
             [
-                f"ManImage1 with QF1={QF1} and QF2={QF2}",
+                f"ManImage2 with QF1={QF1} and QF2={QF2}",
                 f"DCT transform with QF1={QF1} and QF2={QF2}",
                 "Histogram of DCT coefficients",
             ],
+            np.max([QF1, QF2]),
         )
