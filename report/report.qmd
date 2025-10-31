@@ -11,7 +11,7 @@ department: "Department of Informatics"
 logo: "./images/unige.pdf"
 logofooter: "./images/unige_informatic.png"
 # logofootersize: 1.5cm
-# illustration1: "./images/zoomed.png"
+illustration1: "./images/hist_qf2.png"
 # illustration2: "./images/A07.png"
 toc: true
 format:
