@@ -78,19 +78,22 @@ if __name__ == "__main__":
     cropped_img = crop_img(img, 197, 894, 345, 1000)
     rescale_1_5 = skimage.transform.rescale(cropped_img, scale=1.5)
     rescale_0_5 = skimage.transform.rescale(cropped_img, scale=0.5, anti_aliasing=True)
+    rescale_special = skimage.transform.rescale(
+        cropped_img, scale=(1.1, 0.9), anti_aliasing=True
+    )
     rotate_90 = skimage.transform.rotate(
         cropped_img, angle=90, resize=False, preserve_range=True
     )
     rotate_45 = skimage.transform.rotate(
         cropped_img, angle=45, resize=False, preserve_range=True
     )
-    noise_0_5 = add_noise(cropped_img, std=0.5)
-    noise_1 = add_noise(cropped_img, std=1)
-    compression_50_30 = jpeg_compress(jpeg_compress(cropped_img, 50), 30)
-    compression_50_90 = jpeg_compress(jpeg_compress(cropped_img, 50), 90)
-    print_image(img)
-    print_image(cropped_img)
-    print_image(insert_img(img, rescale_1_5, 440, 840))
+    noise_30 = add_noise(cropped_img, std=30)
+    noise_10 = add_noise(cropped_img, std=10)
+    compression_70_40 = jpeg_compress(jpeg_compress(cropped_img, 70), 40)
+    compression_70_20 = jpeg_compress(jpeg_compress(cropped_img, 70), 20)
+    # print_image(img)
+    # print_image(cropped_img)
+    # print_image(insert_img(img, rescale_1_5, 440, 840))
     io.imsave(
         "no_modification.png", util.img_as_ubyte(insert_img(img, cropped_img, 578, 894))
     )
@@ -100,29 +103,33 @@ if __name__ == "__main__":
     )
     io.imsave(
         "rescale_0_5.png",
-        util.img_as_ubyte(insert_img(img, rescale_0_5, 480, 930)),
+        util.img_as_ubyte(insert_img(img, rescale_0_5, 440, 840)),
+    )
+    io.imsave(
+        "rescale_special.png",
+        util.img_as_ubyte(insert_img(img, rescale_special, 440, 840)),
     )
     io.imsave(
         "rotate_90.png",
-        util.img_as_ubyte(insert_img(img, rotate_90, 578, 894)),
+        util.img_as_ubyte(insert_img(img, rotate_90[30:, 30:], 578, 894)),
     )
     io.imsave(
         "rotate_45.png",
         util.img_as_ubyte(insert_img(img, rotate_45, 400, 894)),
     )
     io.imsave(
-        "noise_0_5.png",
-        util.img_as_ubyte(insert_img(img, noise_0_5, 578, 894)),
+        "noise_30.png",
+        util.img_as_ubyte(insert_img(img, noise_30, 578, 894)),
     )
     io.imsave(
-        "noise_1.png",
-        util.img_as_ubyte(insert_img(img, noise_1, 578, 894)),
+        "noise_10.png",
+        util.img_as_ubyte(insert_img(img, noise_10, 578, 894)),
     )
     io.imsave(
-        "compression_50_90.png",
-        util.img_as_ubyte(insert_img(img, compression_50_90, 578, 894)),
+        "compression_70_20.png",
+        util.img_as_ubyte(insert_img(img, compression_70_20, 578, 894)),
     )
     io.imsave(
-        "compression_50_30.png",
-        util.img_as_ubyte(insert_img(img, compression_50_30, 578, 894)),
+        "compression_70_40.png",
+        util.img_as_ubyte(insert_img(img, compression_70_40, 578, 894)),
     )
