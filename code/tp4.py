@@ -68,16 +68,16 @@ def jpeg_compress(img: np.ndarray, quality: int = 90) -> np.ndarray:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Double JPEG compression")
+    parser = argparse.ArgumentParser(description="Test images generation")
     parser.add_argument(
-        "-i", "--image", required=True, help="Image to make double compression"
+        "-i", "--image", required=True, help="Original image used to create test images"
     )
     args = parser.parse_args()
 
     img = read_image(args.image)
     cropped_img = crop_img(img, 197, 894, 345, 1000)
     rescale_1_5 = skimage.transform.rescale(cropped_img, scale=1.5)
-    rescale_0_5 = skimage.transform.rescale(cropped_img, scale=0.5, anti_aliasing=True)
+    rescale_0_7 = skimage.transform.rescale(cropped_img, scale=0.7, anti_aliasing=True)
     rescale_special = skimage.transform.rescale(
         cropped_img, scale=(1.1, 0.9), anti_aliasing=True
     )
@@ -102,8 +102,8 @@ if __name__ == "__main__":
         util.img_as_ubyte(insert_img(img, rescale_1_5, 440, 840)),
     )
     io.imsave(
-        "rescale_0_5.png",
-        util.img_as_ubyte(insert_img(img, rescale_0_5, 440, 840)),
+        "rescale_0_7.png",
+        util.img_as_ubyte(insert_img(img, rescale_0_7, 440, 840)),
     )
     io.imsave(
         "rescale_special.png",
