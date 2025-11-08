@@ -6,6 +6,7 @@ from scipy.fftpack import dctn, idctn
 import skimage
 import cv2
 from skimage.transform import rescale
+from typing import Union
 
 
 def read_image(name: str) -> np.ndarray:
@@ -27,28 +28,41 @@ def lsb_extraction(img: np.ndarray, level: int = 0) -> np.ndarray:
     # return ((result & mask) > 0).astype(int)
     return result & mask
 
-def hide_message(img: np.ndarray, msg: str = "Hellloooowww !!!", key: int = 21, level: int = 0) -> np.ndarray:
+def hide_message(img: np.ndarray, msg: Union[str, np.ndarray] = "Hellloooowww !!!", key: int = 21, level: int = 0) -> np.ndarray:
     # Create random number generator with given key
     rng = np.random.default_rng(seed=key)
     rows, cols = img.shape
     layer = lsb_extraction(img, level)
     result = img.copy() - layer
     layer = layer.ravel()
-    msg_bits = 2**level * np.array(list(''.join(format(b, '08b') for b in msg.encode('utf-8')))).astype(int)
+    if isinstance(msg, np.ndarray):
+        msg_bits = 2**level * (msg.ravel() > 0).astype(int)
+        print(msg_bits)
+    else:
+        msg_bits = 2**level * np.array(list(''.join(format(b, '08b') for b in msg.encode('utf-8')))).astype(int)
     positions = rng.choice(np.arange(layer.shape[0]), size=msg_bits.shape[0])
     layer[positions] = msg_bits
     result += layer.reshape(rows, cols)
     return result
 
-def get_message(img: np.ndarray, key: int = 21, length: int = 100, level: int = 0) -> str:
+def get_message(img: np.ndarray, key: int = 21, size: Union[np.ndarray, int] = 100, level: int = 0) -> Union[str, np.ndarray]:
+    if isinstance(size, int):
+        length = size*8
+    else:
+        length = size[0] * size[1]
     rng = np.random.default_rng(seed=key)
     layer = lsb_extraction(img, level).ravel()
-    positions = rng.choice(np.arange(layer.shape[0]), size=length*8)
+    positions = rng.choice(np.arange(layer.shape[0]), size=length)
     msg_bits = layer[positions]
     msg_bits = (msg_bits > 0).astype(int)
-    msg_bits = ''.join(str(i) for i in msg_bits)
-    # We ignore here the decoding errors to retrieve a message even if we don't know the size of the message
-    return int(msg_bits, 2).to_bytes(len(msg_bits) // 8, 'big').decode('utf-8', errors='ignore')
+    if isinstance(size, np.ndarray):
+        msg_bits = msg_bits.reshape(size[0], size[1])
+        return msg_bits
+    else:
+        msg_bits = ''.join(str(i) for i in msg_bits)
+        # We ignore here the decoding errors to retrieve a message even if we don't know the size of the message
+        return int(msg_bits, 2).to_bytes(len(msg_bits) // 8, 'big').decode('utf-8', errors='ignore')
+
 
 def bit_plane_visualization(img: np.ndarray, title: str = "Bit-planes of the image"):
     plt.figure()
@@ -91,7 +105,7 @@ if __name__ == "__main__":
         "-b", "--bit_plane", action="store_true", help="Display each bit-plane of the image"
     )
     parser.add_argument("-m", "--message", help="Message to hide !")
-    parser.add_argument("-p", )
+    parser.add_argument("-mi", "--message_image", help="Image to hide !")
     args = parser.parse_args()
 
     if args.bit_plane:
@@ -105,3 +119,14 @@ if __name__ == "__main__":
         print_image(img, title='Original image')
         print_image(img_msg, title='Image with hidden message')
         print(f"Recovered message: {get_message(img_msg)}")
+    if args.message_image:
+        assert args.image, "Image must be given to show each bit-plane of the image !"
+        img = read_image(args.image)
+        secret_img = read_image(args.message_image)
+        secret_img[secret_img < 128] = 0
+        secret_img[secret_img >= 128] = 1
+        img_msg = hide_message(img, msg=secret_img)
+        print_image(img, title='Original image')
+        print_image(img_msg, title='Image with hidden message')
+        print_image(get_message(img_msg, size=np.array(secret_img.shape)))
+
