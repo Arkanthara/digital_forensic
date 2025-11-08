@@ -53,16 +53,16 @@ In the remainder of this report, we will focus on a lossy compression: `jpeg` co
 
 ## Image compression
 
-The image compression is based on redundancies, both spatial and psychovisual.
+The image compression is based on redundancies, both statistical and psychovisual.
 
-- Spatial redundancies. This kind of redundancies are present in some region of image. For instance, at some given region, all pixels can have the same intensity.
-  So it's possible to deduct intensity of given pixel by taking the neighbors of this pixel.
-
+- Statistical redundancies. In fact, there is a lot of correlation between pixels or colors of an image. Theses correlations, both spatial and spectral, introduce redundancies that can be used to compress and store intelligently data of image.
 - Psychovisual redundancies. This is based on the imperfection and characteristics of Human Visual System.
   For instance, Human Visual System is more sensitive to the brightness than to the colors, so image can be transformed into YCbCr channels with Y the luminance of the image and Cb and Cr some color channel.
   In this way, we can conservate original luminance of the image, and downsampling the colors channels, and the Human Visual System will not see any change in the image.
-  Human Visual System is also less sensitive to high frequencies, that's why a DCT (Discrete Cosine Transform) transform is applied, allowing to separate low and high frequencies.
+  It's the spectral irrelevance.
+  On top of that, Human Visual System is also less sensitive to high frequencies that represent small details, that's why a DCT (Discrete Cosine Transform) transform is applied, allowing to separate low and high frequencies.
   Then, a quantization is made, removing the high frequencies, and Human Visual System will not see the difference.
+  It's the spatial irrelevance.
 
 So it's possible to reduce the quantity of data to store by deleting redundancies in the image.
 The general way to compress an image lies in this way:
