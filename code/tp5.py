@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import argparse
 from skimage import io, color, util
 from typing import Union
+from skimage.metrics import structural_similarity as ssim
 
 def read_image(name: str, gray: bool = False) -> np.ndarray:
     img = io.imread(name)
@@ -56,7 +57,7 @@ def hide_message(img: np.ndarray, msg: Union[str, np.ndarray], key: int = 21, le
     
     positions = rng.choice(np.arange(layer_flat.shape[0]), size=msg_bits.shape[0], replace=False)
     layer_flat[positions] = msg_bits
-    result += (layer_flat.reshape(rows, cols) << level)  # Add back the modified bits
+    result += (layer_flat.reshape(rows, cols) << level)
     
     return insert_channel(img, result, channel)
 
@@ -64,6 +65,10 @@ def hide_image(img: np.ndarray, msg: np.ndarray, key: int = 21, quantization: in
     assert len(img.shape) == 3, "Must work with rgb image !" 
     assert quantization <= 8, "Quantization represent number of MSB kept. It must be between 1 and 8 !"
     key_incrementer = 3984
+    M, N, _ = img.shape
+    m, n = msg.shape
+    nb_insert = (M * N) // (m * n)
+    nb_insert = max(1, nb_insert // 3)
     current_key = key
     level = 0
     result = img.copy()
@@ -72,23 +77,28 @@ def hide_image(img: np.ndarray, msg: np.ndarray, key: int = 21, quantization: in
     print(f"Message shape: {msg.shape}")
     
     for img_level in range(8):  # 0-7 (LSB to MSB)
-        for img_channel in range(min(3, img.shape[2])):  # RGB channels
-            if level >= quantization:  # Fixed termination condition
+        for img_channel in range(img.shape[2]):
+            if level >= quantization:
+                print(f"Image hidden in at least {img_level + 1} LSB !")
                 return result
             
             # Extract the bit plane from message (MSB first)
-            msg_bit_plane = lsb_extraction(msg, 7 - level)  # 7-level = MSB to LSB order
+            msg_bit_plane = np.array([])
+            for k in range(nb_insert):
+                if level >= quantization:
+                    break
+                msg_bit_plane = np.concatenate([msg_bit_plane, lsb_extraction(msg, 7 - level).ravel()])
+                level += 1
             
             # Hide this bit plane in the cover image
             result = hide_message(
                 result, 
                 msg_bit_plane, 
-                level=img_level,  # Which bit of cover image to use
+                level=img_level,
                 channel=img_channel, 
                 key=current_key
             )
             
-            level += 1
             current_key += key_incrementer
     
     return result
@@ -96,6 +106,10 @@ def hide_image(img: np.ndarray, msg: np.ndarray, key: int = 21, quantization: in
 def get_image(img: np.ndarray, size: np.ndarray, key: int = 21, quantization: int = 4) -> np.ndarray:
     assert len(img.shape) == 3, "Must work with rgb image !"
     assert quantization <= 8, "Quantization represent number of MSB kept. It must be between 1 and 8 !"
+    M, N, _ = img.shape
+    m, n = size
+    nb_insert = (M * N) // (m * n)
+    nb_insert = max(1, nb_insert // 3)
     key_incrementer = 3984
     current_key = key
     level = 0
@@ -105,24 +119,26 @@ def get_image(img: np.ndarray, size: np.ndarray, key: int = 21, quantization: in
     print(f"Expected size: {size}")
     
     for img_level in range(8):  # 0-7 (LSB to MSB)
-        for img_channel in range(min(3, img.shape[2])):  # RGB channels
-            if level >= quantization:  # Fixed termination condition
+        for img_channel in range(img.shape[2]):
+            if level >= quantization:
                 return result
             
             # Extract the bit plane
             extracted_bits = get_message(
                 img, 
-                size=size, 
-                level=img_level,  # Which bit of cover image to extract from
+                size=np.array([1, n * m * nb_insert]),
+                level=img_level,
                 channel=img_channel, 
                 key=current_key
-            )
+            )[0]
+            for k in range(nb_insert):
+                if level >= quantization:
+                    break
+                # Add this bit plane to result with proper weighting
+                bit_weight = 7 - level
+                result = result + ((extracted_bits[k*m*n: (k + 1) * m*n] > 0).astype(np.uint8).reshape(m, n) << bit_weight)
+                level += 1
             
-            # Add this bit plane to result with proper weighting
-            bit_weight = 7 - level  # MSB first order
-            result = result + ((extracted_bits > 0).astype(np.uint8) << bit_weight)
-            
-            level += 1
             current_key += key_incrementer
     
     return result
@@ -133,14 +149,10 @@ def get_message(img: np.ndarray, key: int = 21, size: Union[np.ndarray, int] = 1
     else:
         length = size[0] * size[1]
     
-    # Use the SAME seed as used in hiding
+    # Use the same seed as used in hiding, else no message can be retrieved
     rng = np.random.default_rng(seed=key)
     img_channel = extract_channel(img, channel)
-    
-    # Extract the specified bit level
     layer = lsb_extraction(img_channel, level).ravel()
-    
-    # Use the SAME positions as used in hiding
     positions = rng.choice(np.arange(layer.shape[0]), size=length, replace=False)
     msg_bits = layer[positions]
     
@@ -153,7 +165,6 @@ def get_message(img: np.ndarray, key: int = 21, size: Union[np.ndarray, int] = 1
         msg_bits = ''.join(str(i) for i in msg_bits)
         return int(msg_bits, 2).to_bytes(len(msg_bits) // 8, 'big').decode('utf-8', errors='ignore')
 
-# Rest of your functions remain the same...
 def bit_plane_visualization(img: np.ndarray, title: str = "Bit-planes of the image"):
     plt.figure()
     plt.suptitle(title)
@@ -163,6 +174,43 @@ def bit_plane_visualization(img: np.ndarray, title: str = "Bit-planes of the ima
         plt.axis('off')
         plt.title(f'Level {i}')
     plt.show()
+
+def pixel_wise(img1: np.ndarray, img2: np.ndarray):
+    plt.figure()
+    colorbar = plt.imshow(np.abs(img1 - img2), cmap='viridis')
+    plt.axis('off')
+    plt.colorbar(colorbar)
+    plt.title("Pixel wise difference")
+    plt.show()
+
+def MSE(img_1: np.ndarray, img_2: np.ndarray) -> float:
+    return np.mean((img_1 - img_2)**2)
+
+def add_noise(img: np.ndarray, mean: float = 0.0, std: float = 1.0) -> np.ndarray:
+    noise = np.random.normal(loc = mean, scale = std, size = img.shape)
+    img_noised = img.astype(np.float32) + noise
+    return np.clip(img_noised, a_min = 0, a_max = 255).astype(np.uint8)
+
+def jpeg_compress(img: np.ndarray, quality: int = 90) -> np.ndarray:
+    params = [cv2.IMWRITE_JPEG_QUALITY, quality]
+    success, encoded_img = cv2.imencode('.jpg', img, params)
+
+    if not success:
+        print("Error when encoding")
+
+    compressed_img = cv2.imdecode(encoded_img, cv2.IMREAD_UNCHANGED)
+    return compressed_img
+
+def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> np.ndarray:
+    mse = MSE(img_1, img_2)
+    if mse == 0:
+        return 100
+    return 10 * np.log10(max_value**2/mse)
+
+def print_quality(img_1: np.ndarray, img_2: np.ndarray):
+    print(f"MSE: {MSE(img_1, img_2)}")
+    print(f"PSNR: {PSNR(img_1, img_2)}")
+    print(f"SSIM: {ssim(img_1, img_2)}")
 
 def crop_img(img: np.ndarray, tlx: int, tly: int, brx: int, bry: int) -> np.ndarray:
     assert len(img.shape) == 2, "Image must be 2 dimensions !"
@@ -224,3 +272,4 @@ if __name__ == "__main__":
         print_image(img, title='Original image')
         print_image(img_msg, title='Image with hidden message')
         print_image(secret, title="Hidden image")
+        pixel_wise(img, img_msg)
