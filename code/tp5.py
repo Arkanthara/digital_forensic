@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 import matplotlib.pyplot as plt
 import argparse
 import skimage as ski
@@ -111,7 +112,7 @@ def hide_image(
             msg_bit_plane = np.array([])
 
             # For each insertion, use the same bit plane (this might be the issue)
-            for k in range(nb_insert):
+            for _ in range(nb_insert):
                 if msg_bit_index >= quantization:
                     break
                 # Extract the (7 - msg_bit_index) bit plane from message
@@ -245,17 +246,17 @@ def bit_plane_visualization(img: np.ndarray, title: str = "Bit-planes of the ima
     plt.show()
 
 
-def pixel_wise(img1: np.ndarray, img2: np.ndarray):
+def pixel_wise(img1: np.ndarray, img2: np.ndarray, title: str):
     plt.figure()
     colorbar = plt.imshow(np.abs(img1 - img2), cmap="viridis")
     plt.axis("off")
     plt.colorbar(colorbar)
-    plt.title("Pixel wise difference")
+    plt.title(title)
     plt.show()
 
 
 def MSE(img_1: np.ndarray, img_2: np.ndarray) -> float:
-    return np.mean((img_1 - img_2) ** 2)
+    return float(np.mean((img_1 - img_2) ** 2))
 
 
 def add_noise(img: np.ndarray, mean: float = 0.0, std: float = 1.0) -> np.ndarray:
@@ -275,16 +276,14 @@ def jpeg_compress(img: np.ndarray, quality: int = 90) -> np.ndarray:
     return compressed_img
 
 
-def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> np.ndarray:
+def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> float:
     mse = MSE(img_1, img_2)
     if mse == 0:
         return 100
     return 10 * np.log10(max_value**2 / mse)
 
 
-def print_quality(img_1: np.ndarray, img_2: np.ndarray):
-    print("-------------------------------------------------------------")
-    print("Image comparison between original image and image with secret")
+def print_channel(img_1: np.ndarray, img_2: np.ndarray, title: str):
     print("-------------------------------------------------------------")
     print(f"MSE: {MSE(img_1, img_2)}")
     print(f"PSNR: {PSNR(img_1, img_2)}")
@@ -300,25 +299,53 @@ def print_quality(img_1: np.ndarray, img_2: np.ndarray):
     plt.plot(hist_2_centers, hist_2, label="Image with secret")
     plt.plot(hist_1_centers, hist_1, label="Original image")
     plt.legend()
-    plt.title("Histogram comparison")
+    plt.title(title)
     plt.show()
 
 
-def comparison(img_1: np.ndarray, img_2: np.ndarray):
-    if len(img_1.shape) == 3:
+def print_quality(img_1: np.ndarray, img_2: np.ndarray):
+    print("-------------------------------------------------------------")
+    print("Image comparison between original image and image with secret")
+    print("-------------------------------------------------------------")
+    if len(img_1.shape) != 3:
+        print_channel(img_1, img_2, title="Histogram comparison for grayscale image")
+        pixel_wise(img_1, img_2, title="Pixel-wise difference for grayscale image")
+    else:
+        channel = ["R", "G", "B"]
         for i in range(img_1.shape[2]):
-            print_quality(img_1[:, :, i], img_2[:, :, i])
+            print(
+                f"------------------------ CHANNEL {channel[i]} --------------------------"
+            )
+            print_channel(
+                img_1[:, :, i],
+                img_2[:, :, i],
+                title=f"Histogram comparison for {channel[i]} channel",
+            )
+            pixel_wise(
+                img_1, img_2, title=f"Pixel-wise difference for {channel[i]} channel"
+            )
 
 
 def robustness(
-    img: np.ndarray, tly: int = 0, tlx: int = 0, bry: int = 1000, brx: int = 1000
+    img: np.ndarray,
+    size: Union[np.ndarray, int],
+    key: int = 21,
+    top: int = 0,
+    bottom: int = 1000,
+    left: int = 0,
+    right: int = 1000,
 ):
-    crop_secret = crop_img(img_1, tlx=tlx, tly=tly, brx=brx, bry=bry)
-    compress_secret = jpeg_compress(img, quality=100)
-    noised_secret = ski.util.img_as_ubyte(
+    crop = ski.util.crop(img, ((top, bottom), (left, right), (0, 0)))
+    compress = jpeg_compress(img, quality=100)
+    noised = ski.util.img_as_ubyte(
         ski.util.random_noise(img, mode="gaussian", clip=True)
     )
-    return crop_secret, compress_secret, noised_secret
+    crop_secret = get_message(crop, size=size, key=key)
+    compress_secret = get_message(compress, size=size, key=key)
+    noised_secret = get_message(noised, size=size, key=key)
+    print_image(crop_secret, title="Hidden image retrieved from cropped image")
+    print_image(compress_secret, title="Hidden image retrieved from compressed image")
+    print_image(noised_secret, title="Hidden image retrieved from noised image")
 
 
 def crop_img(img: np.ndarray, tlx: int, tly: int, brx: int, bry: int) -> np.ndarray:
@@ -391,7 +418,8 @@ if __name__ == "__main__":
         print_image(img, title="Original image")
         print_image(img_msg, title="Image with hidden message")
         print_image(secret, title="Hidden image")
-        pixel_wise(img, img_msg)
+        print_quality(img, img_msg)
+        robustness(img_msg, np.array(secret_img.shape))
         # print_image(
         #     ski.util.compare_images(img, img_msg, method="diff"),
         #     title="Pixel wise comparison",
