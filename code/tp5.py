@@ -1,17 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
-from skimage import io, color, util
+import skimage as ski
 from typing import Union
 from skimage.metrics import structural_similarity as ssim
 
 def read_image(name: str, gray: bool = False) -> np.ndarray:
-    img = io.imread(name)
+    img = ski.io.imread(name)
     # Case RGB images
     if len(img.shape) == 3 and gray:
-        img = color.rgb2gray(img)
+        img = ski.color.rgb2gray(img)
     # Convert image to int array in range 0, 255
-    img = util.img_as_ubyte(img)
+    img = ski.util.img_as_ubyte(img)
     return img
 
 def binary_image(name: str) -> np.ndarray:
@@ -208,9 +208,39 @@ def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> np.ndarray:
     return 10 * np.log10(max_value**2/mse)
 
 def print_quality(img_1: np.ndarray, img_2: np.ndarray):
+    print("-------------------------------------------------------------")
+    print("Image comparison between original image and image with secret")
+    print("-------------------------------------------------------------")
     print(f"MSE: {MSE(img_1, img_2)}")
     print(f"PSNR: {PSNR(img_1, img_2)}")
     print(f"SSIM: {ssim(img_1, img_2)}")
+    print("-------------------------------------------------------------")
+    hist_1, hist_1_centers = ski.exposure.histogram(img_1)
+    cdf_1, cdf_1_centers = ski.exposure.cumulative_distribution(img_1)
+
+    hist_2, hist_2_centers = ski.exposure.histogram(img_2)
+    cdf_2, cdf_2_centers = ski.exposure.cumulative_distribution(img_2)
+
+    plt.figure()
+    plt.plot(hist_2_centers, hist_2, label="Image with secret")
+    plt.plot(hist_1_centers, hist_1, label="Original image")
+    plt.legend()
+    plt.title("Histogram comparison")
+    plt.show()
+
+def comparison(img_1: np.ndarray, img_2: np.ndarray):
+    if len(img_1.shape) == 3:
+        for i in range(img_1.shape[2]):
+            print_quality(img_1[:, :, i], img_2[:, :, i])
+
+
+def robustness(img: np.ndarray, tly: int = 0, tlx: int = 0, bry: int = 1000, brx: int = 1000):
+    crop_secret = crop_img(img_1, tlx=tlx, tly=tly, brx=brx, bry=bry)
+    compress_secret = jpeg_compress(img, quality=100)
+    noised_secret = ski.util.img_as_ubyte(ski.util.random_noise(img, mode='gaussian', clip=True))
+    return crop_secret, compress_secret, noised_secret
+
+
 
 def crop_img(img: np.ndarray, tlx: int, tly: int, brx: int, bry: int) -> np.ndarray:
     assert len(img.shape) == 2, "Image must be 2 dimensions !"
@@ -272,4 +302,4 @@ if __name__ == "__main__":
         print_image(img, title='Original image')
         print_image(img_msg, title='Image with hidden message')
         print_image(secret, title="Hidden image")
-        pixel_wise(img, img_msg)
+        print_image(ski.util.compare_images(img, img_msg, method='diff'), title="Pixel wise comparison")
