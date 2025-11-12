@@ -247,8 +247,9 @@ def bit_plane_visualization(img: np.ndarray, title: str = "Bit-planes of the ima
 
 
 def pixel_wise(img1: np.ndarray, img2: np.ndarray, title: str):
+    diff = ski.util.img_as_ubyte(ski.util.compare_images(img1, img2, method="diff"))
     plt.figure()
-    colorbar = plt.imshow(np.abs(img1 - img2), cmap="viridis")
+    colorbar = plt.imshow(diff, cmap="gray", vmin=0, vmax=np.max(diff))
     plt.axis("off")
     plt.colorbar(colorbar)
     plt.title(title)
@@ -322,7 +323,9 @@ def print_quality(img_1: np.ndarray, img_2: np.ndarray):
                 title=f"Histogram comparison for {channel[i]} channel",
             )
             pixel_wise(
-                img_1, img_2, title=f"Pixel-wise difference for {channel[i]} channel"
+                img_1[:, :, i],
+                img_2[:, :, i],
+                title=f"Pixel-wise difference for {channel[i]} channel",
             )
 
 
@@ -335,11 +338,19 @@ def robustness(
     left: int = 0,
     right: int = 1000,
 ):
-    crop = ski.util.crop(img, ((top, bottom), (left, right), (0, 0)))
+    if len(img.shape) == 3:
+        crop = ski.util.crop(img, ((top, bottom), (left, right), (0, 0)))
+        noised = img.copy()
+        for i in range(img.shape[2]):
+            noised[:, :, i] = ski.util.img_as_ubyte(
+                ski.util.random_noise(noised[:, :, i], mode="gaussian", clip=True)
+            )
+    else:
+        crop = ski.util.crop(img, ((top, bottom), (left, right)))
+        noised = ski.util.img_as_ubyte(
+            ski.util.random_noise(img, mode="gaussian", clip=True)
+        )
     compress = jpeg_compress(img, quality=100)
-    noised = ski.util.img_as_ubyte(
-        ski.util.random_noise(img, mode="gaussian", clip=True)
-    )
     crop_secret = get_message(crop, size=size, key=key)
     compress_secret = get_message(compress, size=size, key=key)
     noised_secret = get_message(noised, size=size, key=key)
@@ -400,7 +411,7 @@ if __name__ == "__main__":
         print(f"Recovered message: {bits2str(get_message(img_msg))}")
     if args.message_image:
         assert args.image, "Image must be given to show each bit-plane of the image !"
-        img = read_image(args.image)
+        img = read_image(args.image, gray=True)
         if args.msb_number:
             secret_img = read_image(args.message_image, gray=True)
 
