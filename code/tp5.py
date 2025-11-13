@@ -382,20 +382,22 @@ def print_image(img: np.ndarray, title: str = "Image"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Steganography")
-    parser.add_argument("-i", "--image", help="Image")
+    parser.add_argument("-i", "--image", help="Path to base image")
     parser.add_argument(
         "-b",
         "--bit_plane",
         action="store_true",
         help="Display each bit-plane of the image",
     )
-    parser.add_argument("-m", "--message", help="Message to hide !")
-    parser.add_argument("-mi", "--message_image", help="Image to hide !")
+    parser.add_argument("-m", "--message", help="Message to hide")
+    parser.add_argument("-mi", "--message_image", help="Image to hide")
     parser.add_argument(
         "-msb",
         "--msb_number",
-        help="Store the x MSB of grayscale image into RGB image LSB",
+        help="Store the x MSB of grayscale image into LSB of the RGB base image",
     )
+    parser.add_argument("-g", "--grayscale", action="store_true", help="Convert base image to grayscale")
+    parser.add_argument("-k", "--key", default="16", help="Key used to hide message in pseudo-random positions")
     args = parser.parse_args()
 
     if args.bit_plane:
@@ -404,34 +406,39 @@ if __name__ == "__main__":
         bit_plane_visualization(img)
     if args.message:
         assert args.image, "Image must be given to show each bit-plane of the image !"
-        img = read_image(args.image)
-        img_msg = hide_message(img, msg=args.message, level=7)
+        key = int(args.key)
+        if args.grayscale:
+            img = read_image(args.image, gray=True)
+        else:
+            img = read_image(args.image)
+        img_msg = hide_message(img, msg=args.message, level=7, key=key)
         print_image(img, title="Original image")
         print_image(img_msg, title="Image with hidden message")
-        print(f"Recovered message: {bits2str(get_message(img_msg))}")
+        msg = get_message(img_msg, size=len(args.message), key=key, level=7)
+        print(f"Recovered message: {bits2str(msg)}")
     if args.message_image:
         assert args.image, "Image must be given to show each bit-plane of the image !"
-        img = read_image(args.image, gray=True)
+        key = int(args.key)
+        if args.grayscale:
+            img = read_image(args.image, gray=True)
+        else:
+            img = read_image(args.image)
         if args.msb_number:
             secret_img = read_image(args.message_image, gray=True)
 
             # Hide the image
-            img_msg = hide_image(img, secret_img, quantization=int(args.msb_number))
+            img_msg = hide_image(img, secret_img, key=key, quantization=int(args.msb_number))
 
             # Extract the image
             secret = get_image(
-                img_msg, np.array(secret_img.shape), quantization=int(args.msb_number)
+                img_msg, np.array(secret_img.shape), key=key, quantization=int(args.msb_number)
             )
         else:
             secret_img = binary_image(args.message_image)
-            img_msg = hide_message(img, msg=secret_img)
-            secret = get_message(img_msg, size=np.array(secret_img.shape))
+            img_msg = hide_message(img, msg=secret_img, key=key)
+            secret = get_message(img_msg, size=np.array(secret_img.shape), key=key)
         print_image(img, title="Original image")
         print_image(img_msg, title="Image with hidden message")
         print_image(secret, title="Hidden image")
         print_quality(img, img_msg)
-        robustness(img_msg, np.array(secret_img.shape))
-        # print_image(
-        #     ski.util.compare_images(img, img_msg, method="diff"),
-        #     title="Pixel wise comparison",
-        # )
+        robustness(img_msg, np.array(secret_img.shape), key=key)
