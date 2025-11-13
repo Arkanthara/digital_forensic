@@ -2,6 +2,9 @@
 #import "template.typ": make-report, report-footnote
 #import "metadata.typ": my-report
 #import "@preview/theofig:0.1.0": definition
+// #import "@preview/codly:1.3.0": *
+// #import "@preview/codly-languages:0.1.1": *
+// #show: codly-init.with()
 
 // Main content
 #show: make-report.with(my-report)
@@ -16,6 +19,8 @@ Encryption is good, but it's visible and breakable: the others can see that ther
 That is why people began to hide information in various ways, such as in messages, images, audio, etc, what is known as steganography.
 
 In this work, some basic steganography methods will be implemented and tested.
+
+#pagebreak()
 
 = Methodology
 
@@ -64,26 +69,30 @@ So steganography can hide some message in an image in an undetectable way for hu
 = Implementation
 
 An implementation of steganography method on image is implemented.
-The documentation is the following:
+The documentation is given in @doc.
 
-```text
-usage: tp5.py [-h] [-i IMAGE] [-b] [-m MESSAGE] [-mi MESSAGE_IMAGE] [-msb MSB_NUMBER] [-g] [-k KEY]
+#figure(
+  caption: [Documentation],
+  [
+    ```text
+    usage: tp5.py [-h] [-i IMAGE] [-b] [-m MESSAGE] [-mi MESSAGE_IMAGE] [-msb MSB_NUMBER] [-g] [-k KEY]
 
-Steganography
+    Steganography
 
-options:
-  -h, --help            show this help message and exit
-  -i, --image IMAGE     Path to base image
-  -b, --bit_plane       Display each bit-plane of the image
-  -m, --message MESSAGE
-                        Message to hide
-  -mi, --message_image MESSAGE_IMAGE
-                        Image to hide
-  -msb, --msb_number MSB_NUMBER
-                        Store the x MSB of grayscale image into LSB of the RGB base image
-  -g, --grayscale       Convert base image to grayscale
-  -k, --key KEY         Key used to hide message in pseudo-random positions
-```
+    options:
+      -h, --help            show this help message and exit
+      -i, --image IMAGE     Path to base image
+      -b, --bit_plane       Display each bit-plane of the image
+      -m, --message MESSAGE
+                            Message to hide
+      -mi, --message_image MESSAGE_IMAGE
+                            Image to hide
+      -msb, --msb_number MSB_NUMBER
+                            Store the x MSB of grayscale image into LSB of the RGB base image
+      -g, --grayscale       Convert base image to grayscale
+      -k, --key KEY         Key used to hide message in pseudo-random positions
+    ```],
+)<doc>
 
 In this way, if you want to hide a string message to the image, simply execute the code like bellow:
 
@@ -118,7 +127,127 @@ So a proper work has been made on pseudo-random choice of index.
 
 = Results
 
-Present your results here.
+== Bit-plane image
+
+#figure(
+  caption: "Bit-plane decomposition of an image",
+  image("img/bit_plane.png", width: 125%),
+)
+
+== Binary image hidden in RGB image
+
+#figure(
+  grid(
+    columns: 2,
+    grid.cell(image("img/steg_img.png", fit: "cover", width: 120%)),
+    grid.cell(image("img/msg.png", fit: "cover", width: 120%)),
+  ),
+  caption: [Binary image hidden],
+)
+
+#figure(image("img/hist.png"), caption: [Histogram of B channel])
+
+#figure(
+  caption: "Output of the code",
+  [```text
+  -------------------------------------------------------------
+  Image comparison between original image and image with secret
+  -------------------------------------------------------------
+  ------------------------ CHANNEL R --------------------------
+  -------------------------------------------------------------
+  MSE: 0.0
+  PSNR: 100
+  SSIM: 1.0
+  -------------------------------------------------------------
+  ------------------------ CHANNEL G --------------------------
+  -------------------------------------------------------------
+  MSE: 0.0
+  PSNR: 100
+  SSIM: 1.0
+  -------------------------------------------------------------
+  ------------------------ CHANNEL B --------------------------
+  -------------------------------------------------------------
+  MSE: 0.124509
+  PSNR: 57.178796157890275
+  SSIM: 0.9986712006770483
+  -------------------------------------------------------------
+  ```],
+)
+
+#pagebreak()
+
+== Complete grayscale image hidden in RGB image
+
+The method implemented consist to hide multiple bit-plane
+
+#figure(
+  grid(
+    columns: 2,
+    grid.cell(image("img/full_img_msg.png", width: 120%)), grid.cell(image("img/full_msg.png", width: 120%)),
+  ),
+  caption: [Grayscale image hidden],
+)
+
+#figure(
+  grid(
+    columns: 2,
+    grid.cell(image("img/full_hist_R.png")), grid.cell(image("img/full_pixel_wise_R.png", width: 119%)),
+    grid.cell(image("img/full_hist_G.png")), grid.cell(image("img/full_pixel_wise_G.png", width: 119%)),
+  ),
+  caption: [Binary image hidden],
+)
+
+#figure(
+  caption: "Output of the code",
+  [```text
+  -------------------------------------------------------------
+  Image comparison between original image and image with secret
+  -------------------------------------------------------------
+  ------------------------ CHANNEL R --------------------------
+  -------------------------------------------------------------
+  MSE: 0.1659685442900714
+  PSNR: 55.93054576055208
+  SSIM: 0.9984012127967222
+  -------------------------------------------------------------
+  ------------------------ CHANNEL G --------------------------
+  -------------------------------------------------------------
+  MSE: 0.09969593091365841
+  PSNR: 58.14402927910395
+  SSIM: 0.9990285524483571
+  -------------------------------------------------------------
+  ------------------------ CHANNEL B --------------------------
+  -------------------------------------------------------------
+  MSE: 0.0
+  PSNR: 100
+  SSIM: 1.0
+  -------------------------------------------------------------
+  ```],
+)
+
+== Robustness tests
+
+=== RGB image
+
+#figure(
+  grid(
+    columns: 2,
+    grid.cell(image("img/msg.png")), grid.cell(image("img/robustness_rgb_compress.png")),
+    grid.cell(image("img/robustness_rgb_noise.png")), grid.cell(image("img/robustness_rgb_crop.png")),
+  ),
+  caption: [Robustness tests on RGB image],
+)
+
+=== Grayscale image
+
+#figure(
+  grid(
+    columns: 2,
+    grid.cell(image("img/msg.png", width: 120%)), grid.cell(image("img/robustness_gray_compress.png", width: 120%)),
+    grid.cell(image("img/robustness_gray_noise.png", width: 120%)),
+    grid.cell(image("img/robustness_gray_crop.png", width: 120%)),
+  ),
+  caption: [Robustness tests on grayscale image],
+)
 
 = Conclusion
 
