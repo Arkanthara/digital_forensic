@@ -6,37 +6,32 @@
   // Required information
   logo: "./img/unige.pdf",
   logosize: 6cm,
-  university: "University Name",
-  title: "Report Title",
+  university: "University of Geneva",
+  title: " LSB steganography",
 
   // Structured authors
   authors: (
     (
-      name: "Theresa Tungsten",
-      affiliation: "Artos Institute",
-      email: "tung@artos.edu",
-    ),
-    (
-      name: "Eugene Deklan",
-      // affiliation: "Honduras State",
-      email: "e.deklan@hstate.hn",
+      name: "Michel Jean Joseph Donnet",
     ),
   ),
 
   // Optional information
   faculty: "Faculty of Science",
   // subtitle: "Report Subtitle",
-  course-name: "Course Name",
-  course-id: "CS101",
+  course-name: "Digital Forensics",
+  course-id: "14x065",
   illustrations: (
     (
-      path: "./img/unige_informatic.png",
-      width: 4cm,
+      path: "./img/full_msg.png",
+      width: 10cm,
+    ),
+    (
+      path: "./img/full_hist_R.png",
+      width: 10cm,
     ),
   ),
-  project-name: "Project Name",
-  github: "project-repo",
-  github-link: "https://github.com/username/project-repo",
+  project-name: "Digital Forensics",
   date: none,
 
   // Document options

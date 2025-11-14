@@ -208,9 +208,9 @@
           align: (x, y) => (left + bottom, right + top).at(x),
           [
             #if template.project-name != none {
-              [#smallcaps[template.project-name]]
+              [#smallcaps(template.project-name)]
             } #if template.project-name != none and template.title != none { [/] } #if template.title != none {
-              [#smallcaps[template.title]]
+              [#smallcaps(template.title)]
             }
           ],
           [
@@ -268,12 +268,38 @@
       ]
     ),
   )
+  show heading: set block(above: 1.2em, below: 1.2em)
   // Apply numbering setting
   if template.numbering {
-    set heading(numbering: "1.1")
+    set heading(numbering: "1.")
   } else {
     set heading(numbering: none)
   }
+  set heading(numbering: "1.1")
+
+  show heading.where(level: 1): it => {
+    set text(size: 24pt)
+    set block(above: 1.2em, below: 1.2em)
+    if it.numbering != none {
+      let num = numbering(it.numbering, ..counter(heading).at(it.location()))
+      let prefix = num + h(0.5em)
+      context {
+        pad(left: -measure(prefix).width, prefix + it.body)
+      }
+    } else {
+      it
+    }
+  }
+
+  // show heading.where(level: 2): it => {
+  //   if it.numbering != none {
+  //     let num = numbering(it.numbering, ..counter(heading).at(it.location()))
+  //     let prefix = num + h(0.8em)
+  //     context {
+  //       pad(left: -measure(prefix).width, prefix + it.body)
+  //     }
+  //   }
+  // }
 
   // Set font and styles
   set text(

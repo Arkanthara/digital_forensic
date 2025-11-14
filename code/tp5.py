@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import argparse
 import skimage as ski
 from typing import Union
-from skimage.metrics import structural_similarity as ssim
 
 
 def read_image(name: str, gray: bool = False) -> np.ndarray:
@@ -102,7 +101,7 @@ def hide_image(
     print(f"Number of insertions per bit plane: {nb_insert}")
 
     # Go through cover image bit planes (LSB to MSB) and embed message MSB to LSB
-    for img_level in range(8):  # 0-7 (LSB to MSB of cover image)
+    for img_level in range(8):
         for img_channel in range(3):  # RGB channels
             if msg_bit_index >= quantization:
                 print(f"Image hidden using {msg_bit_index} MSB planes of message!")
@@ -132,7 +131,6 @@ def hide_image(
                 key=current_key,
             )
 
-            # msg_bit_index += 1
             current_key += key_incrementer
 
     return result
@@ -163,8 +161,6 @@ def get_image(
     for img_level in range(8):  # 0-7 (LSB to MSB of cover image)
         for img_channel in range(3):  # RGB channels
             if msg_bit_index >= quantization:
-                # Normalize the result (since we're adding multiple bit planes)
-                # result = np.clip(result, 0, 255)
                 return result
 
             # Extract the bit plane
@@ -182,10 +178,9 @@ def get_image(
             for k in range(nb_insert):
                 if msg_bit_index >= quantization:
                     break
-                # Place bits with correct weighting (MSB first)
                 bit_weight = (
                     7 - msg_bit_index
-                )  # MSB gets highest weight (bit 7, then 6, etc.)
+                )
                 start_idx = k * m * n
                 end_idx = (k + 1) * m * n
                 msg_segment = (extracted_bits[start_idx:end_idx] > 0).astype(np.uint8)
@@ -256,10 +251,6 @@ def pixel_wise(img1: np.ndarray, img2: np.ndarray, title: str):
     plt.show()
 
 
-def MSE(img_1: np.ndarray, img_2: np.ndarray) -> float:
-    return float(np.mean((img_1 - img_2) ** 2))
-
-
 def add_noise(img: np.ndarray, mean: float = 0.0, std: float = 1.0) -> np.ndarray:
     noise = np.random.normal(loc=mean, scale=std, size=img.shape)
     img_noised = img.astype(np.float32) + noise
@@ -277,19 +268,20 @@ def jpeg_compress(img: np.ndarray, quality: int = 90) -> np.ndarray:
     return compressed_img
 
 
-def PSNR(img_1: np.ndarray, img_2: np.ndarray, max_value=255) -> float:
-    mse = MSE(img_1, img_2)
-    if mse == 0:
-        return 100
-    return 10 * np.log10(max_value**2 / mse)
+def print_metrics(img_1: np.ndarray, img_2: np.ndarray):
+    print("-------------------------------------------------------------")
+    print(f"MSE: {ski.metrics.mean_squared_error(img_1, img_2)}")
+    print(f"PSNR: {ski.metrics.peak_signal_noise_ratio(img_1, img_2)}")
+    if len(img_1.shape) == 3:
+        print(f"SSIM: {ski.metrics.structural_similarity(img_1, img_2, channel_axis=2)}")
+        print_image(ski.color.deltaE_cie76(img_1, img_2, channel_axis=2), title="Overall color difference")
+    else:
+        print(f"SSIM: {ski.metrics.structural_similarity(img_1, img_2)}")
+    print("-------------------------------------------------------------")
 
 
 def print_channel(img_1: np.ndarray, img_2: np.ndarray, title: str):
-    print("-------------------------------------------------------------")
-    print(f"MSE: {MSE(img_1, img_2)}")
-    print(f"PSNR: {PSNR(img_1, img_2)}")
-    print(f"SSIM: {ssim(img_1, img_2)}")
-    print("-------------------------------------------------------------")
+    print_metrics(img_1, img_2)
     hist_1, hist_1_centers = ski.exposure.histogram(img_1)
     cdf_1, cdf_1_centers = ski.exposure.cumulative_distribution(img_1)
 
@@ -313,6 +305,8 @@ def print_quality(img_1: np.ndarray, img_2: np.ndarray):
         pixel_wise(img_1, img_2, title="Pixel-wise difference for grayscale image")
     else:
         channel = ["R", "G", "B"]
+        print("-------------------- OVERALL COMPARISON ---------------------")
+        print_metrics(img_1, img_2)
         for i in range(img_1.shape[2]):
             print(
                 f"------------------------ CHANNEL {channel[i]} --------------------------"
@@ -350,18 +344,13 @@ def robustness(
         noised = ski.util.img_as_ubyte(
             ski.util.random_noise(img, mode="gaussian", clip=True)
         )
-    compress = jpeg_compress(img, quality=100)
+    compress = jpeg_compress(img, quality=98)
     crop_secret = get_message(crop, size=size, key=key)
     compress_secret = get_message(compress, size=size, key=key)
     noised_secret = get_message(noised, size=size, key=key)
     print_image(crop_secret, title="Hidden image retrieved from cropped image")
     print_image(compress_secret, title="Hidden image retrieved from compressed image")
     print_image(noised_secret, title="Hidden image retrieved from noised image")
-
-
-def crop_img(img: np.ndarray, tlx: int, tly: int, brx: int, bry: int) -> np.ndarray:
-    assert len(img.shape) == 2, "Image must be 2 dimensions !"
-    return img[tly:bry, tlx:brx]
 
 
 def print_range(img: np.ndarray):
@@ -416,6 +405,7 @@ if __name__ == "__main__":
         print_image(img_msg, title="Image with hidden message")
         msg = get_message(img_msg, size=len(args.message), key=key, level=7)
         print(f"Recovered message: {bits2str(msg)}")
+        print_quality(img, img_msg)
     if args.message_image:
         assert args.image, "Image must be given to show each bit-plane of the image !"
         key = int(args.key)
