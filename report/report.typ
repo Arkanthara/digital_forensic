@@ -20,6 +20,17 @@ The objective of this work will therefore be to understand how video compression
 
 = Methodology <methodology>
 
+First of all, we will start by studying how video compression works.
+To do this, we will use the h264 codec, as it is the most widely used codec on the web.
+
+== H.264
+
+The H.264 codec, also known as MPEG-4 AVC (Advanced Video Coding) or MPEG-4 Part 10, was developed in 2003.
+It undergoes numerous transformations and is still undergoing improvements today
+#report-footnote(link("https://en.wikipedia.org/wiki/Advanced_Video_Coding")[Wikipedia]).
+
+
+
 #pagebreak()
 
 = Implementation <impl>

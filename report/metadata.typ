@@ -7,7 +7,7 @@
   logo: "./img/unige.pdf",
   logosize: 6cm,
   university: "University of Geneva",
-  title: " LSB steganography",
+  title: "Video Compression and Modification Detection",
 
   // Structured authors
   authors: (
@@ -37,6 +37,6 @@
   // Document options
   toc: true,
   numbering: true,
-  bibliography: none,
+  bibliography: "./bibliography.bib",
   appendix: false,
 )
