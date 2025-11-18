@@ -30,6 +30,8 @@ To do this, we will use the h264 codec, as it is the most widely used codec on t
 
 === Psychovisual redundancies
 
+The imperfections of the human visual system can be exploited to reduce the amount of data used by a video without a loss of visual quality.
+
 ==== Spatial irrelevance
 
 The human visual system has some difficulties to perceive small details due to its limitations.
@@ -52,6 +54,22 @@ In this way, human visual system is less sensitive to blue color than to other c
 
 Therefore, retaining all the spectral details of the video may prove unnecessary for good quality reproduction of the video.
 
+==== Temporal irrelevance
+
+The human visual system is not sensitive to rapid changes.
+Thus, in the case of a video, only about 30 frames per second are necessary for humans to perceive smooth motion.
+Since human visual system is unable to detect rapid changes between successive frames, this can be exploited to reduce the amount of data used by a video without loss of visual quality.
+
+=== Statistical redundancies
+
+The statistical redundancies of each frame of a video can be used to optimize the amount of data used.
+Among these redundancies, we have spatial, spectral, and temporal redundancies, as in the human visual system.
+
+==== Spatial irrelevance
+
+==== Spectral irrelevance
+
+==== Temporal irrelevance
 
 == H.264
 
