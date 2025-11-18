@@ -26,6 +26,33 @@ In general, video are sequence of images called frames.
 Based on this kind of video, we will start by studying how video compression works.
 To do this, we will use the h264 codec, as it is the most widely used codec on the web.
 
+== Redundancies
+
+=== Psychovisual redundancies
+
+==== Spatial irrelevance
+
+The human visual system has some difficulties to perceive small details due to its limitations.
+The optics of the eyes and the neural processing tend to smooth out fine patterns.
+For example: a document printed by a laser printer is composed of small dots that are very close together.
+However, we cannot see the individual dots at a normal distance: we only perceive a uniform surface.
+
+This is why this feature can be used to remove small details that are invisible or barely visible for human visual system.
+
+==== Spectral irrelevance
+
+The human visual system consists of approximately 100 million rods responsible for perceiving brightness and approximately 6.5 million cones responsible for perceiving colors.
+Due to the high amount of rods, the human visual system is more sensitive to brightness compared to color.
+
+There are 3 types of cones:
+- L-cones ($approx 65%$), sensitive to long wavelengths (such as the red color).
+- M-cones ($approx 33%$), sensitive to medium wavelengths (such as the green color).
+- S-cones ($approx 2%$), sensitive to short wavelengths (such as blue color).
+In this way, human visual system is less sensitive to blue color than to other colors due to its amount of S-cones.
+
+Therefore, retaining all the spectral details of the video may prove unnecessary for good quality reproduction of the video.
+
+
 == H.264
 
 The H.264 codec, also known as MPEG-4 AVC (Advanced Video Coding) or MPEG-4 Part 10, was developed in 2003.
@@ -81,6 +108,26 @@ The video compression follow the structure bellow, as described in the diagram @
   }
   ```
 ]) <basis>
+
+The video compression follows similar steps than image compression.
+However, some additional steps are provided to look after temporal redundancies.
+
+In brief, we have:
+
+- Partitioning into Macroblocks: the image is partitioned in Macroblocks, generally of size 16x16.
+  Then, depending on precision of prediction step needed, each Macroblock can be decomposed to smaller block (typically of size 16x8, 8x8, 4x4)
+- Prediction: this step is decomposed in 2 substeps:
+  - Intra prediction: this step consists to predict value of a block according to neighboring blocks of the same frame.
+  - Inter prediction: this step consists to predict value of a block according to previous and future frames.
+    This is based on temporal redundancies.
+    For instance, a video of a moving object will probably have only the object that moves without any changes in the background.
+    In this way, only the changes can be stored, the rest staying the same.
+    This is the greatest way for compression to reduce the amount of data.
+- Transform. In this step, the prediction error coming from previous step is transformed by an integer transformation.
+  This transformation is similar to Discrete Cosine Transform, but is faster and avoid floating point errors.
+  In this way, prediction error is decomposed into low and high frequencies.
+- Quantization: due to imperfections of human visual system that is less sensible to small details (high frequencies), only low frequencies can be kept to have a good reproduction of the video with a reduction of amount of data.
+- Encode: All parameters are then stored into the disk in such a way the video can be reconstructed.
 
 
 #pagebreak()
