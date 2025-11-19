@@ -65,29 +65,38 @@ Since human visual system is unable to detect rapid changes between successive f
 The statistical redundancies of each frame of a video can be used to optimize the amount of data used.
 Among these redundancies, we have spatial, spectral, and temporal redundancies, as in the human visual system.
 
-==== Spatial irrelevance <stat_spat>
+==== Spatial irrelevance
 
 These redundancies are introduced by a strong correlation between neighboring pixels.
 By the way, in an image, each pixel is correlated with its neighbors in such a way that the final result is something visible and understandable to humans.
 An image created with no correlation between pixels is something like a noisy image because each pixel is independent from the others.
+So the spatial redundancies can be exploited to predict for instance values of pixels according to neighboring pixels.
+In this manner, some data can be deleted, which reduces amount of data used.
 
 ==== Spectral irrelevance
 
 These redundancies are created by strong correlation between neighboring pixels in color domain.
 This is because color changes are often gradual, and colored regions regularly extend beyond a single pixel.
-Thus, a pixel is strongly correlated with its neighbors in the color domain.
+Thus, a pixel is strongly correlated with its neighbors in the color domain, which can be exploited to reduce amount of data used.
 
 ==== Temporal irrelevance
 
 These redundancies are the most important for video compression.
 In fact, changes to the elements present in the video occur gradually, especially in consecutive frames.
-Thus, between two consecutive frames, there will not be many changes, as shown by fig.
-Indeed, the amount of change created by this jumping man is very small.
-(graph here !)
+Thus, between two consecutive frames, there will not be many changes, as shown by @diff_frame.
+Indeed, the amount of change created by this moving car is very small.
+
+#figure(
+  caption: "Difference between 2 consecutive frames for a 30 fps video",
+  grid(
+    columns: 2,
+    gutter: 0.5cm,
+    image("./img/frame.jpg"),
+    image("./img/diff_frame.jpg")
+  )
+)<diff_frame>
+
 So if only the changes are recorded, most of the frame can be compressed.
-
-
-
 
 == H.264
 
@@ -95,60 +104,78 @@ The H.264 codec, also known as MPEG-4 AVC (Advanced Video Coding) or MPEG-4 Part
 It undergoes numerous transformations and is still undergoing improvements today
 #report-footnote(link("https://en.wikipedia.org/wiki/Advanced_Video_Coding")[Wikipedia]).
 
-=== Base principles
-
-The process of video compression is based on redundancies, both statistical and human, especially on temporal redundancies.
-Indeed the human visual system needs only around 25 frames per second to see a fluid video.
-On top of that, each frame doesn't differ much from the other neighbor frames in a video.
-This permits for instance to store only the change and not the entire frame, allowing to reduce amount of data used.
-
 === Compression
 
-The video compression follow the structure bellow, as described in the diagram @basis.
+// #figure(caption: "Video compression and decompression structure", [
+//   ```pintora
+//   componentDiagram
+//   @param layoutDirection TB
+//
+//   () "Raw video" as a0
+//   () "Compressed video" as a6
+//   component "Encoding" {
+//     [Block partitioning] as a1
+//     [Prediction] as a2
+//     [Transform] as a3
+//     [Quantize] as a4
+//     [Encode] as a5
+//
+//     a0 --> a1
+//     a1 --> a2
+//     a2 --> a3
+//     a3 --> a4
+//     a4 --> a5
+//     a5 --> a6
+//   }
+//
+//   component "Decoding" {
+//     [Block partitioning] as b1
+//     [Prediction] as b2
+//     [Transform] as b3
+//     [Quantize] as b4
+//     [Decode] as b5
+//
+//     a6 --> b5
+//     b5 --> b4
+//     b4 --> b3
+//     b3 --> b2
+//     b2 --> b1
+//     b1 --> a0
+//   }
+//   ```
+// ]) <basis>
 
-#figure(caption: "Video compression and decompression structure", [
-  ```pintora
-  componentDiagram
-  @param layoutDirection TB
+Video compression follows steps similar to those used in image compression, which consist of data transformation, quantization for lossy compression, and data encoding for efficient storage on disk.
+However, some additional steps are provided to exploit temporal redundancies.
 
-  () "Raw video" as a0
-  () "Compressed video" as a6
-  component "Encoding" {
-    [Block partitioning] as a1
-    [Prediction] as a2
-    [Transform] as a3
-    [Quantize] as a4
-    [Encode] as a5
+More concretely, we have the steps bellow.
 
-    a0 --> a1
-    a1 --> a2
-    a2 --> a3
-    a3 --> a4
-    a4 --> a5
-    a5 --> a6
-  }
+==== Color Space Transform
 
-  component "Decoding" {
-    [Block partitioning] as b1
-    [Prediction] as b2
-    [Transform] as b3
-    [Quantize] as b4
-    [Decode] as b5
+The frame is first transformed from RGB color space to YCbCr color space.
+Instead of representing the frame in RGB color space, the YCbCr color space is used to divide the frame into luminance (Y) and chrominance (both Cb and Cr).
+#figure(
+  caption: "Image decomposed in YCbCr color space",
+  grid(
+  columns: 3,
+  gutter: 0.5cm,
+  figure(caption: "Y channel", supplement: none, image("./img/y.jpg")),
+  figure(caption: "Cb channel", supplement: none, image("./img/cb.jpg")),
+  figure(caption: "Cr channel", supplement: none, image("./img/cr.jpg")),
+)) <ycbcr>
 
-    a6 --> b5
-    b5 --> b4
-    b4 --> b3
-    b3 --> b2
-    b2 --> b1
-    b1 --> a0
-  }
-  ```
-]) <basis>
+The luminance looks after the luminosity, the brightness of the image whereas the chrominance looks after colors of the image, as shown on @ycbcr.
 
-The video compression follows similar steps than image compression.
-However, some additional steps are provided to look after temporal redundancies.
+In this way, since the human visual system is less sensitive to color than to brightness, chrominance could be compressed more than luminance at a later stage.
 
-In brief, we have:
+==== Partitioning
+
+Then, the frame is divided into macroblock generally of size $16 times 16$.
+These macroblocks perfectly represent specific regions of the image and are very useful for working on small areas of the image.
+This allows for easier detection of elements such as moving and not moving objects, more accurate motion prediction, and an efficient means of compressing data.
+Indeed, some parts of the image may be flat while others may contain a large amount of detail.
+In this way, some parts of the image can be compressed more than others.
+
 
 - Partitioning into Macroblocks: the image is partitioned in Macroblocks, generally of size 16x16.
   Then, depending on precision of prediction step needed, each Macroblock can be decomposed to smaller block (typically of size 16x8, 8x8, 4x4)
