@@ -87,13 +87,12 @@ Thus, between two consecutive frames, there will not be many changes, as shown b
 Indeed, the amount of change created by this moving car is very small.
 
 #figure(
-  caption: "Difference between 2 consecutive frames for a 30 fps video",
+  caption: "Difference between 2 consecutive frames for a 60 fps video",
   grid(
     columns: 2,
     gutter: 0.5cm,
-    image("./img/frame.jpg"),
-    image("./img/diff_frame.jpg")
-  )
+    image("./img/frame.jpg"), image("./img/diff_frame.jpg"),
+  ),
 )<diff_frame>
 
 So if only the changes are recorded, most of the frame can be compressed.
@@ -157,24 +156,61 @@ Instead of representing the frame in RGB color space, the YCbCr color space is u
 #figure(
   caption: "Image decomposed in YCbCr color space",
   grid(
-  columns: 3,
-  gutter: 0.5cm,
-  figure(caption: "Y channel", supplement: none, image("./img/y.jpg")),
-  figure(caption: "Cb channel", supplement: none, image("./img/cb.jpg")),
-  figure(caption: "Cr channel", supplement: none, image("./img/cr.jpg")),
-)) <ycbcr>
+    columns: 3,
+    gutter: 0.5cm,
+    figure(caption: "Y channel", supplement: none, image("./img/y.jpg")),
+    figure(caption: "Cb channel", supplement: none, image("./img/cb.jpg")),
+    figure(caption: "Cr channel", supplement: none, image("./img/cr.jpg")),
+  ),
+) <ycbcr>
 
 The luminance looks after the luminosity, the brightness of the image whereas the chrominance looks after colors of the image, as shown on @ycbcr.
+On top of that, as we can observe on @ycbcr, all structural information is contained in Y channel, which represent clearly the image in grayscale.
 
 In this way, since the human visual system is less sensitive to color than to brightness, chrominance could be compressed more than luminance at a later stage.
 
-==== Partitioning
+==== Split into macroblocks <split>
 
 Then, the frame is divided into macroblock generally of size $16 times 16$.
 These macroblocks perfectly represent specific regions of the image and are very useful for working on small areas of the image.
 This allows for easier detection of elements such as moving and not moving objects, more accurate motion prediction, and an efficient means of compressing data.
 Indeed, some parts of the image may be flat while others may contain a large amount of detail.
+And on subsequent frames, some informations can be exactly the same, as represented by the black on @diff_frame.
 In this way, some parts of the image can be compressed more than others.
+
+==== Partitioning
+
+Each macroblock is then divided into smaller blocks depending on precision needed.
+This allows a better adaptation on local complexity of the frame.
+
+The macroblock can be divided into subblocks of size $16 times 16$, $8 times 8$, $8 times 4$, $4 times 8$ or $4 times 4$.
+
+==== Prediction
+
+This step is divided into two substeps.
+
+===== Intra-prediction
+
+In this case, only the current frame is taken into account.
+The goal is to predict value of a pixel according to its neighborhood.
+The prediction method is defined by the encoder.
+
+This is very useful for scenes without moves...
+
+===== Inter-prediction
+
+In this case, the subsequent frames are used to make the prediction (both past and future frames).
+The goal is to predict block according to previous and next frames.
+It is based on the fact that only small changes are introduced between subsequent frames, as shown on @diff_frame.
+This prediction looks after motion vector that describe the move of the object: if the object was at a given place and move in a direction given by motion vector, it's easy to predict where it will be, so only the motion vector is needed.
+However, computing this motion vector can be costly.
+But this allows a huge compression of data for moving objects.
+
+There are different kind of predictions:
+
+- forward prediction
+- backward prediction
+- bi-directional prediction
 
 
 - Partitioning into Macroblocks: the image is partitioned in Macroblocks, generally of size 16x16.

@@ -11,8 +11,8 @@ if __name__ == "__main__":
     parser.add_argument("-f2", "--frame_2", help="Frame 2 of a video")
     args = parser.parse_args()
     if args.frame_1:
-        img1 = ski.io.imread(args.frame_1, as_gray=True)
-        img2 = ski.io.imread(args.frame_2, as_gray=True)
+        img1 = ski.io.imread(args.frame_1, as_gray=False)
+        img2 = ski.io.imread(args.frame_2, as_gray=False)
 
         ski.io.imsave("frame.jpg", ski.util.img_as_ubyte(img1))
         ski.io.imsave(
