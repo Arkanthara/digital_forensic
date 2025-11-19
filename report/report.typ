@@ -65,11 +65,29 @@ Since human visual system is unable to detect rapid changes between successive f
 The statistical redundancies of each frame of a video can be used to optimize the amount of data used.
 Among these redundancies, we have spatial, spectral, and temporal redundancies, as in the human visual system.
 
-==== Spatial irrelevance
+==== Spatial irrelevance <stat_spat>
+
+These redundancies are introduced by a strong correlation between neighboring pixels.
+By the way, in an image, each pixel is correlated with its neighbors in such a way that the final result is something visible and understandable to humans.
+An image created with no correlation between pixels is something like a noisy image because each pixel is independent from the others.
 
 ==== Spectral irrelevance
 
+These redundancies are created by strong correlation between neighboring pixels in color domain.
+This is because color changes are often gradual, and colored regions regularly extend beyond a single pixel.
+Thus, a pixel is strongly correlated with its neighbors in the color domain.
+
 ==== Temporal irrelevance
+
+These redundancies are the most important for video compression.
+In fact, changes to the elements present in the video occur gradually, especially in consecutive frames.
+Thus, between two consecutive frames, there will not be many changes, as shown by fig.
+Indeed, the amount of change created by this jumping man is very small.
+(graph here !)
+So if only the changes are recorded, most of the frame can be compressed.
+
+
+
 
 == H.264
 
