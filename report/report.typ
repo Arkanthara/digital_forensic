@@ -1,8 +1,9 @@
 // Main report file
 #import "template.typ": make-report, report-footnote
 #import "metadata.typ": my-report
-#import "@preview/theofig:0.1.0": definition
+#import "@preview/theofig:0.1.0": definition, example
 #import "@preview/pintorita:0.1.4"
+#import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node, shapes
 #show raw.where(lang: "pintora"): it => pintorita.render(it.text, style: " larkLigh")
 
 // Main content
@@ -28,7 +29,7 @@ To do this, we will use the h264 codec, as it is the most widely used codec on t
 
 == Redundancies
 
-=== Psychovisual redundancies
+=== Psychovisual redundancies <psychovisual>
 
 The imperfections of the human visual system can be exploited to reduce the amount of data used by a video without a loss of visual quality.
 
@@ -105,45 +106,6 @@ It undergoes numerous transformations and is still undergoing improvements today
 
 === Compression
 
-// #figure(caption: "Video compression and decompression structure", [
-//   ```pintora
-//   componentDiagram
-//   @param layoutDirection TB
-//
-//   () "Raw video" as a0
-//   () "Compressed video" as a6
-//   component "Encoding" {
-//     [Block partitioning] as a1
-//     [Prediction] as a2
-//     [Transform] as a3
-//     [Quantize] as a4
-//     [Encode] as a5
-//
-//     a0 --> a1
-//     a1 --> a2
-//     a2 --> a3
-//     a3 --> a4
-//     a4 --> a5
-//     a5 --> a6
-//   }
-//
-//   component "Decoding" {
-//     [Block partitioning] as b1
-//     [Prediction] as b2
-//     [Transform] as b3
-//     [Quantize] as b4
-//     [Decode] as b5
-//
-//     a6 --> b5
-//     b5 --> b4
-//     b4 --> b3
-//     b3 --> b2
-//     b2 --> b1
-//     b1 --> a0
-//   }
-//   ```
-// ]) <basis>
-
 Video compression follows steps similar to those used in image compression, which consist of data transformation, quantization for lossy compression, and data encoding for efficient storage on disk.
 However, some additional steps are provided to exploit temporal redundancies.
 
@@ -189,28 +151,141 @@ The macroblock can be divided into subblocks of size $16 times 16$, $8 times 8$,
 
 This step is divided into two substeps.
 
-===== Intra-prediction
+===== Intra-prediction <intra>
 
 In this case, only the current frame is taken into account.
-The goal is to predict value of a pixel according to its neighborhood.
-The prediction method is defined by the encoder.
+The goal is to predict the value of a pixel based on its neighborhood.
+The prediction mode is chosen by the encoder, such as vertical, horizontal or other modes.
+- vertical mode: copy content of previous row
+- horizontal mode: copy content of previous column
 
-This is very useful for scenes without moves...
+The prediction that gives the smallest difference between original block frame and predicted block frame is kept.
+
+This is very useful for scenes without moves.
 
 ===== Inter-prediction
 
-In this case, the subsequent frames are used to make the prediction (both past and future frames).
-The goal is to predict block according to previous and next frames.
-It is based on the fact that only small changes are introduced between subsequent frames, as shown on @diff_frame.
-This prediction looks after motion vector that describe the move of the object: if the object was at a given place and move in a direction given by motion vector, it's easy to predict where it will be, so only the motion vector is needed.
-However, computing this motion vector can be costly.
-But this allows a huge compression of data for moving objects.
+In this case, the subsequent frames are used to make the prediction (past and future frames, depending on kind of prediction).
+The goal is to predict block position according to subsequent frames.
+This is based on the fact that only small changes are introduced between subsequent frames, as shown on @diff_frame.
 
-There are different kind of predictions:
+First of all, we need to introduce a few technical terms, summarized in the @terms_table.
 
-- forward prediction
-- backward prediction
-- bi-directional prediction
+/ I-frame: This is an independent frame that is fully encoded using @intra, which results in low prediction efficiency.
+  The file size is large due to the amount of data that needs to be retained.
+  This type of frame corresponds to the key frames in the video, which are used to encode the other frames.
+/ P-frame: This is a frame encoded using the previous I-frame, which results in good prediction efficiency thanks to previous I-frame.
+  The aim is to track the movement of the object in the video and use this to reduce the amount of data used.
+  By exploiting this source of redundancy, the amount of data used is less than that of I-frame, so the compression is better.
+/ B-frame: this frame is encoded using the previous I-frame and the following P-frame, which results in high prediction efficiency.
+  By using the previous and following images, the prediction is definitely better, allowing less data to be used than for P-frames.
+  This kind of frame is especially used for compression.
+
+#figure(
+  caption: "Kind of frames used in a video",
+  table(
+    columns: 5,
+    table.header([Frame type], [Dependency], [Prediction efficiency], [File size], [Goal]),
+    [I-frame], [No], [Bad], [-], [Key frame],
+    [P-frame], [I-frame], [Good], [+], [Track move],
+    [B-frame], [I-frame, P-frame], [High], [+++], [Compression],
+  ),
+) <terms_table>
+
+There is no inter-prediction in I-frame, as described in @terms_table.
+
+On case of P-frame computation, the block of the P-frame is searched in the previous I-frame.
+A motion vector is then computed, describing the move of the block between this two frames.
+Then, the content of the reference block is predicted according to motion vector and I-frame content.
+
+On case of B-frame computation, the block of the B-frame is searched in the previous I-frame and next P-frame.
+The motion vector is then computed, allowing prediction of the block according to I-frame and P-frame.
+In this case, the prediction of the block is more accurate thanks to the I-frame and P-frame used, allowing greater data compression later on.
+
+Computing the motion vector is costly, however it allows to achieve great compression on moving objects for P-frames and B-frames.
+
+The structure of the video follows a pattern as shown in the @video_structure.
+
+#figure(
+  caption: "Frame organization in video",
+  gap: 1.5em,
+  [
+    #let color-i = rgb(255, 120, 120, 40%)      // rouge pastel
+    #let color-b = rgb(180, 140, 255, 20%)      // violet pastel
+    #let color-p = rgb(255, 160, 210, 20%)      // rose pastel
+
+    #diagram(
+      node-corner-radius: 4pt,
+      spacing: 1.75em,
+
+      // ---- Frames ----
+      node((0, 0), [I], fill: color-i, name: <I-frame>),
+      node((1, 0), [B], fill: color-b),
+      node((2, 0), [B], fill: color-b),
+      node((3, 0), [P], fill: color-p, name: <P-frame>),
+      node((4, 0), [B], fill: color-b),
+      node((5, 0), [B], fill: color-b, name: <B-frame>),
+      node((6, 0), [P], fill: color-p),
+      node((7, 0), [B], fill: color-b),
+      node((8, 0), [...], fill: color-b),
+      node((9, 0), [I], fill: color-i),
+      node((10, 0), [...], fill: color-b),
+      node(enclose: (<I-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "I-frame")),
+      node(enclose: (<B-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "B-frame")),
+      node(enclose: (<P-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "P-frame")),
+
+      // ---- Edges ----
+      edge((0, 0), (1, 0), "->"),
+      edge((1, 0), (2, 0), "->"),
+      edge((2, 0), (3, 0), "->"),
+      edge((3, 0), (4, 0), "->"),
+      edge((4, 0), (5, 0), "->"),
+      edge((5, 0), (6, 0), "->"),
+      edge((6, 0), (7, 0), "->"),
+      edge((7, 0), (8, 0), "->"),
+      edge((8, 0), (9, 0), "->"),
+      edge((9, 0), (10, 0), "->"),
+    )],
+) <video_structure>
+
+==== Residual
+
+Once the prediction is made for a block, the difference between the predicted block and the original block of the frame is computed.
+Depending on results, prediction can be reapplied to have smaller residuals allowing better compression, as mentioned in @intra.
+
+In this way, only the method for establishing the prediction and the residual difference between the prediction and the original image are necessary to reconstruct the original image.
+
+For instance, suppose that we have $B_("original")$ the original block of the frame and $B_("predicted")$ the predicted block.
+Then, the residual $R$ can be computed as shown in @residual.
+
+$ R = B_("original") - B_("predicted") $ <residual>
+
+So if only both motion vector for inter-prediction and prediction method for intra-prediction is kept with the residual, the original block can be reconstruct as shown in @residual_reconstruct.
+
+$ B_("original") = R + B_("predicted") $ <residual_reconstruct>
+
+This is why only residual of prediction and information necessary for prediction are retained, allowing for considerable data compression.
+
+==== Transform
+
+An integer approximation of the Discrete Cosine Transform (DCT) is applied to the prediction residual in order to convert it into frequency coefficients.
+
+The integer approximation is used to facilitate computations and avoid rounding error introduced by a classical DCT that works with floating points.
+In fact, the entire approximation of the DCT is reversible and only processes integers, which is particularly relevant when working with images and videos in the integer domain.
+
+In this way, the residual is divided into high and low frequencies, which proves useful in the next step: the quantization.
+
+==== Quantization
+
+The quantization is a lossy step that determine the quality of the compressed video.
+It is based on imperfection of human visual system, which is less sensitive to small details, as explained in @psychovisual.
+Since high frequencies represent small details, quantization uses the decomposition of the residue into low and high frequencies to remove the high frequencies.
+To do this, a quantization matrix is constructed based on the quality factor defined by the user.
+Then, the residual is divided by the quantization matrix and the result is rounded to have only integer values.
+Some high frequencies then become 0, which reduces the amount of data to be stored.
+In this way, some data are lost, that's why this is a lossy step.
+
+#report-footnote(link("https://www.abhik.xyz/articles/h264-transform-quantization")[Website where DCT is explained])
 
 
 - Partitioning into Macroblocks: the image is partitioned in Macroblocks, generally of size 16x16.

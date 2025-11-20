@@ -196,6 +196,9 @@
   // Set page margins with extra bottom space for footnotes
   set page(margin: (top: 3cm, bottom: 3cm, left: 3cm, right: 2.5cm))
 
+  // Allow to reference an equation
+  set math.equation(numbering: "(1)")
+
   // Set headers and footers
   set page(
     header: context (
