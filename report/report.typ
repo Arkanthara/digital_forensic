@@ -4,6 +4,7 @@
 #import "@preview/theofig:0.1.0": definition, example
 #import "@preview/pintorita:0.1.4"
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node, shapes
+#import "@preview/note-me:0.5.0": note
 #show raw.where(lang: "pintora"): it => pintorita.render(it.text, style: " larkLigh")
 
 // Main content
@@ -159,9 +160,10 @@ The prediction mode is chosen by the encoder, such as vertical, horizontal or ot
 - vertical mode: copy content of previous row
 - horizontal mode: copy content of previous column
 
-The prediction that gives the smallest difference between original block frame and predicted block frame is kept.
+The prediction that gives the smallest difference between original block frame and predicted block frame is kept according to chosen mode.
+There exists 9 prediction modes for $4 times 4$ blocks and 4 modes for $16 times 16$ blocks.
 
-This is very useful for scenes without moves.
+The intra-prediction is very useful for scenes without moves.
 
 ===== Inter-prediction
 
@@ -248,7 +250,7 @@ The structure of the video follows a pattern as shown in the @video_structure.
     )],
 ) <video_structure>
 
-==== Residual
+==== Residue <residue>
 
 Once the prediction is made for a block, the difference between the predicted block and the original block of the frame is computed.
 Depending on results, prediction can be reapplied to have smaller residuals allowing better compression, as mentioned in @intra.
@@ -285,23 +287,84 @@ Then, the residual is divided by the quantization matrix and the result is round
 Some high frequencies then become 0, which reduces the amount of data to be stored.
 In this way, some data are lost, that's why this is a lossy step.
 
-#report-footnote(link("https://www.abhik.xyz/articles/h264-transform-quantization")[Website where DCT is explained])
+==== Encoding
 
+Finally, the quantified residues and parameters useful for prediction, such as the motion vector or prediction method, are encoded in such a way as to use as few bits as possible and to be able to reconstruct the encoded video.
 
-- Partitioning into Macroblocks: the image is partitioned in Macroblocks, generally of size 16x16.
-  Then, depending on precision of prediction step needed, each Macroblock can be decomposed to smaller block (typically of size 16x8, 8x8, 4x4)
-- Prediction: this step is decomposed in 2 substeps:
-  - Intra prediction: this step consists to predict value of a block according to neighboring blocks of the same frame.
-  - Inter prediction: this step consists to predict value of a block according to previous and future frames.
-    This is based on temporal redundancies.
-    For instance, a video of a moving object will probably have only the object that moves without any changes in the background.
-    In this way, only the changes can be stored, the rest staying the same.
-    This is the greatest way for compression to reduce the amount of data.
-- Transform. In this step, the prediction error coming from previous step is transformed by an integer transformation.
-  This transformation is similar to Discrete Cosine Transform, but is faster and avoid floating point errors.
-  In this way, prediction error is decomposed into low and high frequencies.
-- Quantization: due to imperfections of human visual system that is less sensible to small details (high frequencies), only low frequencies can be kept to have a good reproduction of the video with a reduction of amount of data.
-- Encode: All parameters are then stored into the disk in such a way the video can be reconstructed.
+#note[
+  A very good explanation of how H264 works is available on the website #link("https://www.abhik.xyz/articles/h264-fundamentals")[abhik.xyz], which provides interactive explanations.]
+
+=== Decompression
+
+The process of decompression follows the same steps as video compression, but in reverse order, as shown on @simple_process.
+
+So first, data are decoded.
+Next, as in the quantization step for encoding, the DCT coefficients were divided by a quantization matrix, the DCT coefficients are multiplied by the quantization matrix to recover the DCT coefficients in the inverse quantization step.
+Then, an inverse DCT is applied to retrieve the residues, which are added to the prediction made.
+In this way, the original blocks of the partitioning are retrieved, as explained in @residue.
+Then, blocks are reassembled to reconstruct the video.
+Finally, deblocking filters are applied to avoid blocking artifacts on the video.
+
+#figure(
+  caption: "General scheme of video compression/decompression",
+  gap: 1.5em,
+  [
+    #let color-i = rgb(255, 120, 120, 40%)      // rouge pastel
+    #let color-b = rgb(180, 140, 255, 20%)      // violet pastel
+    #let color-p = rgb(255, 160, 210, 20%)      // rose pastel
+
+    #diagram(
+      node-corner-radius: 4pt,
+      spacing: 1.75em,
+
+      // ---- Frames ----
+      node((0, 1), [Raw video], fill: color-i),
+
+      node((0, 0), [Partitioning], fill: color-b),
+      node((1, 0), [Prediction \ (substract)], fill: color-b),
+      node((2, 0), [Transform], fill: color-b),
+      node((3, 0), [Quantize], fill: color-b),
+      node((4, 0), [Encode], fill: color-b),
+
+      node((4, 1), [Compressed \ video], fill: color-i),
+
+      node((4, 2), [Decode], fill: color-b),
+      node((3, 2), [Inverse \ Quantize], fill: color-b),
+      node((2, 2), [Inverse \ Transform], fill: color-b),
+      node((1, 2), [Prediction \ (add)], fill: color-b),
+      node((0, 2), [Reconstruct], fill: color-b),
+
+      // ---- Edges ----
+      edge((0, 1), (0, 0), "->"),
+      edge((0, 0), (1, 0), "->"),
+      edge((1, 0), (2, 0), "->"),
+      edge((2, 0), (3, 0), "->"),
+      edge((3, 0), (4, 0), "->"),
+      edge((4, 0), (4, 1), "->"),
+      edge((4, 1), (4, 2), "->"),
+      edge((4, 2), (3, 2), "->"),
+      edge((3, 2), (2, 2), "->"),
+      edge((2, 2), (1, 2), "->"),
+      edge((1, 2), (0, 2), "->"),
+      edge((0, 2), (0, 1), "->"),
+    )],
+) <simple_process>
+
+=== H265
+
+The H265 codec, also known as High Efficiency Video Coding (HEVC), has emerged in 2013 and is still in development.
+It is based on h264 and improves upon it in terms of compression quality.
+The H265 codec therefore follows the compression scheme described in @simple_process, with a few modifications that make it more efficient in terms of compression, as explained below.
+
+==== Compression
+
+===== Color Space Transform
+
+This step remains unchanged.
+
+===== Partitioning
+
+This is the main step that makes H265 more efficient than H264.
 
 
 #pagebreak()
