@@ -358,14 +358,25 @@ The H265 codec therefore follows the compression scheme described in @simple_pro
 
 ==== Compression
 
-===== Color Space Transform
+The H265 compression follows the same steps than the H264 compression.
+However, both H265 encoding and decoding is made to work in parallel, allowing less power consumption.
+But this requires better material, making it not fully compatible with all devices.
 
-This step remains unchanged.
 
 ===== Partitioning
 
 This is the main step that makes H265 more efficient than H264.
+Instead of working with a decomposition into macroblocks, the frame is decomposed in Coding Tree Unit (CTU).
+These CTU have a variable size between $8 times 8$ and $64 times 64$ depending on need.
+This allows a better compression on flat zones of the frame, like a blue sky, and compression on bigger images.
 
+===== Prediction
+
+The intra-prediction support 35 different modes again 9 for H264, which allows a more precise prediction against a higher computation complexity.
+As the prediction is more precise, it means that the residual contain less informations and can be more compressed.
+
+The inter-prediction is an enhancement of the inter-prediction of the H264: the motion vector prediction is more precise and moves of block is better managed.
+So the prediction error contains less informations, which allows a better compression.
 
 #pagebreak()
 
