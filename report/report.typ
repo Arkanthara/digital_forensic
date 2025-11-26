@@ -183,6 +183,8 @@ First of all, we need to introduce a few technical terms, summarized in the @ter
   By using the previous and following images, the prediction is definitely better, allowing less data to be used than for P-frames.
   This kind of frame is especially used for compression.
 
+These frames create a Group Of Picture as shown on @video_structure.
+
 #figure(
   caption: "Kind of frames used in a video",
   table(
@@ -207,6 +209,7 @@ In this case, the prediction of the block is more accurate thanks to the I-frame
 Computing the motion vector is costly, however it allows to achieve great compression on moving objects for P-frames and B-frames.
 
 The structure of the video follows a pattern as shown in the @video_structure.
+This pattern is called Group Of Picture (GOP) and can be used later for modification detection.
 
 #figure(
   caption: "Frame organization in video",
@@ -290,6 +293,7 @@ In this way, some data are lost, that's why this is a lossy step.
 ==== Encoding
 
 Finally, the quantified residues and parameters useful for prediction, such as the motion vector or prediction method, are encoded in such a way as to use as few bits as possible and to be able to reconstruct the encoded video.
+In general, CABAC method is used.
 
 #note[
   A very good explanation of how H264 works is available on the website #link("https://www.abhik.xyz/articles/h264-fundamentals")[abhik.xyz], which provides interactive explanations.]
@@ -381,11 +385,84 @@ It contains all information necessary to perform the prediction, such as predict
 Intra-prediction support handles 35 different modes, compared to 9 for H264, enabling more accurate prediction despite higher computational complexity.
 This way, the prediction is more accurate, creating a smaller prediction error that can be more compressed.
 
-Inter-prediction is an enhancement of the inter-prediction of H264.
-A motion vector prediction refinement is calculated, enabling better motion tracking.
-On top of that, the search of the move of a block can be performed on blocks with different sizes, against H264 where the search was only between blocks of size $16 times 16$.
+Inter-frame prediction in H265 is better than in H264 thanks to the flexibility of frame partitioning.
+In H264, only $16 times 16$ blocks are used for inter-prediction, whereas in H265, block sizes can range from $8 times 8$ to $64 times 64$, allowing for better motion tracking.
+In addition, H265 can use up to 16 I-frames to calculate the motion vector prediction.
+Finally, certain improvements to the tracking method are proposed, such as an improved tracking accuracy, new modes such as a merge mode and a skip mode, etc.
+The merge mode allows to reuse the motion vector of an adjacent block, and the skip mode enables to skip the prediction for a block that does not move.
 
-So the prediction error contains less informations, which allows a better compression.
+This is why prediction is more accurate with lower prediction errors that requires less data to be stored.
+However, prediction requires more calculations compared to H264.
+
+===== Transform
+
+The transformation stage uses the prediction unit to perform a prediction.
+The difference between the prediction and the original block is then calculated, creating residuals that correspond to the prediction error, as in H264.
+Similar to H264, this prediction error is then transformed in the DCT domain and stored as a transformation unit (TU).
+
+The result is finally encoded.
+
+We can represent the final structure of H265 like in figure blabla.
+
+#diagram(
+  spacing: (14pt, 22pt),
+  node-corner-radius: 4pt,
+  node-stroke: gray + 0.6pt,
+
+  // --- Level 0: CTU ---
+  node((1,0), [*CTU*], name: <ctu>),
+
+  // --- Level 1: CUs ---
+  node((0,1), [CU A], name: <a>),
+  node((1,1), [CU B], name: <b>),
+  node((2,1), [CU C], name: <c>),
+
+  edge(<ctu>, <a>, "->"),
+  edge(<ctu>, <b>, "->"),
+  edge(<ctu>, <c>, "->"),
+
+  // --- Level 2: leaf CUs ---
+  node((0,2), [CU A1], name: <a1>),
+  node((-0.7,2), [CU A2], name: <a2>),
+  node((1,2), [CU B1], name: <b1>),
+  node((2,2), [CU C1], name: <c1>),
+  node((2.7,2), [CU C2], name: <c2>),
+
+  edge(<a>, <a1>, "->"),
+  edge(<a>, <a2>, "->"),
+  edge(<b>, <b1>, "->"),
+  edge(<c>, <c1>, "->"),
+  edge(<c>, <c2>, "->"),
+
+  // --- Level 3: PU + TU ---
+  node((0,3), [PU], name: <a1pu>),
+  node((0,3.5), [TU], name: <a1tu>),
+
+  node((-0.7,3), [PU], name: <a2pu>),
+  node((-0.7,3.5), [TU], name: <a2tu>),
+
+  node((1,3), [PU], name: <b1pu>),
+  node((1,3.5), [TU], name: <b1tu>),
+
+  node((2,3), [PU], name: <c1pu>),
+  node((2,3.5), [TU], name: <c1tu>),
+
+  node((2.7,3), [PU], name: <c2pu>),
+  node((2.7,3.5), [TU], name: <c2tu>),
+
+  edge(<a1>, <a1pu>, "->"),
+  edge(<a2>, <a2pu>, "->"),
+  edge(<b1>, <b1pu>, "->"),
+  edge(<c1>, <c1pu>, "->"),
+  edge(<c2>, <c2pu>, "->"),
+
+  edge(<a1pu>, <a1tu>, "->"),
+  edge(<a2pu>, <a2tu>, "->"),
+  edge(<b1pu>, <b1tu>, "->"),
+  edge(<c1pu>, <c1tu>, "->"),
+  edge(<c2pu>, <c2tu>, "->"),
+)
+
 
 #pagebreak()
 
