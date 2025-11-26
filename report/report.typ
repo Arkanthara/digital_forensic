@@ -132,10 +132,10 @@ On top of that, as we can observe on @ycbcr, all structural information is conta
 
 In this way, since the human visual system is less sensitive to color than to brightness, chrominance could be compressed more than luminance at a later stage.
 
-==== Split into macroblocks <split>
+==== Split into macro-blocks <split>
 
-Then, the frame is divided into macroblock generally of size $16 times 16$.
-These macroblocks perfectly represent specific regions of the image and are very useful for working on small areas of the image.
+Then, the frame is divided into macro-block generally of size $16 times 16$.
+These macro-blocks perfectly represent specific regions of the image and are very useful for working on small areas of the image.
 This allows for easier detection of elements such as moving and not moving objects, more accurate motion prediction, and an efficient means of compressing data.
 Indeed, some parts of the image may be flat while others may contain a large amount of detail.
 And on subsequent frames, some informations can be exactly the same, as represented by the black on @diff_frame.
@@ -143,14 +143,14 @@ In this way, some parts of the image can be compressed more than others.
 
 ==== Partitioning
 
-Each macroblock is then divided into smaller blocks depending on precision needed.
+Each macro-block is then divided into smaller blocks depending on precision needed.
 This allows a better adaptation on local complexity of the frame.
 
-The macroblock can be divided into subblocks of size $16 times 16$, $8 times 8$, $8 times 4$, $4 times 8$ or $4 times 4$.
+The macro-block can be divided into sub-blocks of size $16 times 16$, $8 times 8$, $8 times 4$, $4 times 8$ or $4 times 4$.
 
 ==== Prediction
 
-This step is divided into two substeps.
+This step is divided into two sub-steps.
 
 ===== Intra-prediction <intra>
 
@@ -366,16 +366,25 @@ But this requires better material, making it not fully compatible with all devic
 ===== Partitioning
 
 This is the main step that makes H265 more efficient than H264.
-Instead of working with a decomposition into macroblocks, the frame is decomposed in Coding Tree Unit (CTU).
-These CTU have a variable size between $8 times 8$ and $64 times 64$ depending on need.
-This allows a better compression on flat zones of the frame, like a blue sky, and compression on bigger images.
+Instead of working with a decomposition into macro-blocks, the frame is decomposed in Coding Tree Unit (CTU).
+The Coding Tree Unit divides each frame in Coding Tree (CT) of size $64 times 64$.
+Next, each coding tree is divided into sub-blocks called coding units (CUs), ranging in size from $64 times 64$ to $8 times 8$, depending on requirements.
+The figure blabla show an example of decomposition of a Coding Tree into Coding Units.
+So thanks to the large size that Coding Units can take, the compression of flat areas, like for instance a blue sky, is better than for H264.
 
 ===== Prediction
 
-The intra-prediction support 35 different modes again 9 for H264, which allows a more precise prediction against a higher computation complexity.
-As the prediction is more precise, it means that the residual contain less informations and can be more compressed.
+The prediction is made on Coding Units.
+During the prediction step, the Prediction Unit (PU) is created.
+It contains all information necessary to perform the prediction, such as prediction mode used or sub-decomposition of the Coding Unit.
 
-The inter-prediction is an enhancement of the inter-prediction of the H264: the motion vector prediction is more precise and moves of block is better managed.
+Intra-prediction support handles 35 different modes, compared to 9 for H264, enabling more accurate prediction despite higher computational complexity.
+This way, the prediction is more accurate, creating a smaller prediction error that can be more compressed.
+
+Inter-prediction is an enhancement of the inter-prediction of H264.
+A motion vector prediction refinement is calculated, enabling better motion tracking.
+On top of that, the search of the move of a block can be performed on blocks with different sizes, against H264 where the search was only between blocks of size $16 times 16$.
+
 So the prediction error contains less informations, which allows a better compression.
 
 #pagebreak()
