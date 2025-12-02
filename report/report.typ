@@ -99,7 +99,7 @@ Indeed, the amount of change created by this moving car is very small.
 
 So if only the changes are recorded, most of the frame can be compressed.
 
-== H.264
+== H.264 <h264>
 
 The H.264 codec, also known as MPEG-4 AVC (Advanced Video Coding) or MPEG-4 Part 10, was developed in 2003.
 It undergoes numerous transformations and is still undergoing improvements today
@@ -356,7 +356,7 @@ Finally, deblocking filters are applied to avoid blocking artifacts on the video
     )],
 ) <simple_process>
 
-== H265
+== H265 <h265>
 
 The H265 codec, also known as High Efficiency Video Coding (HEVC), has emerged in 2013 and is still in development.
 It is based on h264 and improves upon it in terms of compression quality.
@@ -419,7 +419,7 @@ Finally, quantization is applied as in H264, then H265 uses an improved version 
 
 We can represent the final structure of H265 like in figure blabla.
 
-== H266
+== H266 <h266>
 
 The H266 codec, also known as Versatile Video Coding (VVC) or MPEGi, is the successor to H265.
 This codec was introduced in 2020 and is still under development.
@@ -477,7 +477,32 @@ The sequence $0$ is therefore preserved and increased, which improves the entrop
 
 #pagebreak()
 
-= Implementation <impl>
+= Forensic <impl>
+
+Now that we know how video compression works for different coded, we are interested on how digital forensic can detect some modifications of a video.
+
+There is different kind of video forgery detections, as shown on @video_forgery_classification.
+
+#figure(
+  caption: [Video forgery classification @selvarajInterframeForgeryDetection2020],
+  image("img/video_forgery_classification.png"),
+) <video_forgery_classification>
+
+== H264
+
+=== Stream Structure
+
+As shown on @video_structure, the H264 like the other codecs follow a specific GOP structure.
+The modification of this structure can lead in some irregularity that can be detected by the GOP structure analysis, as shown on @gop_modification.
+
+#figure(
+  caption: [Modification of GOP structure @fernandezDigitalVideoManipulation2024],
+  image("img/gop_modification.png"),
+) <gop_modification>
+
+=== Double Compression
+
+=== Intra-frame manipulation
 
 #pagebreak()
 
