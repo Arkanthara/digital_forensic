@@ -211,9 +211,88 @@ Extension of stochastic modulation... Make convolution of message and cover imag
 - Security increases dramatically since the histogram does not change significantly (convolution)
 - F5 uses ±1-steg in the frequency domain
 
+==== Distortion (impact) minimization
+- Most modern approach
+- Define a cost function
+  - How much does it cost to modify a certain pixel? Say ρ(i)n
+  - Overall cost  = $sum_(i = 1)^n rho(i)[x(i) − y(i)]^2$
+- Identify an embedding rule which minimizes the embedding cost
+  - F5 is optimum from this point of view (DCT domain)
 
+==== Typical payloads
+- Payload
+  - from 0.1 to 0.5 bpp in the pixel domain: 1000x1000 image => ~ 40Kbyte
+  - up to 0.8 bpnzc in the DCT domain: The actual payload depends on the image content. A realistic value is around 20Kbyte for a 1000x1000 image
 
+=== Steganalysis
+The application scenario is of the outmost importance together with the information available to the warden
+- Blind vs targeted steganalysis
+- Knowledge of cover image statistics
+- Knowledge of payload
 
+==== hypothesis test
+- Rigorous formulation
+- Observables: y = {y1, y2 ... yN}
+  - Image pixels, audio signal samples, etc.
+  - Often to simplify the  problem the analysis relies on some functions of y (features)
+- Two alternative hypothesis
+  - H0 : y does not contain a hidden message
+  - H1 : y contains a hidden message
+- Optimum decision with respect to a certain criterion
+- Bayes criterion
+  - Minimization of overall error probability
+  - Difficult to apply since a prior probabilities are not known
+- Neyman-Pearson criterion
+  - False alarm probability
+    - Decide in favour of H1 when H0 holds
+  - Missed detection probability
+    - Decide in favour of H0 when H1 holds
+  - N-P: minimize Pm for a given (maximum) Pf
+- In steganalysis we must first fix Pf and then decide how to use the result of the test
 
+Example: Let us assume that the test relies on a single statistics with known pmf 
+(Gaussian) under both H0 and H1.
 
+For any value of Pf (threshold) we find a Pm.
+The plot showing Pd = 1- Pm as a function of Pf is called ROC curve
+
+The goodness of a steganalyzer is evaluated by means of the ROC curve or its AUC (areas under curve the big is the area, the more accurate the system is for steganalysis... For steganography, we expect something linear...).
+Perfect security requires that performance are equal obtained by means of a random guess (diagonal ROC, AUC = ½).
+
+Example:
+- Let us assume that the pdf of the image source is known. In this case the steganalyzer can use a Chi Suare test
+- Divide the pdf in several intervals (bins)
+- Compute how many times the observed samples fall in the bins: let us indicate this value as ni
+- Given the pdf let indicate with pi the probability that a sample falls into the i-th bin
+in − npi( )2
+npi
+n
+ 2 = i=1
+- High values are taken as an evidence in favour of H1
+
+=== Choice of statistics (feature)
+- In targeted seteganalysis we use few ad-hoc statistics
+- Example: LSB replacement steganalysis
+  Given an image and its histogram, we can use a Chi-square test in which the assumed pmf is
+  $h_(H_(p 1)) (2k) = h_(H_(p 1)) (2k +1) = (h(2k) + h(2k +1)) / 2$ with $h$ value of a bin inside histogram... So we compare consecutive bins of histogram !!
+  Such a test reveals the presence of LSB steganography (at 1 bpp)with great accuracy. Steganalysis is obviously more difficult at low payloads
+
+- With blind steganalysis everything is more difficult
+- If source statistics are known we can still use targeted features
+- Otherwise
+  - Compute many features (> 100) that do not depend on image content
+  - Train a classifier with properly chosen examples
+    - Neural networks, Support Vector Machines (SVM)
+- ROC curves are evaluated empirically on a test set
+- CNN applied directly in the pixel domain are rapidly replacing SVMs (obtain benefits in computationnal power, but lost accuracy by no pre-processing of images to have better results of analysis...)
+
+== Summary
+- Several steganographic techniques exist with a large number of available software packages
+  - Security looks trivial but is not
+  - Need to know at least basic principles
+  - Take care of system attacks
+- Steganalysis
+- Reliable in some selected cases, but difficult in general
+- Strongly dependent on application scenario
+- Work in progress
 
