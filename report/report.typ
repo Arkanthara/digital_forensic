@@ -475,11 +475,93 @@ For instance, if we have the sequence $[0.2, 0.3, 0.6]$, normal rounding will re
 However, dependent quantization will return $[0, 0, 0]$, because for $0.6$, it will detect that the previous value was $0$, so instead of putting $1$, it will put $0$, which does not break the existing sequence of $0$.
 The sequence $0$ is therefore preserved and increased, which improves the entropic coding of the sequence.
 
+== AOMedia Video 1 (AV1)
+
+The AOMedia Video 1 (AV1) codec is a royalty-free and open-source codec that has been developed by "Alliance for Open Media", an alliance between Amazon, Google, Netflix, VideoLAN and other actors.
+The first version was released in 2018 and this codec is still in improvement.
+This codec was created to success the VP9 Google codec for streaming video on internet and social network and is now used and supported by some range of devices.
+
+The base principle stay the same.
+However, the method differs from others.
+First of all, the AV1 remove the video noise, avoiding complex encoding.
+Then, during decoding, some noise is artificialy created and added to the image, allowing better stream speed with approximatively same result...
+
+=== Partitioning
+
+The frame is decomposed in SuperBlocks (SB).
+At the begining, the encoder choose between SuperBlocks of size $128 times 128$ or $64 times 64$.
+Then, each block can be divided in 10 different way:
+- none: the block is not partitioned
+- split: partitioning into 4 square sub-blocks
+- horizontal: horizontal division of the block
+- horizontal 4: the block is divided into 4 equal horizontal strips
+- vertical: vertical partitioning of the block
+- vertical 4: the block is divided into 4 equal vertical strips
+- horizontal A: the block is first divided horizontally, then the upper part is partitioned vertically
+- horizontal B: identical to horizontal A, but with the lower part partitioned vertically
+- vertical A: the block is first divided vertically, then the left part is partitioned horizontally
+- vertical B: identical to vertical A, but with the right sub-block partitioned horizontally
+The minimal block size is of $4 times 4$.
+Thanks to this 10 different way of partitioning the blocks, the AV1 codec is able to effectively detect the shape of complex objects.
+In addition, thanks to the size of SuperBlocks, high-resolution videos with flat areas such as blue skies are processed efficiently.
+
+Compared to H266 partitioning, the AV1 codec performs less complex partitioning, but thanks to predefined partitioning shapes, partitioning can be performed more efficiently than with H266, and it is easily parallelizable with hardware acceleration already implemented in many devices, such as NVIDIA graphics cards since the 3000 series.
+
+=== Prediction
+
+The AV1 codec uses up to 56 prediction modes.
+However, some new tools are used to achieve an accurate prediction, such as for intra-predictions:
+- Paeth Predictor: this is an algorithm taken from PNG format that search best prediction according to up, down and diagonal pixels.
+- Smooth Predictor: tool optimized for progressive gradients
+- Chroma from Luma (CFL): a tool that predicts chrominance from the luminance channel.
+  Since the luminance channel offers better quality, this allows for accurate and high-quality painting of the chrominance channel.
+  This tool is one of the best data savers in AV1.
+And for inter-prediction:
+- Overlapped Block Motion Compensation (OBMC): this tool consists to take motion vectors of neighboring blocks and mixing them into block's border, allowing smooth block transition.
+- Wraped Motion: tool that looks after small affine transformations such as zoom, rotation, etc...
+- Compound Prediction: tool that combine multiple reference frame with complex masking.
+  The idea is that certain objects can be better predicted from previous images, for example, and that other objects in the same video can be better predicted from subsequent images.
+  In this way, a mask is created to retain the best prediction for the object and the other object based on the previous and subsequent images.
+
+As with H266, the prediction obtained using the new tools and methods is more accurate, but at the cost of longer computation times.
+
+=== Transform
+
+AV1 can achieve transformation on blocks of size up to $64 times 64$.
+As a 2D transformation can be applied first in 1 dimension and then on the other dimension, the AV1 use a combinaison of different kind of transformations.
+- Classical DCT transformation
+- Asymmetric Discrete Sine Transform (ADST) used for directional gradients
+- FlipADST that is only ADST applied in inverse order (right to left or down to up).
+  In this way, directional gradients are well managed.
+- Identity (IDTX): no transformation.
+  This is very usefull for brutal transitions like black text on white, avoiding some artifacts introduced by a transformation.
+Thanks to this 16 combinations of transformations, information is more preserved in quantization step.
+
+=== Quantization
+
+The quantization used in AV1 is a granular quantization named Delta-Q, allowing dynamic quantization.
+On top of that, the quantization is less visible for human visual system.
+
+=== Entropy encoding
+
+Use multi-symbols arithmetic coding that uses symbols instead of bits.
+This allows a better parallelilzation on modern Computing Units.
+
+=== Decoding
+
+The decoding use:
+
+- Deblocking filter
+- Constrained Directional Enhancement Filter (CDEF) that detect edges of blocks and remove noise across edges without destroying it...
+- Loop Restoration that restore global quality of a block using denoising filters such as Wiener filter...
+
 #pagebreak()
 
 = Forensic <impl>
 
-Now that we know how video compression works for different coded, we are interested on how digital forensic can detect some modifications of a video.
+Now that we know how video compression works for different encodings, we will look at how digital forensics can detect certain modifications to a video.
+
+To do this, we will review the artifacts generated at each stage of video compression and see how they can be exploited to detect certain problems in a video.
 
 There is different kind of video forgery detections, as shown on @video_forgery_classification.
 
