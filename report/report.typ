@@ -395,18 +395,59 @@ The figure blabla show an example of decomposition of a Coding Tree into Coding 
     ```pintora
     mindmap
     @param layoutDirection TB
-    + :Coding Tree Unit
-    Size 64x64;
-    ++ :Coding Unit
-    Size 32x32;
-    ++ :Coding Unit
-    Size 32x32;
-    +++ Activity Diagram
-    ++ Structural Diagrams
-    +++ Class Diagram
-    +++ Component Diagram
+    + :CTU
+    64x64;
+    ++ :CU
+    32x32;
+    +++ :CU
+    16x16;
+    +++ :CU
+    16x16;
+    +++ :CU
+    16x16;
+    ++++ :CU
+    8x8;
+    ++++ :CU
+    8x8;
+    +++++ :CU
+    4x4;
+    +++++ :CU
+    4x4;
+    +++++ :CU
+    4x4;
+    +++++ :CU
+    4x4;
+    ++++ :CU
+    8x8;
+    ++++ :CU
+    8x8;
+    +++ :CU
+    16x16;
+    ++ :CU
+    32x32;
+    ++ :CU
+    32x32;
+    ++ :CU
+    32x32;
+    +++ :CU
+    16x16;
+    +++ :CU
+    16x16;
+    +++ :CU
+    16x16;
+    ++++ :CU
+    8x8;
+    ++++ :CU
+    8x8;
+    ++++ :CU
+    8x8;
+    ++++ :CU
+    8x8;
+    +++ :CU
+    16x16;
+
     ```
-  ]
+  ],
 )
 
 Thanks to Wavefront Parallel Processing (WWP) technology, each Coding Tree Unit can be processed in parallel, reducing computation time on multi-core processors.
