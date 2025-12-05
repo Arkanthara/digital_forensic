@@ -28,13 +28,13 @@ In general, video are sequence of images called frames.
 Based on this kind of video, we will start by studying how video compression works.
 To do this, we will use the h264 codec, as it is the most widely used codec on the web.
 
-== Redundancies
+= Redundancies
 
-=== Psychovisual redundancies <psychovisual>
+== Psychovisual redundancies <psychovisual>
 
 The imperfections of the human visual system can be exploited to reduce the amount of data used by a video without a loss of visual quality.
 
-==== Spatial irrelevance
+=== Spatial irrelevance
 
 The human visual system has some difficulties to perceive small details due to its limitations.
 The optics of the eyes and the neural processing tend to smooth out fine patterns.
@@ -43,7 +43,7 @@ However, we cannot see the individual dots at a normal distance: we only perceiv
 
 This is why this feature can be used to remove small details that are invisible or barely visible for human visual system.
 
-==== Spectral irrelevance
+=== Spectral irrelevance
 
 The human visual system consists of approximately 100 million rods responsible for perceiving brightness and approximately 6.5 million cones responsible for perceiving colors.
 Due to the high amount of rods, the human visual system is more sensitive to brightness compared to color.
@@ -56,18 +56,18 @@ In this way, human visual system is less sensitive to blue color than to other c
 
 Therefore, retaining all the spectral details of the video may prove unnecessary for good quality reproduction of the video.
 
-==== Temporal irrelevance
+=== Temporal irrelevance
 
 The human visual system is not sensitive to rapid changes.
 Thus, in the case of a video, only about 30 frames per second are necessary for humans to perceive smooth motion.
 Since human visual system is unable to detect rapid changes between successive frames, this can be exploited to reduce the amount of data used by a video without loss of visual quality.
 
-=== Statistical redundancies
+== Statistical redundancies
 
 The statistical redundancies of each frame of a video can be used to optimize the amount of data used.
 Among these redundancies, we have spatial, spectral, and temporal redundancies, as in the human visual system.
 
-==== Spatial irrelevance
+=== Spatial irrelevance
 
 These redundancies are introduced by a strong correlation between neighboring pixels.
 By the way, in an image, each pixel is correlated with its neighbors in such a way that the final result is something visible and understandable to humans.
@@ -75,13 +75,13 @@ An image created with no correlation between pixels is something like a noisy im
 So the spatial redundancies can be exploited to predict for instance values of pixels according to neighboring pixels.
 In this manner, some data can be deleted, which reduces amount of data used.
 
-==== Spectral irrelevance
+=== Spectral irrelevance
 
 These redundancies are created by strong correlation between neighboring pixels in color domain.
 This is because color changes are often gradual, and colored regions regularly extend beyond a single pixel.
 Thus, a pixel is strongly correlated with its neighbors in the color domain, which can be exploited to reduce amount of data used.
 
-==== Temporal irrelevance
+=== Temporal irrelevance
 
 These redundancies are the most important for video compression.
 In fact, changes to the elements present in the video occur gradually, especially in consecutive frames.
@@ -99,20 +99,22 @@ Indeed, the amount of change created by this moving car is very small.
 
 So if only the changes are recorded, most of the frame can be compressed.
 
-== H.264 <h264>
+#pagebreak()
+
+= H.264 <h264>
 
 The H.264 codec, also known as MPEG-4 AVC (Advanced Video Coding) or MPEG-4 Part 10, was developed in 2003.
 It undergoes numerous transformations and is still undergoing improvements today
 #report-footnote(link("https://en.wikipedia.org/wiki/Advanced_Video_Coding")[Wikipedia]).
 
-=== Compression
+== Compression
 
 Video compression follows steps similar to those used in image compression, which consist of data transformation, quantization for lossy compression, and data encoding for efficient storage on disk.
 However, some additional steps are provided to exploit temporal redundancies.
 
 More concretely, we have the steps bellow.
 
-==== Color Space Transform
+=== Color Space Transform
 
 The frame is first transformed from RGB color space to YCbCr color space.
 Instead of representing the frame in RGB color space, the YCbCr color space is used to divide the frame into luminance (Y) and chrominance (both Cb and Cr).
@@ -132,27 +134,27 @@ On top of that, as we can observe on @ycbcr, all structural information is conta
 
 In this way, since the human visual system is less sensitive to color than to brightness, chrominance could be compressed more than luminance at a later stage.
 
-==== Split into macro-blocks <split>
+=== Split into MacroBlocks <split>
 
-Then, the frame is divided into macro-block generally of size $16 times 16$.
-These macro-blocks perfectly represent specific regions of the image and are very useful for working on small areas of the image.
+Then, the frame is divided into MacroBlock generally of size $16 times 16$.
+These MacroBlocks perfectly represent specific regions of the image and are very useful for working on small areas of the image.
 This allows for easier detection of elements such as moving and not moving objects, more accurate motion prediction, and an efficient means of compressing data.
 Indeed, some parts of the image may be flat while others may contain a large amount of detail.
 And on subsequent frames, some informations can be exactly the same, as represented by the black on @diff_frame.
 In this way, some parts of the image can be compressed more than others.
 
-==== Partitioning
+=== Partitioning
 
-Each macro-block is then divided into smaller blocks depending on precision needed.
+Each MacroBlock is then divided into smaller blocks depending on precision needed.
 This allows a better adaptation on local complexity of the frame.
 
-The macro-block can be divided into sub-blocks of size $16 times 16$, $8 times 8$, $8 times 4$, $4 times 8$ or $4 times 4$.
+The MacroBlock can be divided into sub-blocks of size $16 times 16$, $8 times 8$, $8 times 4$, $4 times 8$ or $4 times 4$.
 
-==== Prediction
+=== Prediction
 
 This step is divided into two sub-steps.
 
-===== Intra-prediction <intra>
+==== Intra-prediction <intra>
 
 In this case, only the current frame is taken into account.
 The goal is to predict the value of a pixel based on its neighborhood.
@@ -165,7 +167,7 @@ There exists 9 prediction modes for $4 times 4$ blocks and 4 modes for $16 times
 
 The intra-prediction is very useful for scenes without moves.
 
-===== Inter-prediction
+==== Inter-prediction
 
 In this case, the subsequent frames are used to make the prediction (past and future frames, depending on kind of prediction).
 The goal is to predict block position according to subsequent frames.
@@ -253,7 +255,7 @@ This pattern is called Group Of Picture (GOP) and can be used later for modifica
     )],
 ) <video_structure>
 
-==== Residue <residue>
+=== Residue <residue>
 
 Once the prediction is made for a block, the difference between the predicted block and the original block of the frame is computed.
 Depending on results, prediction can be reapplied to have smaller residuals allowing better compression, as mentioned in @intra.
@@ -271,7 +273,7 @@ $ B_("original") = R + B_("predicted") $ <residual_reconstruct>
 
 This is why only residual of prediction and information necessary for prediction are retained, allowing for considerable data compression.
 
-==== Transform
+=== Transform
 
 An integer approximation of the Discrete Cosine Transform (DCT) is applied to the prediction residual in order to convert it into frequency coefficients.
 
@@ -280,7 +282,7 @@ In fact, the entire approximation of the DCT is reversible and only processes in
 
 In this way, the residual is divided into high and low frequencies, which proves useful in the next step: the quantization.
 
-==== Quantization
+=== Quantization
 
 The quantization is a lossy step that determine the quality of the compressed video.
 It is based on imperfection of human visual system, which is less sensitive to small details, as explained in @psychovisual.
@@ -290,7 +292,7 @@ Then, the residual is divided by the quantization matrix and the result is round
 Some high frequencies then become 0, which reduces the amount of data to be stored.
 In this way, some data are lost, that's why this is a lossy step.
 
-==== Entropy encoding
+=== Entropy encoding
 
 Finally, the quantified residues and parameters useful for prediction, such as the motion vector or prediction method, are encoded in such a way as to use as few bits as possible and to be able to reconstruct the encoded video.
 Depending on requirements, two methods can be used:
@@ -300,7 +302,7 @@ Depending on requirements, two methods can be used:
 #note[
   A very good explanation of how H264 works is available on the website #link("https://www.abhik.xyz/articles/h264-fundamentals")[abhik.xyz], which provides interactive explanations.]
 
-=== Decompression
+== Decompression
 
 The process of decompression follows the same steps as video compression, but in reverse order, as shown on @simple_process.
 
@@ -356,7 +358,9 @@ Finally, deblocking filters are applied to avoid blocking artifacts on the video
     )],
 ) <simple_process>
 
-== H265 <h265>
+#pagebreak()
+
+= H265 <h265>
 
 The H265 codec, also known as High Efficiency Video Coding (HEVC), has emerged in 2013 and is still in development.
 It is based on h264 and improves upon it in terms of compression quality.
@@ -366,18 +370,18 @@ The main difference between the H264 and H265 formats is that H264 is designed f
 The H265 format breaks the image down into tiles that can be processed independently of each other.
 
 
-=== Compression
+== Compression
 
 The H265 compression follows the same steps than the H264 compression.
 However, both H265 encoding and decoding is made to work in parallel, allowing less power consumption.
 But this requires better material, making it not fully compatible with all devices.
 
 
-==== Partitioning
+=== Partitioning
 
 This is the main step that makes H265 more efficient than H264.
 The partitioning structure follows a Quad Tree (QT) structure:
-instead of working with a decomposition into macro-blocks, the frame is decomposed in Coding Tree Units (CTU) of size $64 times 64$.
+instead of working with a decomposition into MacroBlocks, the frame is decomposed in Coding Tree Units (CTU) of size $64 times 64$.
 This makes compression of flat areas such as blue skies more efficient, because instead of dividing the flat area into $16$ blocks of size $16 times 16$, a single block of size $64 times 64$ can be used.
 Thanks to the larger block size, compression can be performed on higher-quality videos, up to 8K.
 
@@ -387,7 +391,7 @@ The figure blabla show an example of decomposition of a Coding Tree into Coding 
 
 Thanks to Wavefront Parallel Processing (WWP) technology, each Coding Tree Unit can be processed in parallel, reducing computation time on multi-core processors.
 
-==== Prediction
+=== Prediction
 
 The prediction is made on Coding Units.
 During the prediction step, the Prediction Unit (PU) is created.
@@ -408,7 +412,7 @@ Finally, some novelties are used to increase accuracy of inter-prediction:
 This is why prediction is more accurate, which results in lower prediction errors that requires less data to be stored.
 However, prediction requires more computations compared to H264.
 
-==== Transform
+=== Transform
 
 The transformation stage uses the prediction unit to perform a prediction.
 The difference between the prediction and the original block is then calculated, creating residuals that correspond to the prediction error, as in H264.
@@ -419,15 +423,17 @@ Finally, quantization is applied as in H264, then H265 uses an improved version 
 
 We can represent the final structure of H265 like in figure blabla.
 
-== H266 <h266>
+#pagebreak()
+
+= H266 <h266>
 
 The H266 codec, also known as Versatile Video Coding (VVC) or MPEGi, is the successor to H265.
 This codec was introduced in 2020 and is still under development.
 It enables compression of 360-degree and high dynamic range (HDR) videos, supports video compression up to 16K quality, and brings improvements to video compression, making it up to twice as efficient as H265.
 
-=== Compression
+== Compression
 
-==== Partitioning
+=== Partitioning
 
 The main change bring by H266 is its partitioning structure more flexible than the Quad Tree structure of H265: the Multi-Type Tree (MTT) which is a mix-up between Quad Tree, Binary Tree and Ternary Tree.
 The partition unit is still called a Coding Tree Unit, but can reach a size of $128 times 128$, which is more efficient for high-resolution videos such as 8K or 16K videos.
@@ -439,7 +445,7 @@ Each time the frame is divided into a coding sub-tree, the division can be perfo
 
 The new partitioning system therefore allows for more accurate tracking of object shapes.
 
-==== Prediction
+=== Prediction
 
 Instead of having 35 different prediction modes, H266 introduces 67, allowing for greater accuracy during prediction.
 
@@ -461,12 +467,12 @@ And for inter-prediction:
 - Geometric partitioning, which allows the block to be divided into two sub-blocks (for example, by making a diagonal cut) and different movements to be applied to each sub-block.
   This makes movement tracking more accurate.
 
-==== Transform
+=== Transform
 
 For transformation, since H266 doesn't partition images into blocks, the transformation can also be applied to non-square blocks.
 The encoder can choose between different transformations, such as Discrete Cosine Transform VIII and Discrete Sinus Transform VII, in order to apply the best transformation for a data compression.
 
-==== Quantization
+=== Quantization
 
 Unlike the H265 or H264 codec, the H266 codec uses adaptive quantization, called Dependent Quantization.
 During the rounding phase of quantization, the coefficient value will be rounded based on the previous coefficient, which will increase the efficiency of entropy coding.
@@ -475,7 +481,9 @@ For instance, if we have the sequence $[0.2, 0.3, 0.6]$, normal rounding will re
 However, dependent quantization will return $[0, 0, 0]$, because for $0.6$, it will detect that the previous value was $0$, so instead of putting $1$, it will put $0$, which does not break the existing sequence of $0$.
 The sequence $0$ is therefore preserved and increased, which improves the entropic coding of the sequence.
 
-== AOMedia Video 1 (AV1)
+#pagebreak()
+
+= AOMedia Video 1 (AV1)
 
 The AOMedia Video 1 (AV1) codec is a royalty-free and open-source codec that has been developed by "Alliance for Open Media", an alliance between Amazon, Google, Netflix, VideoLAN and other actors.
 The first version was released in 2018 and this codec is still in improvement.
@@ -483,8 +491,10 @@ This codec was created to success the VP9 Google codec for streaming video on in
 
 The base principle stay the same.
 However, the method differs from others.
-First of all, the AV1 remove the video noise, avoiding complex encoding.
-Then, during decoding, some noise is artificialy created and added to the image, allowing better stream speed with approximatively same result...
+First of all, the AV1 remove the video noise, avoiding complex encoding of noise.
+Then, during decoding, some artificial noise is added to the video to achieve a realist result, allowing better stream speed with approximatively same result than with noise encoding...
+
+== Compression
 
 === Partitioning
 
@@ -523,52 +533,103 @@ And for inter-prediction:
   The idea is that certain objects can be better predicted from previous images, for example, and that other objects in the same video can be better predicted from subsequent images.
   In this way, a mask is created to retain the best prediction for the object and the other object based on the previous and subsequent images.
 
-As with H266, the prediction obtained using the new tools and methods is more accurate, but at the cost of longer computation times.
+As with H266, the prediction obtained using the new tools and methods is more accurate, but at the cost of heavier computations.
 
 === Transform
 
-AV1 can achieve transformation on blocks of size up to $64 times 64$.
-As a 2D transformation can be applied first in 1 dimension and then on the other dimension, the AV1 use a combinaison of different kind of transformations.
-- Classical DCT transformation
-- Asymmetric Discrete Sine Transform (ADST) used for directional gradients
-- FlipADST that is only ADST applied in inverse order (right to left or down to up).
-  In this way, directional gradients are well managed.
+Contrary to H265 which is limited to $32 times 32$ transformations, AV1 can achieve transformation on blocks up to $64 times 64$ in size.
+Since a 2D transformation can be applied first in one dimension and then in the other, AV1 uses a combination of different types of transformations, applied separately to each dimension.
+The types of transformations used are the following:
+- Discrete Cosine Transform (DCT): it is the classical transformation also used in H264, H265 and H266.
+- Asymmetric Discrete Sine Transform (ADST): this transformation is particularly efficient for directional gradients.
+- FlipADST: it's only the ADST applied in inverse order (right to left or down to up).
+  So with ADST and FlipADST, all directional gradients are well managed.
 - Identity (IDTX): no transformation.
-  This is very usefull for brutal transitions like black text on white, avoiding some artifacts introduced by a transformation.
-Thanks to this 16 combinations of transformations, information is more preserved in quantization step.
+  This is very usefull for brutal transitions like black text on white, avoiding some artifacts introduced by a transformation such as blurring edge or something else.
+
+Thanks to this 16 combinations of transformations, information is better preserved in quantization step.
 
 === Quantization
 
-The quantization used in AV1 is a granular quantization named Delta-Q, allowing dynamic quantization.
-On top of that, the quantization is less visible for human visual system.
+The quantization used in AV1 is a granular and dynamic quantization based on segmentation and $Delta Q$.
+
+In fact, AV1 quantization segments frames into a segment map based on the visual interest of each segment.
+Then, a $Delta Q$ is added to each segment depending on the visual interest of the given segment in order to make the final quantization more or less accurate.
+In this way, granular quantification will perform a perceptual quantization that will preserve the most important video's information for human visual system.
+For instance, a uniform blue sky will have stronger quantization than the actor's face thereby assigining fewer bits to the low-detail area than to the high-detail area.
 
 === Entropy encoding
 
-Use multi-symbols arithmetic coding that uses symbols instead of bits.
-This allows a better parallelilzation on modern Computing Units.
-
-=== Decoding
-
-The decoding use:
-
-- Deblocking filter
-- Constrained Directional Enhancement Filter (CDEF) that detect edges of blocks and remove noise across edges without destroying it...
-- Loop Restoration that restore global quality of a block using denoising filters such as Wiener filter...
+Entropy encoding uses Asymmetric Numeral Systems (ANS) to perform encoding, which is as efficient as the CABAC encoding used in other codecs.
+However, this method is faster than the classic CABAC method thanks to easier parallelization on modern architectures and direct encoding of symbols instead of converting them to bits before encoding.
 
 #pagebreak()
 
-= Forensic <impl>
+= Forensic <forensic>
 
-Now that we know how video compression works for different encodings, we will look at how digital forensics can detect certain modifications to a video.
+Now that we know how video compression works for different codecs, we will examine the artifacts generated by these different codecs to give an idea of how digital forensics can exploit compressed video to recover its history.
 
-To do this, we will review the artifacts generated at each stage of video compression and see how they can be exploited to detect certain problems in a video.
-
-There is different kind of video forgery detections, as shown on @video_forgery_classification.
+When a video is modified, it must be decoded, modified and finaly reencoded as shown on @modification.
 
 #figure(
-  caption: [Video forgery classification @selvarajInterframeForgeryDetection2020],
-  image("img/video_forgery_classification.png"),
-) <video_forgery_classification>
+  caption: "Modification of a video",
+  gap: 1.5em,
+  [
+    #let color-i = rgb(255, 120, 120, 40%)      // rouge pastel
+    #let color-b = rgb(180, 140, 255, 20%)      // violet pastel
+    #let color-p = rgb(255, 160, 210, 20%)      // rose pastel
+
+    #diagram(
+      node-stroke: gray,
+      node-inset: 10pt,
+      node-corner-radius: 10pt,
+      spacing: 1em,
+      node((0, 0), [Original video], fill: gradient.radial(white, blue, radius: 200%)),
+      node((1, 0), inset: 5pt, shape: shapes.chevron, [Uncompress], fill: gradient.radial(white, red, radius: 100%)),
+      node((2, 0), [Modifications], fill: gradient.radial(white, purple, radius: 200%)),
+      node((3, 0), inset: 5pt, shape: shapes.chevron, [Compress], fill: gradient.radial(white, red, radius: 100%)),
+      node((4, 0), [Modified video], fill: gradient.radial(white, orange, radius: 200%)),
+    )],
+)<modification>
+
+== Partitioning
+
+The partitioning of the frames into both MacroBlock, SuperBlocks and Coding Tree Units produces some artifacts.
+
+=== H264
+
+In the H264 format, macroblock partitioning introduces a rigid grid that can be exploited to detect, for instance, double compression with video cropping or double compression with an object added to the video.
+
+
+This causes artifacts from the old grid due to incorrect alignment of the previous grid with the grid created by recompression, such as discontinuities introduced by DCT at the old blocks border.
+Furthermore, if recompression is performed with another codec, the artifacts generated by the H264 grid will still appear, making it possible to detect transcoding @zhangDetectionTranscodingH2642019.
+
+=== H265
+
+The H265 Coding Tree structure is more complex than the H264 fixed grid, but still have some artifacts.
+In fact, different encoders, such as NVENC, x265, or those used by software, do not all partition frame in the same way, which sometimes makes it possible to detect which encoder or software was used.
+It is also possible to detect certain deepfake videos, as the generated videos can introduce noise into a flat area, making the partitioning of images nonsensical (for example, the sky broken down into 4 x 4 CU).
+
+=== H266
+
+The H266 coding tree introduces unique artifacts due to its complex and non-square decomposition.
+In fact, if the video appears to come from a given camera but the MTT partitioning is perfectly executed, this means that the partitioning was not performed by the given camera, as this requires a lot of computation which cannot be performed by the camera.
+
+=== AV1
+
+Since the AV1 format removes noise before encoding, all blocks are very clean, which is suspicious.
+In addition, each platform such as YouTube, Netflix, etc. uses a different partitioning complexity, favoring speed (in the case of YouTube) or quality.
+In this way, a study of the complexity of partitioning can provide information about the platform from which the video originates.
+Furthermore, the specific shapes introduced by partitioning may indicate that it was not performed with H264 or H265, which only work with square blocks.
+
+== Prediction
+
+This is the stage of video compression that produces the most interesting artifacts and provides the most useful information for digital forensics.
+
+In fact, each compressed video follows a structure called a “Group Of Pictures” (GOP) created by the prediction stage, as shown in @video_structure.
+Then, if some modification is performed on the video, the GOP structure of the video will be changed.
+
+#pagebreak()
 
 == H264
 
@@ -582,18 +643,5 @@ The modification of this structure can lead in some irregularity that can be det
   image("img/gop_modification.png"),
 ) <gop_modification>
 
-=== Double Compression
-
-=== Intra-frame manipulation
-
-#pagebreak()
-
-= Results
-
-#pagebreak()
-
-= Discussion
-
-#pagebreak()
 
 = Conclusion
