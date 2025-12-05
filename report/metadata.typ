@@ -37,6 +37,6 @@
   // Document options
   toc: true,
   numbering: true,
-  bibliography: "./bibliography.bib",
+  bibliography: "./Digital_Forensic.bib",
   appendix: false,
 )
