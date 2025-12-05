@@ -167,7 +167,7 @@ There exists 9 prediction modes for $4 times 4$ blocks and 4 modes for $16 times
 
 The intra-prediction is very useful for scenes without moves.
 
-==== Inter-prediction
+==== Inter-prediction <inter>
 
 In this case, the subsequent frames are used to make the prediction (past and future frames, depending on kind of prediction).
 The goal is to predict block position according to subsequent frames.
@@ -715,14 +715,34 @@ That's why it is important to detect this kind of manipulation.
 When this type of modification is made to a video, the continuity of the GOP structure is generally broken, which can be detected by the Earth's Mover distance @aliInterframeForgeryVideo2025.
 This can also be detected in the event of recompression, as there will be a conversion of the frame type similar to that shown in the @video_modification.
 
+== Quantization and Entropy encoding
+
+The quantization step produce some artifacts such as blocking, ringing or flickering artifacts @anilH264VIDEOCODING.
+- Blocking artifacts: These artifacts are caused by DCT transformation and block quantization, which create discontinuities at the block boundaries.
+- Ringing artifacts: The quantization create some distortions around sharp borders by removing high frequencies.
+- Flicker: this is a temporal artifact that manifests itself as rapid discontinuities in luminance, particularly in flat, stationary areas.
+  This phenomenon is due to a difference in the loss of DCT coefficients caused by quantization rounding in consecutive images, but also to a temporal discontinuity between I-frames and the preceding P and B-frames @kuszpetPOSTPROCESSINGFLICKERREDUCTION.
+  In fact, I-frames are encoded without information about the other frames, as explained in @inter.
+  I-frames are therefore subject to quantization artifacts and rounding errors.
+  Furthermore, if we consider a device such as a camera, B-frames are not created as explained above due to the computation time and live encoding of the acquired video.
+  The video is therefore composed solely of I-frames and P-frames.
+  And since P-frames are based on the previous I-frame, this means that when a new I-frame appears, there is a discontinuity between the last P-frame and the new I-frame due to quantization artifacts and rounding errors, which are not related.
+
+However, these artifacts are becoming less and less common thanks to improved methods.
+For example, in AV1, if there is a sharp edge, no quantization is performed in order to avoid resonance artifacts.
+In addition, the use of B-frames reduces flickering by taking the previous and following frames, allowing for a smoother transition between the P-frame and the following I-frame.
+But they are not completely eliminated, and the use of machine learning can help detect them.
+
+To review
+
+Entropy coding is based on probabilistic models.
+However, each software program has its own implementation of entropy coding, which makes the probabilistic models slightly different.
+Thus, by analyzing the binary structure, it is possible to identify the source of the video, as Sony's hardware encoders, for example, are slightly different from those of NVENC.
+In addition, all information is encoded in the binary, such as motion vectors.
+It is therefore possible to extract them from the binary stream and determine inconsistencies in the directions taken by the motion vector.
+
+MISLnet ???
+
 #pagebreak()
-
-== H264
-
-=== Stream Structure
-
-As shown on @video_structure, the H264 like the other codecs follow a specific GOP structure.
-The modification of this structure can lead in some irregularity that can be detected by the GOP structure analysis, as shown on
-
 
 = Conclusion
