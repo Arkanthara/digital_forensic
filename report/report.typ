@@ -480,7 +480,7 @@ And for inter-prediction:
 
 === Transform
 
-For transformation, since H266 doesn't partition images into blocks, the transformation can also be applied to non-square blocks.
+For transformation, since H266 doesn't partition images into squared blocks, the transformation can also be applied to non-square blocks.
 The encoder can choose between different transformations, such as Discrete Cosine Transform VIII and Discrete Sinus Transform VII, in order to apply the best transformation for a data compression.
 
 === Quantization
