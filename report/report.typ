@@ -13,26 +13,31 @@
 = Introduction
 
 Nowadays, a large number of videos circulate on the internet.
-Given that each video is composed of around twenty images per second, storing and transmitting videos requires a large amount of data.
-This is why methods have been implemented to reduce the amount of data used by a video while preserving its visual quality.
-However, some videos circulating on the internet convey a distorted image of reality through clever modifications to the original content, which can even lead to people being exonerated in court.
-This is why it is important to know the history of a video, which can be achieved through digital forensics.
-Since video compression leaves traces, these can be analyzed to reveal any modifications to the video.
-The objective of this work will therefore be to understand how video compression works and to see how the traces left by compression can be used to detect modifications to the video.
+Given that each video is composed of around 25 images per second called frames, storing and transmitting videos requires a large amount of data.
+This is why methods have been implemented to reduce the amount of data used by a video while preserving as much as possible its visual quality.
+
+However, some videos circulating on the internet convey a distorted image of reality through clever editing or AI-generated content.
+The consequences of these fake videos are numerous and vary in severity.
+For example, the reputation of a person, a company, or a political party can be unfairly destroyed.
+Furthermore, fake videos, such as modified surveillance footage, can mislead the justice system in criminal cases, for example.
+
+That's why it is important to know the history of a video, which can be achieved through digital forensics.
+And studying how video compression works will reveal certain artifacts that can be exploited to detect any modifications made to the video.
+
+The objective of this work will first be to understand how video compression works for the H264, H265, H266, and AV1 codecs, which are the most widely used codecs.
+Next, studying the artifacts produced by video compression will provide a better understanding of the basics of video forensics.
 
 #pagebreak()
-
-= Methodology <methodology>
-
-In general, video are sequence of images called frames.
-Based on this kind of video, we will start by studying how video compression works.
-To do this, we will use the h264 codec, as it is the most widely used codec on the web.
 
 = Redundancies
 
 == Psychovisual redundancies <psychovisual>
 
-The imperfections of the human visual system can be exploited to reduce the amount of data used by a video without a loss of visual quality.
+The imperfections of the human visual system are widely exploited by video compression in order to greatly reduce the amount of data used by a video while minimizing the loss of visual quality.
+
+That's why it's important to understand how the human visual system works in order to gain a real understanding of video compression.
+
+Video compression uses certain redundancies, both psychovisual and statistical, to determine which data should be retained and which can be discarded.
 
 === Spatial irrelevance
 
@@ -536,7 +541,7 @@ Compared to H266 partitioning, the AV1 codec performs less complex partitioning,
 
 === Prediction
 
-The AV1 codec uses up to 56 prediction modes.
+The AV1 codec uses up to 56 prediction modes, and up to 7 reference frame for inter-prediction.
 However, some new tools are used to achieve an accurate prediction, such as for intra-predictions:
 - Paeth Predictor: this is an algorithm taken from PNG format that search best prediction according to up, down and diagonal pixels.
 - Smooth Predictor: tool optimized for progressive gradients
@@ -704,6 +709,34 @@ This makes analyzing inter-frame modification or motion vectors more efficient a
 #pagebreak()
 
 = Conclusion
+
+So the codec H264, H265, H266 and AV1 follow a same global structure to perform video compression.
+However, they differ in approaches, complexity, as shown on @summary.
+
+#figure(
+  caption: [Summary of differences between H264, H265, H266 and AV1],
+  [#show table.cell.where(x: 0): set text(style: "italic")
+    #table(
+      columns: 5,
+      align: center + horizon,
+      table.header([], [*H264*], [*H265*], [*H266*], [*AV1*]),
+
+      [Release date], [2003], [2013], [2020], [2018],
+      [Proprietary], [Yes], [Yes], [Yes], [No],
+      [Maximum quality], [4K], [8K], [16K], [16K],
+      [Parallelizable], [No], [Yes], [Yes], [Yes],
+      [Partitioning], [MacroBlocks (MB)], [Coding Tree (CT)], [Multi-Type Tree (MTT)], [SuperBlocks (SB)],
+      // [Partitioning modes], $1$, $1$, $4$, $10$,
+      // [Minimum block size], $4 times 4$, $8 times 8$, $4 times 4$, $4 times 4$,
+      [Maximum block size], $16 times 16$, $64 times 64$, $128 times 128$, $128 times 128$,
+      [Prediction modes], $9$, $35$, $67$, $56$,
+      [Transform techniques], [DCT], [DCT/DST], [DCT/DST], [DCT/ADST/FlipADST/IDTX],
+      [Quantization], [static], [static], [dynamic], [dynamic],
+      [Entropy encoding], [CAVLC/CABAC], [CABAC], [CABAC], [ANS],
+      [Complexity], [very low], [low], [very high], [high],
+      [Compression efficacity], [low], [normal], [very high], [high],
+    )],
+) <summary>
 
 === Note on the use of AI
 
