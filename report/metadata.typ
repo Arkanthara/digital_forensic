@@ -21,16 +21,16 @@
   // subtitle: "Report Subtitle",
   course-name: "Digital Forensics",
   course-id: "14x065",
-  // illustrations: (
-  //   (
-  //     path: "./img/full_msg.png",
-  //     width: 10cm,
-  //   ),
-  //   (
-  //     path: "./img/full_hist_R.png",
-  //     width: 10cm,
-  //   ),
-  // ),
+  illustrations: (
+    (
+      path: "./img/frame.jpg",
+      width: 8cm,
+    ),
+    (
+      path: "./img/diff_frame.jpg",
+      width: 8cm,
+    ),
+  ),
   project-name: "Digital Forensics",
   date: none,
 
