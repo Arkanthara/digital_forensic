@@ -1,0 +1,57 @@
+@startuml
+skinparam usecaseBorderColor #f84c66ff
+skinparam usecaseFontColor #24273a
+skinparam usecaseBackgroundColor #ed8796
+skinparam usecaseFontStyle bold
+skinparam usecaseFontSize 20
+skinparam componentStyle rectangle
+skinparam componentBorderColor #8aadf4
+skinparam componentFontColor #7dc4e4
+skinparam componentFontStyle bold
+skinparam componentBackgroundColor #363a4f 
+skinparam backgroundColor transparent
+skinparam roundCorner 20
+skinparam rectangleBorderColor #c6a0f6
+skinparam rectangleFontColor #c6a0f6
+skinparam rectangleFontStyle bold
+skinparam rectangleFontSize 25
+left to right direction
+skinparam componentFontSize 20
+
+skinparam arrowColor #f5bde6
+skinparam arrowThickness 2
+skinparam edgeFontColor #f5a97f
+skinparam edgeLineWidth 2
+
+rectangle Compress {
+[Partitioning] as a2
+[Prediction (substract)] as a3
+[Transform] as a4
+[Quantize] as a5
+[Encode] as a6
+}
+
+rectangle Uncompress {
+[Decode] as a8
+[Inverse Quantize] as a9
+[Inverse Transform] as a10
+[Prediction (add)] as a11
+[Reconstruct] as a12
+}
+(Raw video) as a1
+(Compressed video) as a7
+
+a1 --> a2
+a2 --> a3
+a3 --> a4
+a4 --> a5
+a5 --> a6
+a6 --> a7
+a8 <-- a7
+a9 <-- a8
+a10 <-- a9
+a11 <-- a10
+a12 <-- a11
+a1 <-- a12
+
+@enduml

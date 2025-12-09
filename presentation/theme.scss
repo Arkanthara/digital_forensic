@@ -1,0 +1,155 @@
+/**
+ * Catppuccin Macchiato theme for reveal.js.
+ * Based on https://github.com/catppuccin/catppuccin
+ *
+ * Adapted for Quarto by [Your Name]
+ * Copyright (C) 2024
+ */
+
+/*-- scss:defaults --*/
+
+// Include theme-specific fonts
+$systemFontsSansSerif: -apple-system, BlinkMacSystemFont, avenir next, avenir,
+  segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial,
+  sans-serif;
+$systemFontsMono: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console,
+  monospace;
+
+// Catppuccin Macchiato Color Palette
+$rosewater: #f4dbd6;
+$flamingo: #f0c6c6;
+$pink: #f5bde6;
+$mauve: #c6a0f6;
+$red: #ed8796;
+$maroon: #ee99a0;
+$peach: #f5a97f;
+$yellow: #eed49f;
+$green: #a6da95;
+$teal: #8bd5ca;
+$sky: #91d7e3;
+$sapphire: #7dc4e4;
+$blue: #8aadf4;
+$lavender: #b7bdf8;
+$text: #cad3f5;
+$subtext1: #b8c0e0;
+$subtext0: #a5adcb;
+$overlay2: #939ab7;
+$overlay1: #8087a2;
+$overlay0: #6e738d;
+$surface2: #5b6078;
+$surface1: #494d64;
+$surface0: #363a4f;
+$base: #24273a;
+$mantle: #1e2030;
+$crust: #181926;
+
+// Override theme settings
+$body-color: $text !default;
+$presentation-heading-color: $mauve !default;
+$presentation-heading-text-shadow: none !default;
+$presentation-heading-text-transform: none !default;
+$body-bg: $base !default;
+$link-color: $blue !default;
+$link-color-hover: $sky !default;
+$selection-bg: $surface0 !default;
+$code-color: $peach !default;
+$presentation-list-bullet-color: $blue !default;
+
+$font-family-sans-serif: $systemFontsSansSerif !default;
+$font-family-monospace: "Fira Code", $systemFontsMono !default;
+
+// Change text colors against light slide backgrounds
+$light-bg-text-color: $base !default;
+
+/*-- scss:rules --*/
+
+// Define additional color effects based on Catppuccin spec
+// https://github.com/catppuccin/catppuccin
+:root {
+  --r-bold-color: #{$peach};
+  --r-italic-color: #{$yellow};
+  --r-inline-code-color: #{$code-color};
+  --r-list-bullet-color: #{$presentation-list-bullet-color};
+  --r-blockquote-color: #{$mauve};
+  --r-caption-color: #{$overlay1};
+}
+
+.reveal {
+  strong,
+  b {
+    &:not(.callout-title strong, .callout-title b) {
+      color: var(--r-bold-color);
+    }
+  }
+  em,
+  i,
+  blockquote {
+    color: var(--r-italic-color);
+  }
+  code {
+    color: var(--r-inline-code-color);
+  }
+  // Catppuccin colored list bullets and numbers
+  ul,
+  ol {
+    li::marker {
+      color: var(--r-list-bullet-color);
+    }
+  }
+  // Blockquote styling
+  blockquote {
+    border-left: 4px solid var(--r-blockquote-color);
+    padding-left: 1em;
+    background: $surface0;
+    border-radius: 0 8px 8px 0;
+    padding: 1em;
+  }
+  // Caption styling
+  figcaption {
+    color: var(--r-caption-color);
+    font-size: 0.8em;
+    margin-top: 0.5em;
+  }
+  // Table styling
+  table {
+    border-collapse: collapse;
+    margin: 1em 0;
+  }
+  th {
+    background-color: $surface0;
+    color: $lavender;
+    font-weight: 600;
+  }
+  td, th {
+    border: 1px solid $surface1;
+    padding: 0.5em 1em;
+  }
+  // Code block styling
+  pre {
+    background: $mantle;
+    border-radius: 8px;
+    padding: 1em;
+    code {
+      background: transparent;
+    }
+  }
+}
+.reveal .footer {
+  color: $maroon;
+}
+.reveal .slide-logo {
+  height: 50px !important;
+  width: 50px !important;
+  max-width: unset !important;
+  max-height: unset !important;
+}
+
+/**
+ * Catppuccin Macchiato colors by Catppuccin Org
+ * https://github.com/catppuccin/catppuccin
+ */
+/*
+ html * {
+  color-profile: sRGB;
+  rendering-intent: auto;
+}*/
