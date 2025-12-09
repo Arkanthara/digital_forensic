@@ -14,6 +14,7 @@ format:
     theme: theme.scss
     footer: 'Michel Jean Joseph Donnet'
     toc: true
+    auto-stretch: false
 resources:
   - demo.pdf
 ---
@@ -71,9 +72,8 @@ Difference between consecutives frames 60fps
 
 # Video Compression
 
-## General Video Compression scheme
+## General Video Compression scheme {.small-bg background-image="img/diagram.svg" background-size="95%"}
 
-![](./img/diagram.svg){width=140%}
 
 ## YCbCr
 
@@ -245,8 +245,10 @@ Video -> Uncompress -> Modifications -> Compress -> Modified Video
 - Direct bitstream analysis
 
 ::: {.notes}
+
 - DCT applied on each block -> artifact on block borders
 - (Video )
+
 :::
 
 ## Conclusion

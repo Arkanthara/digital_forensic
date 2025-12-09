@@ -133,17 +133,42 @@ $light-bg-text-color: $base !default;
       background: transparent;
     }
   }
+  h2 {
+  display: flex-start;
+}
+
+.small-bg {
+  background-size: auto 100% !important; /* keeps height 100%, width auto */
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
 }
 .reveal .footer {
   color: $maroon;
 }
 .reveal .slide-logo {
-  height: 50px !important;
-  width: 50px !important;
+  height: 100px !important;
+  width: 100px !important;
   max-width: unset !important;
   max-height: unset !important;
 }
-
+.center-xy {
+          margin: 0;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          -ms-transform: translateY(-50%), translateX(-50%);
+          transform: translateY(-50%), translateX(-50%);
+        }
+.reveal .slide-content {
+  margin: 0;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          -ms-transform: translateY(-50%), translateX(-50%);
+          transform: translateY(-50%), translateX(-50%);
+}
 /**
  * Catppuccin Macchiato colors by Catppuccin Org
  * https://github.com/catppuccin/catppuccin
