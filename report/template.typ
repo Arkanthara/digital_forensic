@@ -212,9 +212,10 @@
           [
             #if template.project-name != none {
               [#smallcaps(template.project-name)]
-            } #if template.project-name != none and template.title != none { [/] } #if template.title != none {
-              [#smallcaps(template.title)]
             }
+            // #if template.project-name != none and template.title != none { [/] } #if template.title != none {
+            //   [#smallcaps(template.title)]
+            // }
           ],
           [
             #v(1.2cm)

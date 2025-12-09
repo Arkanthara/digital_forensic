@@ -7,7 +7,7 @@
   logo: "./img/unige.pdf",
   logosize: 6cm,
   university: "University of Geneva",
-  title: "Video Compression and Modification Detection",
+  title: [Video Compression:\ Codecs and Artifacts],
 
   // Structured authors
   authors: (
@@ -31,7 +31,7 @@
       width: 8cm,
     ),
   ),
-  project-name: "Digital Forensics",
+  project-name: "Digital Forensics/Video Compression: Codecs and Artifacts",
   date: none,
 
   // Document options
