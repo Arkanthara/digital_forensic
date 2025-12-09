@@ -75,3 +75,82 @@ Difference between consecutives frames 60fps
 
 ![](./img/diagram.svg){width=140%}
 
+## YCbCr
+
+::: {layout-ncol="3"}
+
+![Y](img/y.jpg)
+
+![Cb](img/cb.jpg)
+
+![Cr](img/cr.jpg)
+
+:::
+
+## Partitioning
+
+![](img/h265_ctu.png)
+
+::: {.notes}
+H264: MacroBlocks 16x16
+
+H265: CTU: 64x64 (quad tree)
+
+H266: Multi-Type-Tree 128x128 (quad, tertiary, binary, no split)
+
+AV1: SuperBlocks 128x128
+:::
+
+## Partitioning: example AV1
+
+![10-way AV1 block decomposition](img/av1_decomposition.png)
+
+## Prediction
+
+#### Inter-prediction
+
+- Predict block according to previous and past frames
+- Different kind of predicted frames
+  - I-frames: only intra-predicted
+  - P-frames: take care aboud **previous** frames only
+  - B-frames: take care about **previous** and **next** frames
+
+
+#### Intra-prediction
+
+- Predict block on single frame without informations from other frames
+- Accept different modes
+
+::: {.notes}
+Intra prediction
+
+- h264: 9 modes
+- h265: 35 modes
+- h266: 67 modes
+- av1: 56 modes
+
+Inter prediction
+
+- take more images as references (av1: 7)
+- Motion vector computation
+- geometric partitioning
+- (merge mode)
+- compound prediction: complex frame masking
+
+:::
+
+## Transform
+
+- Discrete Cosine Transform (DCT)
+- Discrete Sine Transform (DST)
+- Asymmetric Discrete Sine Transform (ADST) / FlipADST
+- Identity (IDTX)
+
+::: {.notes}
+
+Transform can be made in each direction
+
+- Combine transformations !
+
+:::
+
