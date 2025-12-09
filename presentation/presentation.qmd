@@ -105,16 +105,7 @@ AV1: SuperBlocks 128x128
 
 ![10-way AV1 block decomposition](img/av1_decomposition.png)
 
-## Prediction
-
-#### Inter-prediction
-
-- Predict block according to previous and past frames
-- Different kind of predicted frames
-  - I-frames: only intra-predicted
-  - P-frames: take care aboud **previous** frames only
-  - B-frames: take care about **previous** and **next** frames
-
+## Prediction (1/2)
 
 #### Intra-prediction
 
@@ -128,7 +119,25 @@ Intra prediction
 - h265: 35 modes
 - h266: 67 modes
 - av1: 56 modes
+:::
 
+## Prediction (2/2)
+
+#### Inter-prediction
+
+- Predict block according to previous and past frames
+- Different kind of predicted frames
+  - I-frames: only intra-predicted
+  - P-frames: take care aboud **previous** frames only
+  - B-frames: take care about **previous** and **next** frames
+
+::: {layout=[1] style="text-align: center"}
+
+![Group Of Pictures (GOP)](img/gop.svg)
+
+:::
+
+::: {.notes}
 Inter prediction
 
 - take more images as references (av1: 7)
@@ -150,7 +159,106 @@ Inter prediction
 
 Transform can be made in each direction
 
-- Combine transformations !
+- Combine transformations ! (AV1)
+- ADST: directional gradients
+- IDTX for brutal transitions (Ex: text on white) / Avoid artifacts (blurring edge, ...)
+- DST: more efficient for some luma components due to block structure...
 
 :::
 
+## Quantize
+
+- Static quantization (H264, H265)
+  - Good explanation on the website [abhik.xyz](https://www.abhik.xyz/articles/h264-transform-quantization)
+- Dynamic quantization (H266, AV1)
+
+::: {.notes}
+
+- Dynamic quantization
+Ex: [0.2, 0.3, 0.6] -> [0, 0, 0] instead of [0, 0, 1]
+
+  - face high quality kept
+  - sharp edge: no quantization avoiding resonnance artifacts
+  - background low quality
+
+:::
+
+## Entropy encoding
+
+- Context-Adaptative Variable-Length Coding (CAVLC)
+- Context-Adaptative Binary Arithmetic Coding (CABAC)
+- (Asymmetric Numeral Systems) ANS
+
+::: {.notes}
+- ANS encodes directly symbols
+- Parallelizable
+- Similar performances to CABAC
+:::
+
+## Uncompress
+
+Usage of Deblocking Filters
+
+::: {.notes}
+- ringing artifacts: distortions around sharp borders by removing high frequencies
+- blocking artifacts: caused by DCT transform and quantization -> discontinuities at block boundaries
+:::
+
+# Forensic
+
+::: {.notes}
+
+Video -> Uncompress -> Modifications -> Compress -> Modified Video
+
+:::
+
+## Partitioning
+
+- Grid misalignment (H264)
+- DeepFakes Videos introduce some noise at unexpected locations (flat blue sky)
+- Frame partitioning too complex and well managed to be performed by expected device (H266 / AV1)
+- Specific shapes (AV1)
+
+## Prediction (1/2)
+
+- Motion vector analysis (DeepFakes Videos)
+- Group Of Pictures (GOP) analysis (Frame deletion / insertion / duplication / shuffling / ...)
+
+## Prediction (2/2)
+
+::: {layout="[[1,1], [1]]" style="text-align: center"}
+
+![Example 1](img/gop_modification_1.svg)
+
+![Example 2](img/gop_modification_2.svg)
+
+![Example 3](img/gop_modification_3.svg)
+
+:::
+
+## Quantization / Entropy encoding
+
+- Block artifacts
+- Flickering
+- Ringing artifacts
+- Metadata analysis
+- Direct bitstream analysis
+
+::: {.notes}
+- DCT applied on each block -> artifact on block borders
+- (Video )
+:::
+
+## Conclusion
+
+- Knowledge of how video compression works allows better understanding on how digital forensic perform analysis
+
+- Forensic digital analysis techniques are based primarily on GOP structure analysis, but also on motion vector analysis, etc...
+
+- **BUT** the H266 and AV1 formats are still new and require the development of new digital forensic analysis methods
+
+- *What's about the AV2 format, which is announced for the end of 2025?*
+
+
+
+# Questions

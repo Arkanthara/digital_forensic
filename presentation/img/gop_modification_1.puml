@@ -1,0 +1,60 @@
+@startuml
+skinparam usecaseBorderColor #f84c66ff
+skinparam usecaseFontColor #24273a
+skinparam usecaseBackgroundColor #ed8796
+skinparam usecaseFontStyle bold
+skinparam usecaseFontSize 20
+skinparam componentStyle rectangle
+skinparam componentBorderColor #8aadf4
+skinparam componentFontColor #7dc4e4
+skinparam componentFontStyle bold
+skinparam componentBackgroundColor #363a4f 
+skinparam backgroundColor transparent
+skinparam roundCorner 30
+skinparam rectangleBorderColor #c6a0f6
+skinparam rectangleFontColor #c6a0f6
+skinparam rectangleFontStyle bold
+skinparam rectangleFontSize 25
+skinparam rectangleRoundCorner 10
+left to right direction
+skinparam componentFontSize 20
+
+skinparam arrowColor #f5bde6
+skinparam arrowThickness 2
+skinparam edgeFontColor #f5a97f
+skinparam edgeLineWidth 2
+
+rectangle P as b1 {
+}
+[B] as b2
+[B] as b3
+[B] as b4
+rectangle {
+rectangle P as b5 {
+}
+}
+
+b1 --> b2
+b2 --> b3
+b3 --> b4
+b4 --> b5
+
+
+rectangle P as a2 {
+}
+rectangle P as a3 {
+}
+rectangle P as a4 {
+}
+rectangle P as a5 {
+}
+(I) as a6
+
+a2 --> a3
+a3 --> a4
+a4 --> a5
+a5 --> a6
+
+
+
+@enduml
