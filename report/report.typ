@@ -218,46 +218,51 @@ Computing the motion vector is costly, however it allows to achieve great compre
 The structure of the video follows a pattern as shown in the @video_structure.
 This pattern is called Group Of Picture (GOP) and can be used later for modification detection.
 
+// #figure(
+//   caption: "Frame organization in video",
+//   gap: 1.5em,
+//   [
+//     #let color-i = rgb(255, 120, 120, 40%)      // rouge pastel
+//     #let color-b = rgb(180, 140, 255, 20%)      // violet pastel
+//     #let color-p = rgb(255, 160, 210, 20%)      // rose pastel
+
+//     #diagram(
+//       node-corner-radius: 4pt,
+//       spacing: 1.75em,
+
+//       // ---- Frames ----
+//       node((0, 0), [I], fill: color-i, name: <I-frame>),
+//       node((1, 0), [B], fill: color-b),
+//       node((2, 0), [B], fill: color-b),
+//       node((3, 0), [P], fill: color-p, name: <P-frame>),
+//       node((4, 0), [B], fill: color-b),
+//       node((5, 0), [B], fill: color-b, name: <B-frame>),
+//       node((6, 0), [P], fill: color-p),
+//       node((7, 0), [B], fill: color-b),
+//       node((8, 0), [...], fill: color-b),
+//       node((9, 0), [I], fill: color-i),
+//       node((10, 0), [...], fill: color-b),
+//       node(enclose: (<I-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "I-frame")),
+//       node(enclose: (<B-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "B-frame")),
+//       node(enclose: (<P-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "P-frame")),
+
+//       // ---- Edges ----
+//       edge((0, 0), (1, 0), "->"),
+//       edge((1, 0), (2, 0), "->"),
+//       edge((2, 0), (3, 0), "->"),
+//       edge((3, 0), (4, 0), "->"),
+//       edge((4, 0), (5, 0), "->"),
+//       edge((5, 0), (6, 0), "->"),
+//       edge((6, 0), (7, 0), "->"),
+//       edge((7, 0), (8, 0), "->"),
+//       edge((8, 0), (9, 0), "->"),
+//       edge((9, 0), (10, 0), "->"),
+//     )],
+// ) <video_structure>
+
 #figure(
-  caption: "Frame organization in video",
-  gap: 1.5em,
-  [
-    #let color-i = rgb(255, 120, 120, 40%)      // rouge pastel
-    #let color-b = rgb(180, 140, 255, 20%)      // violet pastel
-    #let color-p = rgb(255, 160, 210, 20%)      // rose pastel
-
-    #diagram(
-      node-corner-radius: 4pt,
-      spacing: 1.75em,
-
-      // ---- Frames ----
-      node((0, 0), [I], fill: color-i, name: <I-frame>),
-      node((1, 0), [B], fill: color-b),
-      node((2, 0), [B], fill: color-b),
-      node((3, 0), [P], fill: color-p, name: <P-frame>),
-      node((4, 0), [B], fill: color-b),
-      node((5, 0), [B], fill: color-b, name: <B-frame>),
-      node((6, 0), [P], fill: color-p),
-      node((7, 0), [B], fill: color-b),
-      node((8, 0), [...], fill: color-b),
-      node((9, 0), [I], fill: color-i),
-      node((10, 0), [...], fill: color-b),
-      node(enclose: (<I-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "I-frame")),
-      node(enclose: (<B-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "B-frame")),
-      node(enclose: (<P-frame>), shape: shapes.brace.with(dir: bottom, length: 100% - 1em, label: "P-frame")),
-
-      // ---- Edges ----
-      edge((0, 0), (1, 0), "->"),
-      edge((1, 0), (2, 0), "->"),
-      edge((2, 0), (3, 0), "->"),
-      edge((3, 0), (4, 0), "->"),
-      edge((4, 0), (5, 0), "->"),
-      edge((5, 0), (6, 0), "->"),
-      edge((6, 0), (7, 0), "->"),
-      edge((7, 0), (8, 0), "->"),
-      edge((8, 0), (9, 0), "->"),
-      edge((9, 0), (10, 0), "->"),
-    )],
+caption: "Group Of Pictures structure of a video",
+image("img/gop.svg")
 ) <video_structure>
 
 === Residue <residue>
@@ -327,8 +332,12 @@ Finally, deblocking filters are applied to avoid blocking artifacts on the video
     #let color-p = rgb(255, 160, 210, 20%)      // rose pastel
 
     #diagram(
-      node-corner-radius: 4pt,
-      spacing: 1.75em,
+      node-stroke: gray,
+      node-inset: 10pt,
+      node-corner-radius: 10pt,
+      spacing: 1em,
+      // node-corner-radius: 4pt,
+      // spacing: 1.75em,
 
       // ---- Frames ----
       node((0, 1), [Raw video], fill: color-i),

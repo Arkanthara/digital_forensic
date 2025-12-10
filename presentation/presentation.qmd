@@ -15,6 +15,9 @@ format:
     footer: 'Michel Jean Joseph Donnet'
     toc: true
     auto-stretch: false
+    navigation-mode: vertical
+    toc-depth: 1
+
 resources:
   - demo.pdf
 ---
