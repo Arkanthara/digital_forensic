@@ -6,8 +6,6 @@ filters:
 format:
   revealjs: 
     slide-number: true
-    chalkboard: 
-      buttons: false
     preview-links: auto
     logo: img/unige.svg
     logo-size: 20
@@ -17,6 +15,7 @@ format:
     auto-stretch: false
     navigation-mode: vertical
     toc-depth: 1
+    embed-resources: true
 
 resources:
   - demo.pdf
