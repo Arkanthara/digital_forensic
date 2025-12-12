@@ -570,18 +570,22 @@ DNN-based active fingerprinting may provide a solution
 
 In computer science, information hiding is the principle of segregation of the design decisions in a computer program that are most likely to change, thus protecting other parts of the program from extensive modification if the design decision is changed
 
-== Steganography: hidden communication
-Steganography is the art/science of communicating hiding the existence of the communication
+- steganography (linguistic/technical)
+- watermarking
 
-In contrast to cryptography, where the enemy is allowed to intercept and modify messages without being able to violate the security ensured by a cryptosystem, the goal of steganography is to hide messages inside other harmless messages in a way that does not allow the enemy to even detect the presence of the embedded secret message
+=== Cryptography
 
-== Cryptography
 Cryptography is the study of secure communications techniques that allow only the sender and intended recipient of a message to view its contents.
 
 The term is derived from the Greek word kryptos, which means hidden.
 It is closely associated to encryption, which is the act of scrambling ordinary text into what is known as ciphertext and then back again upon arrival
 
-== Steganography
+== Steganography: hidden communication
+
+Steganography is the art/science of communicating hiding the existence of the communication
+
+In contrast to cryptography, where the enemy is allowed to intercept and modify messages without being able to violate the security ensured by a cryptosystem, *the goal of steganography is to hide messages inside other harmless messages* in a way that does not allow the enemy to even detect the presence of the embedded secret message
+
 - Greek Words : STEGANOS – “Covered” GRAPHIE – “Writing”
 - Steganography is the art and science of writing hidden messages in such a way that no one apart from the intended recipient knows of the existence of the message.
 - This can be achieve by concealing the existence of information within seemingly harmless carriers or cover
@@ -589,7 +593,7 @@ It is closely associated to encryption, which is the act of scrambling ordinary 
 
 The primary goal of steganography is to hide a message inside another message in a way that avoids drawing suspicion to the transmission of the hidden message. If suspicion is raised, then the goal is defeated.
 
-== Historical notes
+=== Historical notes
 - Steganography is as old as the humans
 - Ancient Chinese
 - Herodotus:
@@ -600,40 +604,42 @@ The primary goal of steganography is to hide a message inside another message in
 - Invisible ink
 - Modern publishing
 
-=== Ancient Chinese
+==== Ancient Chinese
+
 - Wax  balls:  the  messages  were  written  on  silk  and  encased  in  balls  of  wax.
 
   The wax ball could then be hidden in the messenger
 
-- Paper masks: The sender and the receiver shared copies of a paper mask with
-  a number of holes cut at random locations
+- Paper masks: The sender and the receiver shared copies of a paper mask with a number of holes cut at random locations
 
-=== Herodotus
+==== Herodotus
+
 - Shaved slaves: messages were written over slaves heads
 - Wax tablet: method was to engrave a message  in a block of wood, then cover it with wax, so it  looked like a blank wax tablet.
-  When they wanted to retrieve
-the message, they would simply melt off the wax
+  When they wanted to retrieve the message, they would simply melt off the wax
 
-=== Acrostic
+==== Acrostic
 
-- Take initial letters:  mfbuyiwubfstidttmnttgilaumwuniptcosnatpttafsotncaiaswttitintplpftbtxlfan
-htitqompca
+- Take initial letters:  mfbuyiwubfstidttmnttgilaumwuniptcosnatpttafsotncaiaswttitintplpftbtxlfanhtitqompca
 - Filter with p = 3.141592653689793...-> buubdlupnpsspx
 - Take the previous letter in the alphabet: ATTACK TOMORROW
 
-=== Music-stego
+==== Music-stego
 
-=== Invisible inks
+==== Invisible inks
+
 - Lemon, urine: after burned released carbon shows up
 - Refined with chemistry: salt ammoniac dissolved in water
 - Refined with biology: some  natural unique responses
 
-=== Modern publishing
+==== Modern publishing
+
 - Intended gaps: False  intended data
 - Microdots: imperceptible dots
 - Line spacing: modern  publishing
 
-== Steganography in the digital age
+==== Steganography in the digital age
+
 - Renewed interest starting from nineties
 - Enabling technologies:
   - Wide band communication channels
@@ -652,12 +658,14 @@ htitqompca
   - Control of public opinion
 - Regardless of motivations, the study of steganalysis is necessary to determine the security of steganographic techniques
 
-=== Opposite requirements
+== Requirements to modern steganography
+
 In steganography designers must face with 2 opposite requirements:
 - Invisibility (statistical) This invisibility must be statistical...
 - Capacity (payload) This is the amount of data that we want to communicate...
 
 === Perceptual invisibility
+
 The hidden message must remain invisible even after the applications of signal processing techniques
 
 === The invisibility requirement
@@ -684,18 +692,21 @@ The hidden message must remain invisible even after the applications of signal p
 to describe DCT coefficients)
 - Example: F5, OutGuess, Jsteg (most of them are available on the internet)
 
-==== Spatial/pixel domain
+== Spatial/pixel domain
+
 The stego-message is hidden in the array of integer numbers a digital image consists of
 
-==== Transform/frequency domain
+== Transform/frequency domain
 In some cases, for instance with JPEG images, the stego message is hidden into the (block) DCT coefficents of the images
 
 === Three classes of steganographic algorithms
+
 - Steganography by cover selection
 - Steganography by cover synthesis
 - Steganography by cover modification
 
-==== Steganography by cover selection
+== Steganography by cover selection
+
 - Alice has a database of images, wherein she chooses the image corresponding to the correct message. The message can be linked to
   - Semantic image content
   - Value of a selected subset of LSB’s
@@ -706,7 +717,8 @@ In some cases, for instance with JPEG images, the stego message is hidden into t
   - Very low payload
   - Example: an 8 character message (64 bit) requires a database with at least  264 (1019) images
 
-==== Steganography by cover synthesis
+== Steganography by cover synthesis
+
 - Alice creates an image on-the-fly conveying the to-be-transmitted message
 - Creating a realistic image is not easy. Alice could proceed as follows
   - Alice gathers several shots of the same scene
@@ -716,22 +728,27 @@ In some cases, for instance with JPEG images, the stego message is hidden into t
 - Cons: still low payload (too many images needed)
 
 ==== Cover synthesis by AI
+
 - GANs and other generative models proved to be able to generate visually plausible fakes
 - Two CNNs struggling following a Game-theoretic formulation
 
-==== Steganography by cover modification
+== Steganography by cover modification
+
 - By far the most common approach
 - It allows large payloads, but security must be studied carefully
 
-==== A detailed example: LSB embedding
+==== A detailed example
+
+== LSB embedding
 
 The least sensitive bits (LSB’s) of the pixels of an image (or the DCT coefficients) are replaced with the stego-message  (payload = 1bpp)
 
-==== Visual imperceptibility
+=== Visual imperceptibility
 
 LSB replacement looks perfect (but is not): the LSB plane of an image is very similar to noise
 
-==== Attacking LSB replacement
+=== Attacking LSB replacement
+
 As a matter of fact, steganalysis of LSB replacement steganography is quite easy (at least for high payload)
 
 - If x(i) is even we have 01100000 which remains as is or is increased by 1 -> 01100001
@@ -750,7 +767,8 @@ As a matter of fact, steganalysis of LSB replacement steganography is quite easy
   - Steganalysis-aware steganography
   - Distortion minimization
 
-==== Model-based steganography
+== Empirical approaches of steganography: Model-based steganography
+
 - A model is identified to describe the image source
 - Steganography acts in such a way not to modify the model
 - Example: statistic restoration (We modify for instance the LSB to have same statistics characteristics... And we know exactly which bit pick up...)
@@ -853,7 +871,7 @@ n
 - ROC curves are evaluated empirically on a test set
 - CNN applied directly in the pixel domain are rapidly replacing SVMs (obtain benefits in computationnal power, but lost accuracy by no pre-processing of images to have better results of analysis...)
 
-== Summary
+=== Summary
 - Several steganographic techniques exist with a large number of available software packages
   - Security looks trivial but is not
   - Need to know at least basic principles
@@ -862,4 +880,45 @@ n
 - Reliable in some selected cases, but difficult in general
 - Strongly dependent on application scenario
 - Work in progress
+
+= Lecture 9: Biometric forensics
+
+== Biometric forensics: classification: Attacks on biometric systems
+
+- Direct attacks (spoofing or presentation attacks - PAs) are performed at the sensor level: the sensor is fooled but not replaced or tampered.
+- Indirect attacks are performed inside the system by:
+  - bypassing the feature extractor or the comparator (3, 5)
+  - manipulating the biometric references in the biometric reference database (6)
+  - exploiting possible weak points in communication channels (2, 4, 7, 8)
+
+== Presentation attack
+
+- silicon masks
+- photos as faceID
+- fake fingers
+- finger-vein spoofing
+- iris spoofing
+- fingerprint presentation attack (gummy finger)(with cooperation): Gelatin or wood glue are used to produce fake fingers for spoofing of fingerprint biometric systems
+- fingerprint presentation attack (gummy finger)(without cooperation): Lifted latent fingerprint is printed on a PCB (Printed Circuit Board) to serve as a mold
+- iris presentation attacks: High quality paper and inkjet printer
+- Deepfake 2D face presentation attacks: Realistic face images are generated using a pre-trained Generative Adversarial Network (GAN)
+- voice presentation attack: Playback of a voice recording, a synthesised speech or a converted voice in front of a microphone
+
+== Presentation attack defense methods
+
+- software-based: biometric data from the sensor is analyzed to discriminate original/alive vs attacked sample (e.g., motion, texture)
+- hardware-based: an additional sensor is used and its data analyzed to discriminate original/alive vs attacked sample (e.g., temperature, pulse)
+- challenge-response: the user interacts with the system (e.g., prompted text in face/speaker recognition)
+
+With only optical band:
+- optical flows: gradient of changes in one picture (only local characteristics !)...
+- texture analysis: global + local analysis -> classifier...
+
+Multi-spectral face presentation attack defense
+- color
+- depth (protect again photos)
+- infrared (protect again masks ?)
+- thermal
+
+Biometric are very unique and irreplacable => prefer password instead !!!
 
