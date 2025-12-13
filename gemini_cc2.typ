@@ -1,4 +1,10 @@
 #import "@preview/tablem:0.3.0": tablem
+// Main report file
+#import "template.typ": make-report, report-footnote
+#import "metadata.typ": my-report
+
+#show: make-report.with(my-report)
+
 
 = Image Editing
 
