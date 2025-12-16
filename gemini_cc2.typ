@@ -17,6 +17,8 @@ L'égalisation d'histogramme est une technique de traitement d'image visant à *
 - *Cas des images saturées :* L'application de l'égalisation à des images présentant des zones de *saturation* (valeurs de pixels maximales ou minimales atteintes) entraîne souvent un *déplacement* des *pics impulsifs* de l'histogramme, ce qui peut *complexifier la détection* de la manipulation.
 - *Détection Compliquée par la Saturation :* La détection de l'égalisation repose souvent sur l'observation de l'*alignement des marches* ou de la *linéarité* de la CDF. Dans les images avec des zones de saturation (pixels à 0 ou 255), l'égalisation force ces grandes masses de pixels à *s'étaler* sur la nouvelle gamme dynamique. Cela a pour conséquence de *déplacer* les *pics impulsifs* (les marches abruptes) de l'histogramme vers des positions inattendues. Ce déplacement *perturbe les modèles statistiques* utilisés pour juger de la « propreté » de la distribution des pixels, rendant plus difficile de confirmer ou d'infirmer la présence d'une égalisation.
 
+#pagebreak()
+
 == Détection d'altération (_Tampering Detection_)
 
 L'altération ou *forgerie* d'image (_tampering_) est l'application de techniques d'édition et de retouche après la prise de vue originale, dans le but de créer une _illusion_ ou une *tromperie*.
@@ -50,6 +52,8 @@ Ces techniques reposent sur l'analyse des spécificités et des *artefacts* intr
 - *Double compression JPEG :* Lorsqu'une image déjà compressée en JPEG est éditée puis *recompressée* en JPEG, la deuxième compression laisse des motifs d'artefacts très reconnaissables.
 - *Artefacts de blocage JPEG :* Si une zone est épissée, il est probable que la grille de compression JPEG du fragment inséré ne soit *pas alignée* sur celle de l'image de fond, créant des frontières d'artefacts.
 - *Détection de fantômes JPEG (_JPEG Ghost detection_) :* Basée sur l'analyse des artefacts de double compression. Elle permet de détecter l'insertion de patchs d'image de *faible qualité* dans une image de *meilleure qualité*, signalant que différentes parties de l'image ont subi des niveaux de compression différents.
+
+#pagebreak()
 
 == Détection d'altération : Techniques basées sur la caméra, la physique et la géométrie
 
@@ -101,6 +105,8 @@ Elles utilisent des principes de perspective pour vérifier si la scène et les 
   - *Redresser* (_rectifier_) des surfaces planes (murs, sols).
   - Permettre, sous certaines conditions (si l'on connaît des éléments de référence), de prendre des *mesures réelles* à partir de la surface plane de l'image, révélant ainsi les incohérences d'échelle.
 
+#pagebreak()
+
 = Digital Forensics of Printed Document
 
 == Principes généraux de l'analyse forensique des documents imprimés
@@ -122,6 +128,8 @@ L'un des défis majeurs est que les *mêmes technologies d'impression* professio
 === Protection contre la contrefaçon
 
 - Pour contrer ces menaces, de nombreuses *entreprises sont spécialisées* dans le développement de solutions *anti-contrefaçon* (encres spéciales, motifs de sécurité, etc.).
+
+#pagebreak()
 
 == Attribution d'appareil : concepts de base
 
@@ -197,6 +205,8 @@ Les imprimantes laser sont des machines de haute précision qui s'appuient sur u
 
 Ces trois artefacts constituent une *signature physique* de l'appareil, utilisable pour l'attribution.
 
+#pagebreak()
+
 == Authentification de documents imprimés : Approche active
 
 === Analyse forensique active sur les documents imprimés
@@ -219,6 +229,8 @@ L'approche *active* consiste à *insérer intentionnellement* des informations (
 - Ils sont principalement utilisés dans les imprimantes vendues aux *États-Unis* (exigence du FBI).
 - Ils peuvent être *anonymisés* ou *retirés* (par exemple, en ajoutant d'autres points jaunes pour perturber le code).
 
+#pagebreak()
+
 == Approches pour la détection de la source de texte imprimé (Attribution passive)
 
 L'attribution passive (_Passive Source Attribution_) vise à identifier la source d'un document imprimé en analysant les *empreintes digitales* (_fingerprints_) _intrinsèques_ laissées par l'appareil d'impression (généralement laser ou jet d'encre).
@@ -238,6 +250,8 @@ L'approche passive est privilégiée pour sa robustesse et sa pérennité par ra
 
 - *Résistance aux modifications :* La modification du document (par exemple, en insérant un faux code d'identification d'imprimante) ne *corrompt pas* les résultats de l'analyse passive, car celle-ci repose sur les *imperfections physiques* et non sur des données encodées.
 - *Indépendance temporelle :* Elle fonctionne même si le document a été imprimé il y a *longtemps* et que les systèmes d'identification actifs (_Machine Identification Codes_) ont évolué ou ne sont plus supportés. Les *signatures mécaniques* de l'appareil restent pertinentes.
+
+#pagebreak()
 
 == Attribution par imprimante laser (_Laser Printer Attribution_)
 
@@ -268,6 +282,8 @@ Cette méthode est un exemple d'approche passive de détection de source d'impri
 - *Limitation de la méthode :*
   - La précision est *faible* lorsque les imprimantes testées proviennent de la *même génération* (ex : les modèles LJ1000 et LJ1200 de la même marque).
   - Un *problème pratique* est que la lettre "_I_" n'apparaît pas assez fréquemment dans tous les documents pour garantir l'extraction d'un nombre suffisant d'échantillons.
+
+#pagebreak()
 
 == Attribution par imprimante laser : Approche GLCM (Mikkilineni et coll.)
 
@@ -370,6 +386,8 @@ La différence fondamentale réside dans la *granularité de l'analyse spatiale*
 - *Explosion des caractéristiques :* C'est ce qui explique la taille du vecteur.
   - *GLCM Simple :* 22 statistiques (moyennées).
   - *GLCM-MD :* 22 statistiques $times$ 8 directions = *176 caractéristiques* distinctes.
+
+#pagebreak()
 
 == Descripteur de filtre de gradient de texture convolutionnel (_Convolutional Texture Gradient Filter_ - CTGF)
 
@@ -476,6 +494,8 @@ Le fait de savoir qu'une imprimante produit *beaucoup* de texture A et *peu* de 
 
 - *Conclusion :* L'histogramme de texture est donc une *représentation numérique* de l'empreinte digitale laissée par le *firmware* et la *mécanique* de l'imprimante.
 
+#pagebreak()
+
 == Apprentissage profond pour l'attribution de source d'imprimante laser
 
 L'utilisation de l'apprentissage profond (_Deep Learning_ - DL) est une approche *passive* visant à automatiser l'extraction des signatures fines d'une imprimante laser.
@@ -538,6 +558,8 @@ Une *Machine à Vecteurs de Support* (_Support Vector Machine_ - SVM) est un alg
   - Le SVM choisit l'hyperplan qui possède la *marge la plus large* (la distance la plus grande) entre la frontière et les points de données les plus proches de chaque classe.
 - *Vecteurs de Support :* Les points de données les plus proches de l'hyperplan sont appelés les *vecteurs de support*. Ce sont ces points critiques qui déterminent la position et l'orientation de l'hyperplan.
 - *Espace de Caractéristiques :* Pour séparer les classes non linéairement (lorsque la frontière n'est pas une simple ligne droite), le SVM utilise des *fonctions de noyau* (_kernel functions_) pour projeter les données dans un *espace de plus haute dimension* où la séparation linéaire devient possible.
+
+#pagebreak()
 
 == Attribution de source des images imprimées : Approches et Objectifs
 
