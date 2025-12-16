@@ -613,6 +613,8 @@ L'approche de Tsai est une variante de l'analyse DWT qui explore un espace de ca
   - La *flexibilité* des algorithmes est essentielle pour traiter les *scénarios en ensemble ouvert* (nouvelles imprimantes inconnues).
   - La menace croissante des *attaques adversariales* (où un contrefacteur tente de reproduire ou d'effacer intentionnellement l'empreinte d'une imprimante) nécessite le développement de méthodes *robustes*.
 
+#pagebreak()
+
 = Deep learning methods in digital forensics
 
 == Tatouage des Réseaux Neuronaux Profonds (_DNN Watermarking_)
@@ -696,6 +698,8 @@ Plusieurs défis majeurs doivent être relevés pour que le DNN watermarking soi
   - La *gestion des clés* (_Keyword management_).
 - *Sécurité contre les attaques intentionnelles :* Protéger le filigrane contre les tentatives actives de suppression ou de falsification.
 
+#pagebreak()
+
 == Tatouage de GAN : solutions précoces et nouvelles
 
 Le tatouage des GAN (_Generative Adversarial Networks_) est un cas spécifique du tatouage des DNN. Il vise à insérer une signature dans le modèle générateur, rendant chaque image qu'il produit traçable. La difficulté majeure est la *robustesse* du filigrane face aux attaques courantes visant à le supprimer.
@@ -725,6 +729,8 @@ Le tatouage supervisé est une approche d'apprentissage profond pour rendre le f
   - Le *réseau générateur* (_Generator network_) apprend à créer l'image avec le filigrane intégré.
   - Un *réseau discriminateur* (_Discriminator network_) tente de distinguer l'image tatouée d'une image normale, forçant le générateur à rendre le filigrane *invisible*.
   - Un *réseau vérificateur* (_Verifier network_) est entraîné pour *extraire* le filigrane de l'image, garantissant qu'il est *lisible* en fin de chaîne.
+
+#pagebreak()
 
 == Tatouage sans réentraînement (_Retraining-free Fingerprinting_)
 
@@ -759,6 +765,8 @@ Cette approche a été testée avec succès sur divers modèles GAN de pointe, d
   - *Complémentarité :* Le tatouage DNN n'est pas une solution universelle, mais un *complément valide et nécessaire* aux méthodes passives de MMF traditionnelles.
 
 - *Nécessité de Flexibilité :* La capacité de générer des filigranes différents sans réentraîner est essentielle pour fournir la *flexibilité* et la *traçabilité* requises par les applications de sécurité et d'authentification futures.
+
+#pagebreak()
 
 = Modern Steganography
 
@@ -798,6 +806,8 @@ Ces techniques sont essentielles pour la *forensique multimédia*, car elles ali
 
 - *Attribution de source (Forensique) :* L'analyse forensique cherche à *détecter* la stéganographie (_steganalysis_) ou à *vérifier* l'absence/présence d'un tatouage (_watermark detection_).
 - *Défense contre la contrefaçon :* Les filigranes robustes sont utilisés pour marquer les documents de valeur ou les images soumises au droit d'auteur.
+
+#pagebreak()
 
 == Principes de base de la Cryptographie (_Basics of Cryptography_)
 
@@ -840,6 +850,8 @@ La cryptographie est un vaste domaine qui chevauche plusieurs disciplines :
 
 - *Cryptologie :* Le terme générique englobant la cryptographie (la conception des algorithmes) et la *cryptanalyse* (l'étude des méthodes pour casser ou attaquer ces algorithmes).
 - *Stéganographie :* Bien que la stéganographie cache l'*existence* du message, tandis que la cryptographie cache le *contenu*, les deux sont souvent utilisées ensemble (chiffrer un message avant de le cacher stéganographiquement).
+
+#pagebreak()
 
 == Principes de base de la Stéganographie (_Basics of Steganography_)
 
@@ -898,6 +910,8 @@ La *stéganalyse* est le domaine d'étude complémentaire à la stéganographie.
 - *Intérêt fondamental :* Indépendamment des motivations (sécuritaires ou éthiques), l'étude de la stéganalyse est *nécessaire* pour *déterminer la sécurité* des techniques stéganographiques.
   - *Principe :* Si une technique de stéganographie résiste aux meilleurs outils de stéganalyse, alors elle est considérée comme *sûre* et *indétectable*. La stéganalyse alimente donc la conception de méthodes stéganographiques plus robustes.
 
+#pagebreak()
+
 == Exigences de la Stéganographie Moderne
 
 La conception d'une méthode stéganographique efficace est un exercice d'équilibrisme entre deux exigences *opposées* : la dissimulation (invisibilité) et la quantité de données cachées (capacité).
@@ -942,6 +956,8 @@ Le choix du domaine où le message est caché a un impact majeur sur la capacit�
   - *Désavantages :* *Capacité plus faible* et *sécurité inférieure* (en raison de l'existence de bons modèles statistiques pour décrire les coefficients DCT).
   - *Exemples d'algorithmes :* *F5*, *OutGuess*, *Jsteg*.
 
+#pagebreak()
+
 == Stéganographie dans le Domaine Spatial (_Steganography in Spatial Domain_)
 
 La stéganographie dans le domaine spatial est la méthode de dissimulation la plus directe et la plus intuitive. Elle consiste à *modifier directement les valeurs des pixels* de l'image porteuse (_cover image_) pour y encoder le message secret.
@@ -977,6 +993,8 @@ La technique LSB est la plus courante dans le domaine spatial :
   - *Exemple :* L'insertion LSB a tendance à rendre les LSB plus aléatoires. Les *histogrammes* de l'image modifiée présentent souvent des anomalies ou des motifs statistiques non naturels que les algorithmes de stéganalyse peuvent facilement détecter.
 
 En conclusion, la stéganographie dans le domaine spatial est idéale pour la *grande capacité* et la *simplicité*, mais sa *faible sécurité* la limite aux contextes où l'image n'est soumise à *aucune altération* ou compression après l'insertion.
+
+#pagebreak()
 
 == Stéganographie dans le Domaine des Transformations (_Transform Domain Steganography_)
 
@@ -1016,6 +1034,8 @@ De nombreux algorithmes célèbres travaillent dans ce domaine :
 - *OutGuess :* Une méthode qui tente de *corriger* la distribution statistique après l'insertion du message pour contrecarrer la stéganalyse.
 - *F5 :* Un algorithme avancé qui utilise une *technique de codage matriciel* (_matrix encoding_) pour minimiser le nombre de modifications des coefficients DCT, augmentant ainsi la sécurité.
 
+#pagebreak()
+
 == Stéganographie par Sélection du Support Porteur (_Steganography by Cover Selection_)
 
 La stéganographie par sélection du support porteur (_Cover Selection_) est une approche qui inverse le processus traditionnel de dissimulation. Au lieu de modifier un support existant pour y cacher un message, Alice *choisit* un support déjà existant dans une base de données qui correspond au message qu'elle souhaite envoyer.
@@ -1046,6 +1066,8 @@ Le message secret peut être lié à une image spécifique dans la base de donn�
 === Conclusion
 
 Cette méthode est une démonstration théorique de la relation inverse entre capacité et sécurité : en obtenant une sécurité presque parfaite, on sacrifie presque toute la capacité utile. Elle est principalement utilisée dans des scénarios où la charge utile est très limitée (quelques bits) ou dans des expériences de laboratoire.
+
+#pagebreak()
 
 == Stéganographie par Synthèse du Support Porteur (_Steganography by Cover Synthesis_)
 
@@ -1079,6 +1101,8 @@ L'utilisation de l'Intelligence Artificielle générative a transformé cette ap
 
 Cette approche est la plus prometteuse pour la stéganographie moderne, car elle permet une *haute sécurité* en garantissant que les propriétés statistiques du support synthétisé sont presque idéales.
 
+#pagebreak()
+
 == Stéganographie par Modification du Support Porteur (_Steganography by Cover Modification_)
 
 La stéganographie par modification du support porteur est, *de loin, l'approche la plus courante* (_by far the most common approach_) et traditionnelle pour dissimuler de l'information. Elle consiste à insérer le message secret en *altérant légèrement* le média existant (texte, image, audio, vidéo).
@@ -1110,6 +1134,8 @@ La modification du support se divise en deux catégories selon la manière dont 
 
 - *Méthodes Aléatoires/Séquentielles :* Les bits sont insérés de manière simple (ex: séquentiellement dans l'ordre de balayage de l'image ou pseudo-aléatoirement). Ces méthodes sont largement dépassées et facilement détectables.
 - *Méthodes Adaptatives (_Adaptive Steganography_) :* L'algorithme analyse le contenu local du support porteur et insère le message uniquement dans les *zones de texture complexe* ou de *bruit important*. Ces zones sont naturellement plus aléatoires, ce qui permet de masquer plus facilement l'altération statistique de l'insertion.
+
+#pagebreak()
 
 == Stéganographie LSB (_LSB Steganography_)
 
@@ -1188,6 +1214,8 @@ L'analyse RS est la méthode classique et la plus puissante pour détecter l'ins
 === Conclusion
 
 L'anomalie statistique créée par la régularisation des valeurs de pixels (l'égalisation de $"hstego"(k)$ et $"hstego"(k+1)$) fournit une *signature quantitative* de la modification. Les techniques de stéganalyse utilisent cette signature pour prouver l'existence du message, réalisant ainsi l'objectif inverse de la stéganographie.
+
+#pagebreak()
 
 == Approches Empiriques de la Stéganographie : Amélioration de la Sécurité
 
@@ -1276,6 +1304,8 @@ La stéganalyse est formulée comme un *test d'hypothèse rigoureux* :
 - *Stéganalyse :* Elle est *fiable* dans des cas sélectionnés (stéganalyse ciblée, charge utile élevée), mais *difficile* dans le cas général (stéganalyse aveugle).
 - *Domaine Actif :* Ces domaines restent des sujets de recherche intense (_work in progress_).
 
+#pagebreak()
+
 = Biometric forensics
 
 == Criminalistique Biométrique : Classification des Attaques sur les Systèmes Biométriques (_Attacks on Biometric Systems_)
@@ -1328,6 +1358,8 @@ Les attaques indirectes soulignent l'importance de la *cryptographie* et des *m�
   - manipulating the biometric references in the biometric reference database (6)
   - exploiting possible weak points in communication channels (2, 4, 7, 8)
 
+#pagebreak()
+
 == Attaques de Présentation (_Presentation Attacks_)
 
 Les attaques de présentation (PA), souvent appelées *usurpation d'identité* (_spoofing_), sont des attaques *directes* menées au niveau du capteur biométrique. Elles consistent à présenter à l'interface de capture un artéfact ou une imitation dans le but de se faire passer pour un utilisateur légitime.
@@ -1358,6 +1390,8 @@ Les attaques de présentation (PA), souvent appelées *usurpation d'identité* (
 === Défense contre les PAs
 
 La principale défense contre ces attaques est la *Détection d'Attaque de Présentation* (_Presentation Attack Detection_ - PAD), qui utilise des techniques pour vérifier la *vitalité* ou les propriétés physiques (chaleur, mouvement, réflectivité) de l'échantillon présenté.
+
+#pagebreak()
 
 == Méthodes de Défense contre les Attaques de Présentation (_Presentation Attack Defense Methods_)
 

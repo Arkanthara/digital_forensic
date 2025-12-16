@@ -1,0 +1,248 @@
+---
+title: "Révisions Approfondies Digital Forensics - CC2"
+author: "Synthèse Complète"
+format:
+  html:
+    toc: true
+    number-sections: false
+    theme: cosmo
+    css: styles.css
+    embed-resources: true
+  pdf:
+    toc: true
+    number-sections: true
+    geometry:
+      - top=20mm
+      - left=20mm
+      - right=20mm
+      - bottom=20mm
+lang: fr
+---
+
+Ce document propose une synthèse détaillée des 30 questions du quiz de Digital Forensics. Il approfondit les concepts, les algorithmes et les mécanismes de défense présentés dans le cours.
+
+# Partie 1 : Édition d'Image et Détection d'Altération
+
+## 1. Traces d'édition d'image : égalisation d'histogramme
+* **Fonctionnement :** L'égalisation vise à maximiser le contraste en étalant les intensités des pixels pour que leur distribution soit uniforme sur toute la plage dynamique.
+* **Signature statistique (CDF) :** L'image résultante possède une Fonction de Répartition Cumulative (CDF - Cumulative Density Function) qui est **linéaire**. C'est la signature mathématique de l'opération.
+* **Anomalie des zones saturées :** Sur une image naturelle, les zones saturées (0 ou 255) forment des pics nets. Après égalisation, ces pics "impulsifs" sont déplacés à des positions arbitraires dans l'histogramme, créant des artefacts détectables.
+* **Métrique :** On mesure le degré d'"uniformité" de l'histogramme pour confirmer la manipulation.
+
+## 2. Détection d'altération : techniques basées sur les pixels et le format
+* **Techniques basées sur les pixels (Pixel-based) :**
+    * **Clonage (Copy-Move) :** Copie d'une région vers une autre. Les régions clonées peuvent avoir n'importe quelle forme.
+    * **Rééchantillonnage (Resampling) :** Nécessaire lors du redimensionnement ou de la rotation d'une zone collée. Il introduit des **corrélations périodiques** spécifiques entre pixels voisins (interpolation).
+    * **Épissage (Splicing) :** Collage d'une image externe. Cela perturbe brutalement les statistiques de Fourier d'ordre supérieur.
+    * **Statistiques locales :** Les manipulations lissent souvent artificiellement les statistiques locales (bruit, variance).
+* **Techniques basées sur le format (Format-based) :**
+    * **Double compression JPEG :** Si une image compressée est modifiée puis re-sauvegardée, des artefacts de double quantification apparaissent.
+    * **Artefacts de blocage (Blocking) :** Les grilles de compression JPEG (8x8 pixels) de l'élément inséré et de l'image de fond sont rarement alignées. Ce désalignement de grille est détectable.
+    * **JPEG Ghosts :** Détection de différences de qualité de compression (quantification) entre différentes zones de l'image.
+
+## 3. Détection d'altération : caméra, physique et géométrie
+* **Basées sur la caméra (Camera-based) :**
+    * **Aberrations chromatiques :** Les franges de couleur sur les bords contrastés doivent être cohérentes radialement depuis le centre optique. Une variation locale indique une anomalie.
+    * **Bruit du capteur (PRNU) :** Chaque capteur a une empreinte de bruit unique (Photo-Response Non-Uniformity). Une altération rompt ce motif.
+    * **Interpolation CFA (Color Filter Array) :** Le dématriçage (Bayer) crée des corrélations entre couleurs voisines. Une zone insérée brise ces corrélations.
+* **Basées sur la physique (Physics-based) :**
+    * **Éclairage 2D :** Utilise les normales de surface simplifiées (sur le contour des objets) pour vérifier si la direction de la lumière est cohérente pour tous les objets.
+    * **Éclairage 3D :** Modélisation plus complexe (modèle de l'œil humain) pour estimer les normales de surface 3D et valider les ombres.
+* **Basées sur la géométrie (Geometric-based) :**
+    * **Point principal :** Projection du centre optique. Si un objet est déplacé dans l'image, le point principal estimé pour cet objet se déplace proportionnellement.
+    * **Mesures métriques :** Utilise la géométrie projective pour rectifier des plans (murs, sols) et vérifier les échelles relatives des objets.
+
+# Partie 2 : Forensique des Documents Imprimés
+
+## 4. Forensique des documents imprimés : principes généraux
+* **Contexte :** Malgré le numérique, l'imprimé reste crucial pour la valeur légale, la traçabilité et le packaging.
+* **Impacts négatifs majeurs :**
+    * **Fausse monnaie :** Menace pour l'économie nationale.
+    * **Faux emballages (Médicaments) :** Risque sanitaire critique (produits contrefaits dans des boîtes parfaites).
+    * **Faux papiers d'identité :** Facilitent les attaques biométriques (Print Spoofing).
+
+## 5. Attribution de dispositif : concepts de base
+* **Définition :** Identifier la source (Marque/Modèle ou Unité spécifique) d'un document numérisé.
+* **Deux types d'empreintes :**
+    * **Extrinsèques (Watermarking) :** Codes insérés volontairement par le fabricant.
+    * **Intrinsèques (Blind) :** Défauts involontaires dus à la fabrication (tolérances) ou à l'usure (rayures, poussières).
+* **Signatures exploitées :** Texture du motif d'impression (banding), bruit, erreurs de positionnement de l'encre.
+
+## 6. Authentification de document imprimé : approche active
+* **Machine Identification Codes (MIC) :**
+    * Technologie pionnière de Xerox (années 80, révélée en 2004).
+    * **Matrice de points jaunes :** Minuscules points jaunes imprimés sur toute la page.
+    * **Données encodées :** Numéro de série de l'imprimante, date et heure de l'impression.
+* **Autres méthodes :** Stéganographie d'imprimante, Codes-barres 2D cryptographiques.
+* **Limites :** Méthode souvent limitée aux USA (exigence FBI), et les codes peuvent être effacés ou brouillés (anonymisation).
+
+## 7. Approches pour la détection de source de texte imprimé
+* **Approche Passive :** Analyse les défauts naturels sans rien ajouter au document.
+* **Zones d'intérêt (ROI) :**
+    * **Caractères :** Analyse de la rugosité des contours ("I", "e").
+    * **Frames (Cadres) :** Analyse de blocs de texture (texte ou fond).
+    * **Document entier :** Statistiques globales.
+* **Avantages :** Robuste dans le temps (fonctionne sur vieux documents), insensible à la manipulation des codes actifs.
+
+## 8. Attribution d'imprimante laser (Ali et al.)
+* **Cible :** Analyse spécifique de la lettre **"I"**.
+* **Méthode :**
+    1.  Extraction des lettres "I".
+    2.  Calcul des profils de projection (valeurs de pixels horizontales/verticales).
+    3.  Réduction de dimensionnalité par **ACP** (Analyse en Composantes Principales).
+    4.  Classification par **GMM** (Gaussian Mixture Model).
+* **Limites :** Difficile de distinguer des modèles de même génération (ex: LJ1000 vs LJ1200) et la lettre "I" peut être rare.
+* **Astuce Matérielle :** Utiliser différents scanners ou résolutions pour désaligner la grille de numérisation et révéler le motif de l'imprimante.
+
+## 9. Approche GLCM (Mikkilineni et al.)
+* **Cible :** Analyse de la lettre **"e"**.
+* **Outil :** GLCM (Gray-Level Co-occurrence Matrix). C'est un histogramme 2D qui compte la fréquence des paires de pixels voisins.
+* **Caractéristiques extraites (Features) :**
+    * **Contraste :** Intensité des variations locales.
+    * **Corrélation :** Linéarité des dépendances entre pixels.
+    * **Énergie :** Uniformité de la texture.
+    * **Homogénéité :** Proximité de la distribution par rapport à la diagonale.
+* **Variante Ferreira :** Approche **Multi-directionnelle** (plusieurs angles) et **Multi-échelle** (pyramide gaussienne) pour plus de robustesse.
+
+## 10. Descripteur CTGF (Convolutional Texture Gradient Filter)
+* **Objectif :** Isoler la signature de texture dans les zones de transition (bords flous) générées par le firmware de l'imprimante (halftoning).
+* **Algorithme détaillé :**
+    1.  **Négatif :** Inversion de l'image ($N = 255 - S$) pour travailler sur l'encre.
+    2.  **Crop :** Suppression de 6% des bordures (bruit de scan).
+    3.  **Convolution :** Somme des voisins dans une fenêtre $n \times n$ (matrice de uns).
+    4.  **Gradient :** Calcul de la différence absolue avec les voisins ($|x-y|$).
+    5.  **Filtrage :** On ne garde que les pixels dont le gradient est dans un intervalle optimal $[g_{low}, g_{high}]$.
+    6.  **Histogramme :** Construction de la distribution des valeurs filtrées.
+    7.  **Normalisation :** Mise à l'échelle Min-Max.
+* **Réduction :** Élimination des features dont l'étendue (range) est inférieure à la moyenne.
+
+## 11. Deep Learning pour l'attribution laser
+* **Entrée :** Lettres "A" et "E".
+* **Architecture :** Ensemble de CNNs "Shallow" (peu profonds) travaillant sur des imagettes 28x28.
+* **Prétraitement :** Les CNNs analysent trois versions : l'image brute, le résidu médian et le résidu moyen.
+* **Classification :** Les vecteurs de caractéristiques extraits par les CNNs sont concaténés et classifiés par des **SVM** (Support Vector Machines) pour une meilleure séparation des classes.
+
+## 12. Détection de source d'images imprimées
+* **Lee et Choi (Bruit) :** * Conversion en espace **CMY**.
+    * Estimation du bruit par soustraction de l'image filtrée (**Filtre de Wiener**).
+    * Calcul de features GLCM sur ce bruit résiduel.
+* **Lee et Choi (Ondelettes) :**
+    * Utilisation de la **DWT** (Discrete Wavelet Transform).
+    * Focus sur la sous-bande **HH** (Hautes fréquences diagonales) qui capture les micro-détails.
+    * Calcul de moments statistiques (Skewness, Kurtosis) dans le domaine **CMYK**.
+* **Tsai :** Similaire (DWT), mais utilise 3 sous-bandes (HH, HL, LH) et reste en RGB.
+
+# Partie 3 : Tatouage DNN et Stéganographie
+
+## 13. Principes du tatouage de DNN (DNN watermarking)
+* **Nouveau Paradigme :** Au lieu de tatouer chaque image (impossible à grande échelle), on tatoue le **modèle générateur** (IA).
+* **Box-free Watermarking :** Le tatouage est conjoint. L'image générée par le modèle contient intrinsèquement la preuve de son origine, lisible sans avoir accès au modèle (Black-box verification).
+* **Exigences de robustesse :** Le tatouage doit survivre si le modèle est modifié (Pruning, Fine-tuning) ou si l'image est altérée (Compression, Crop).
+
+## 14. Tatouage de GAN
+* **Robustesse prouvée :**
+    * **Traitement d'image :** Résiste à la compression JPEG, au bruit, au flou.
+    * **Modèle - Pruning (Élagage) :** Résiste à la suppression de ~25% des neurones.
+    * **Modèle - Quantification :** Résiste à la réduction de précision des poids.
+* **Point faible :** Le **Fine-tuning** (ré-entraînement) est l'attaque la plus efficace pour effacer le tatouage.
+
+## 15. Tatouage supervisé
+* **Architecture :** Entraînement de bout en bout avec 4 réseaux :
+    * **Encodeur :** Prépare le message.
+    * **Générateur :** Crée l'image contenant le message.
+    * **Discriminateur :** Vérifie le réalisme (Qualité).
+    * **Vérificateur/Extracteur :** Tente de lire le message (Présence du tatouage).
+* **Fonction de perte :** Combine la perte de qualité visuelle et la perte de récupération du message.
+
+## 16. Fingerprinting sans ré-entraînement (Retraining-free)
+* **Problème :** Ré-entraîner un gros modèle (GAN) pour donner une signature unique à chaque utilisateur est trop coûteux.
+* **Solution (ParamGen) :** * On insère une couche spécifique (ex: couche de normalisation) dans le modèle.
+    * Un petit réseau externe (**ParamGen Network**) génère les poids de cette couche à la volée en fonction de la signature désirée.
+* **Résultat :** Chaque utilisateur a une version légèrement différente du modèle (signature unique) sans ré-entraînement complet.
+
+## 17. Méthodes de dissimulation d'information
+* **Stéganographie :** Dissimuler l'existence du canal de communication. Le média doit paraître anodin.
+* **Tatouage (Watermarking) :** Marquer le média pour la protection (copyright) ou l'authenticité. La marque peut être robuste (indélébile) ou fragile (se brise si modifié).
+* **Cryptographie :** Rendre le contenu inintelligible. L'existence du message est visible, mais son sens est caché.
+
+## 18. Bases de la cryptographie
+* **Objectifs CIA+N :** Confidentialité, Intégrité, Authenticité, Non-répudiation.
+* **Principe :** Transformation d'un texte clair (Plaintext) en texte chiffré (Ciphertext).
+* **Différence clé :** En crypto, l'ennemi voit le message chiffré mais ne peut le lire. En stéganographie, si l'ennemi détecte le message, l'objectif est échoué.
+
+## 19. Bases de la stéganographie
+* **Définition :** Art de l'écriture cachée (*Steganos* + *Graphie*).
+* **Composants :** * **Message secret (Payload).**
+    * **Support de couverture (Carrier/Cover) :** Image, audio, vidéo, texte.
+    * **Clé (Optionnelle).**
+
+## 20. Exigences de la stéganographie moderne
+* **Invisibilité Perceptuelle :** L'œil ne doit voir aucune différence.
+* **Invisibilité Statistique :** Les algorithmes d'analyse ne doivent détecter aucune anomalie statistique. C'est le critère le plus difficile.
+* **Capacité (Payload) :** Quantité de bits cachés par pixel (bpp).
+* **Compromis fondamental :** Augmenter la capacité dégrade l'invisibilité statistique.
+
+## 21. Stéganographie dans le domaine spatial
+* **Technique :** Modification directe des valeurs des pixels (ex: LSB).
+* **Avantages :** Très haute capacité (jusqu'à 3 bits par pixel en RGB), implémentation triviale.
+* **Inconvénients :** Extrêmement fragile. La moindre compression, redimensionnement ou ajout de bruit détruit le message. Détection statistique aisée (Histogrammes).
+
+## 22. Stéganographie dans le domaine transformé
+* **Technique :** Modification des coefficients dans un domaine fréquentiel (ex: coefficients DCT dans le JPEG).
+* **Avantages :** Beaucoup plus robuste. Résiste à la compression JPEG et au traitement du signal car le message est dans les fréquences significatives.
+* **Inconvénients :** Capacité plus faible que le spatial.
+
+## 23. Stéganographie par sélection (Cover Selection)
+* **Principe :** Aucune modification du fichier.
+* **Méthode :** Alice possède une base de données géante d'images. Si elle veut envoyer le message "A", elle cherche une image dont le Hash ou les propriétés correspondent à "A".
+* **Sécurité :** Parfaite (l'image est 100% naturelle).
+* **Capacité :** Ridicule. Pour envoyer 8 octets, il faudrait une base de données de $2^{64}$ images.
+
+## 24. Stéganographie par synthèse (Cover Synthesis)
+* **Principe :** Créer un média artificiel qui contient le message.
+* **Méthode Traditionnelle :** Assemblage de blocs (Patchs) pour former une image. Les jointures créent des artefacts visibles.
+* **Méthode Moderne (IA) :** Utilisation de **GANs**. Un générateur crée une image réaliste en encodant le message, tandis qu'un stéganalyste adverse essaie de le détecter (Théorie des jeux).
+
+## 25. Stéganographie par modification (Cover Modification)
+* **Principe :** L'approche standard. On modifie une image existante.
+* **Stratégie Adaptative :** Pour éviter la détection, on ne cache pas le message n'importe où. On privilégie les zones **bruitées ou texturées** où les modifications sont difficiles à distinguer du bruit naturel.
+* **Minimisation de distorsion :** Utilisation de "Codes Matriciels" pour minimiser le nombre de changements nécessaires pour encoder un message donné.
+
+## 26. Stéganographie LSB (Least Significant Bit)
+* **Fonctionnement :** Remplacement du dernier bit de chaque pixel.
+* **Attaque statistique (Pair of Values) :**
+    * Naturellement, les fréquences des valeurs paires ($2k$) et impaires ($2k+1$) sont distinctes.
+    * L'insertion aléatoire LSB tend à échanger les valeurs paires et impaires.
+    * **Résultat :** Les fréquences s'égalisent ($h(2k) \approx h(2k+1)$). Cette anomalie d'histogramme par paires est une preuve flagrante de manipulation.
+
+## 27. Approches empiriques et sécurité
+* **Stéganographie préservant le modèle :** Après insertion, on modifie d'autres pixels pour restaurer les statistiques globales (ex: corriger l'histogramme).
+* **Modulation Stochastique :** On masque le message en imitant le bruit naturel du capteur (bruit thermique/quantification).
+* **Consciente de la stéganalyse (Steganalysis-aware) :** Exemple du "$\pm 1$ embedding". Au lieu de juste remplacer le bit (Flip), on ajoute ou soustrait 1 à la valeur du pixel de manière intelligente pour minimiser l'impact statistique.
+* **Minimisation de l'impact (ex: F5, HUGO) :** Définit une fonction de coût $\rho(i)$ pour chaque pixel. On modifie prioritairement les pixels où le coût de détection est le plus faible.
+
+# Partie 4 : Forensique Biométrique
+
+## 28. Forensique biométrique : classification des attaques
+* **Attaques Directes (Presentation Attacks / Spoofing) :**
+    * Lieu : Au niveau du capteur (Point 1).
+    * Nature : Présentation d'un artefact physique ou numérique. Le système fonctionne normalement mais est trompé par l'entrée.
+* **Attaques Indirectes :**
+    * Lieu : À l'intérieur du système (Points 2 à 8).
+    * Exemples : Injection de données dans les câbles, modification de la base de données (Template Planting), contournement de l'extracteur de features.
+
+## 29. Types d'attaques de présentation
+* **Visage :** Photos imprimées (haute résolution), écrans (Replay attack), Masques 3D (Silicone/Latex), Deepfakes projetés.
+* **Empreinte :** "Gummy fingers" (moulages en gélatine/colle à bois), impression d'encre conductrice sur PCB.
+* **Iris :** Impression photo haute qualité, lentilles de contact à motifs.
+* **Voix :** Rejeu d'enregistrement (Playback), synthèse vocale (Text-to-Speech), conversion de voix (Voice Conversion).
+
+## 30. Défense contre les attaques de présentation (PAD)
+* **Approches Logicielles (Software-based) :**
+    * **Texture :** Analyse des micro-textures (LBP) pour distinguer la peau du papier/pixel.
+    * **Mouvement :** Détection du clignement des yeux, mouvements de tête, flux optique incohérent (photo statique vs visage 3D).
+* **Approches Matérielles (Hardware-based) :**
+    * **Thermique :** Vérification de la chaleur du visage.
+    * **Profondeur (3D) :** Caméras stéréoscopiques ou structurées pour rejeter les surfaces planes (photos/écrans).
+    * **Infrarouge (NIR/SWIR) :** Analyse de la réflectance de la peau et détection du réseau veineux sous-cutané.
+* **Challenge-Response :** Demander à l'utilisateur une action aléatoire (tourner la tête, lire un texte) pour prouver qu'il n'est pas une photo ou un enregistrement.
